@@ -1,40 +1,79 @@
 package model;
 
+import java.io.Serializable;
+
 /**
- * Classe che rappresenta una categoria di un annuncio
- * Una categoria è costituita da un nome e da un campo
+ * Classe che rappresenta una categoria di una gerarchia.
+ * Una categoria è costituita da un nome e da un campo.
  */
-public class Categoria {
+public class Categoria implements Serializable {
     private String nome;
     private Campo campo = null;
 
-    public Categoria(String nome){
+    /**
+     * Costruisce una Categoria con il nome specificato.
+     *
+     * @param nome il nome della categoria
+     */
+    public Categoria(String nome) {
         this.nome = nome;
     }
 
-    public Categoria(String nome, Campo campo){
+    /**
+     * Costruisce una Categoria con il nome e il campo specificati.
+     *
+     * @param nome il nome della categoria
+     * @param campo il campo associato alla categoria
+     */
+    public Categoria(String nome, Campo campo) {
         this.nome = nome;
         this.campo = campo;
     }
 
-    public String getNome(){
+    /**
+     * Restituisce il nome della categoria.
+     *
+     * @return il nome della categoria
+     */
+    public String getNome() {
         return this.nome;
     }
 
-    public Campo getCampo(){
+    /**
+     * Restituisce il campo associato alla categoria.
+     *
+     * @return il campo associato alla categoria
+     */
+    public Campo getCampo() {
         return this.campo;
     }
 
-    public void setNome(String nome){
+    /**
+     * Imposta il nome della categoria.
+     *
+     * @param nome il nuovo nome della categoria
+     */
+    public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public void setCampo(Campo campo){
+    /**
+     * Imposta il campo associato alla categoria.
+     *
+     * @param campo il nuovo campo associato alla categoria
+     */
+    public void setCampo(Campo campo) {
         this.campo = campo;
     }
 
+    /**
+     * Restituisce una rappresentazione in stringa della categoria.
+     * La stringa include il nome della categoria e, se presente, il campo associato.
+     *
+     * @return una rappresentazione in stringa della categoria
+     */
     @Override
-    public String toString(){
-        return "Nome: " + this.nome + "\n" + (this.campo!=null ? "Campo: " + this.campo + "\n" : "");
+    public String toString() {
+        return "Nome: " + this.nome + "\n" + (this.campo != null ? "Campo: " + this.campo + "\n" : "");
     }
 }
