@@ -64,6 +64,17 @@ public class Utente implements Serializable {
     }
 
     /**
+     * Verifica se lo username e la password specificati corrispondono a quelli dell'utente.
+     *
+     * @param username lo username da verificare
+     * @param password la password da verificare
+     * @return true se lo username e la password corrispondono a quelli dell'utente, false altrimenti
+     */
+    public boolean verificaCredenziali(String username, String password) {
+        return this.username.equals(username) && this.password.equals(password);
+    }
+
+    /**
      * Restituisce una rappresentazione in stringa dell'utente.
      * La stringa include lo username e i permessi dell'utente.
      *
