@@ -51,6 +51,21 @@ public class ConsoleView {
     }
 
     /**
+     * Mostra il menu Configuratore sulla console.
+     */
+    public void showMenuConfiguratore() {
+        List<String> menuItems = List.of(
+                GREEN + "1. Visualizza Comprensori" + RESET,
+                GREEN + "2. Visualizza Gerarchie" + RESET,
+                GREEN + "3. Visualizza Fattori di Conversione" + RESET,
+                CYAN + "4. Crea Comprensorio" + RESET,
+                CYAN + "5. Crea Gerarchia" + RESET,
+                RED + "6. Uscita" + RESET
+        );
+        printMenuBox(YELLOW + "MENU Configuratore" + RESET, menuItems);
+    }
+
+    /**
      * Stampa un riquadro del menu con un titolo e una lista di voci.
      *
      * @param title il titolo del riquadro
