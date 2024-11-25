@@ -45,7 +45,7 @@ public class ConsoleView {
         List<String> menuItems = List.of(
                 GREEN + "1. Login" + RESET,
                 CYAN + "2. Registrazione" + RESET,
-                RED + "3. Uscita" + RESET
+                RED + "0. Uscita" + RESET
         );
         printMenuBox(YELLOW + "Benvenuto in LogHorizon2!" + RESET, menuItems);
     }
@@ -60,7 +60,7 @@ public class ConsoleView {
                 GREEN + "3. Visualizza Fattori di Conversione" + RESET,
                 CYAN + "4. Crea Comprensorio" + RESET,
                 CYAN + "5. Crea Gerarchia" + RESET,
-                RED + "6. Uscita" + RESET
+                RED + "0. Uscita" + RESET
         );
         printMenuBox(YELLOW + "MENU Configuratore" + RESET, menuItems);
     }

@@ -1,6 +1,6 @@
 package model;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -83,6 +83,29 @@ public class Campo implements Serializable {
     }
 
     /**
+     * Scrive l'oggetto Campo in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Campo da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    /**
      * Restituisce una rappresentazione in stringa del campo.
      * La stringa include il nome del campo e i valori nel dominio.
      *
@@ -94,7 +117,7 @@ public class Campo implements Serializable {
         sb.append("Nome: ").append(this.nome).append("\n");
         sb.append("Valori: \n");
         for (String valore : this.dominio.keySet()) {
-            sb.append(valore).append(" - ").append(this.dominio.get(valore)).append("\n");
+            sb.append("\t").append(valore).append(" - ").append(this.dominio.get(valore)).append("\n");
         }
         return sb.toString();
     }

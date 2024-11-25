@@ -1,6 +1,6 @@
 package model;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Classe che rappresenta una categoria di una gerarchia.
@@ -64,6 +64,29 @@ public class Categoria implements Serializable {
      */
     public void setCampo(Campo campo) {
         this.campo = campo;
+    }
+
+    /**
+     * Scrive l'oggetto Categoria in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Categoria da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
     }
 
     /**

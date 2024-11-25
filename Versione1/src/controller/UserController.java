@@ -5,7 +5,7 @@ import model.Utente;
 import model.Comprensorio;
 import view.ConsoleView;
 import util.UserGenerator;
-
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +37,7 @@ public class UserController {
      */
     public void start() {
         while (true) {
-            // Skip registrazione e login che ci rompeva le palle
-            this.manageConfiguratore();
+            this.manageConfiguratore(); // Skip registrazione e login che ci rompeva le palle
             view.showMenu();
             String choice = view.getInput("Cosa vuoi fare? ");
             switch (choice) {
@@ -58,7 +57,7 @@ public class UserController {
                         this.register();
                     // TODO : forse qua va un salvataggio su file
                     break;
-                case "3":
+                case "0":
                     this.view.showMessage("Grazie per aver utilizzato il programma. Arrivederci!");
                     return;
                 default:
@@ -217,7 +216,7 @@ public class UserController {
                 case "5":
                     // Crea gerarchia
                     break;
-                case "6":
+                case "0":
                     this.view.showMessage("Grazie per aver utilizzato il programma. Arrivederci!");
                     return;
                 default:
@@ -228,9 +227,40 @@ public class UserController {
 
     private String visualizzaComprensori() {
         StringBuilder sb = new StringBuilder();
+
+        Comprensorio c1 = new Comprensorio("Comprensorio1");
+        c1.addComune("Comune1");
+        c1.addComune("Comune2");
+        c1.addComune("Comune3");
+        Comprensorio c2 = new Comprensorio("Comprensorio2");
+        c2.addComune("Comune4");
+        c2.addComune("Comune5");
+        c2.addComune("Comune6");
+        this.comprensori.add(c1);
+        this.comprensori.add(c2);
+
         for (Comprensorio c : this.comprensori) {
             sb.append(c.toString()).append("\n");
         }
         return sb.toString();
+    }
+
+    private void saveUtenti() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("utenti.bin"))) {
+            out.writeObject(this.utenti);
+            System.out.println("Utenti salvati con successo.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadUtenti() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("utenti.bin"))) {
+            this.utenti.clear();
+            this.utenti.addAll((List<Utente>) in.readObject());
+            System.out.println("Utenti caricati con successo.");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,6 +1,6 @@
 package model;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Classe che rappresenta un utente del sistema.
@@ -75,6 +75,29 @@ public class Utente implements Serializable {
     }
 
     /**
+     * Scrive l'oggetto Utente in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Utente da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    /**
      * Restituisce una rappresentazione in stringa dell'utente.
      * La stringa include lo username e i permessi dell'utente.
      *
@@ -82,7 +105,7 @@ public class Utente implements Serializable {
      */
     @Override
     public String toString() {
-        return "username: " + username + " " + "permessi: " + (isConfig ? "configuratore" : "utente");
+        return "Username: " + username + "\n" + "Permessi: " + (isConfig ? "Configuratore" : "Fruitore");
     }
 
     /**

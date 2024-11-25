@@ -1,6 +1,6 @@
 package model;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -83,6 +83,29 @@ public class Comprensorio implements Serializable {
     }
 
     /**
+     * Scrive l'oggetto Comprensorio in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Comprensorio da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    /**
      * Restituisce una rappresentazione in stringa del comprensorio.
      * La stringa include il nome del comprensorio e la lista dei comuni.
      *
@@ -91,9 +114,9 @@ public class Comprensorio implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Nome: ").append(this.nome).append(" Comuni: ");
+        sb.append("Comprensorio: ").append(this.nome).append("\nComuni:\n");
         for (String c : this.comuni) {
-            sb.append(c).append(" ");
+            sb.append("\t").append(c).append("\n");
         }
         return sb.toString();
     }
