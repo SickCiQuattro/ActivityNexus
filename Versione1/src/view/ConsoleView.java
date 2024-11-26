@@ -1,5 +1,7 @@
 package view;
 
+import util.UserUtil;
+
 import java.util.Scanner;
 import java.util.List;
 
@@ -48,6 +50,41 @@ public class ConsoleView {
                 RED + "0. Uscita" + RESET
         );
         printMenuBox(YELLOW + "Benvenuto in LogHorizon2!" + RESET, menuItems);
+    }
+
+    /**
+     * Avvia il ciclo principale del controller.
+     * Mostra il menu principale e gestisce le scelte dell'utente.
+     */
+    public void start() {
+        while (true) {
+            this.showMenu();
+            this.getInput("Cosa vuoi fare? ");
+            switch (choice) {
+                case "1":
+                    if (this.login())
+                        if (this.isConfig) {
+                            this.manageConfiguratore();
+                            return;
+                        }
+                        else{
+                            this.view.showMessage("TODO menu Fruitore");
+                            return;
+                        }
+                    break;
+                case "2":
+                    if (this.login(UserUtil.generateRandomUsername(), UserUtil.generateRandomPassword()))
+                        this.register();
+                    // TODO : forse qua va un salvataggio su file
+                    break;
+                case "0":
+                    this.view.showMessage("Grazie per aver utilizzato il programma. Arrivederci!");
+                    return;
+                default:
+                    this.view.showMessage("Opzione non valida. Riprova.");
+            }
+        }
+        // TODO forse qua va un salvataggio su file
     }
 
     /**

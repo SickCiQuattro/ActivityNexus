@@ -99,4 +99,16 @@ public class Categoria implements Serializable {
     public String toString() {
         return "Nome: " + this.nome + "\n" + (this.campo != null ? "Campo: " + this.campo + "\n" : "");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Categoria categoria = (Categoria) obj;
+        return nome.equals(categoria.nome);
+    }
 }

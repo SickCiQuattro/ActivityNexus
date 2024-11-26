@@ -37,9 +37,9 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Verifica se l'utente è un configuratore.
+     * Verifica se l'utente è un Configuratore.
      *
-     * @return true se l'utente è un configuratore, false altrimenti
+     * @return true se l'utente è un Configuratore, false altrimenti
      */
     public boolean isConfig() {
         return isConfig;

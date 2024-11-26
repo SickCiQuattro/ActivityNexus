@@ -4,7 +4,7 @@ import model.Configuratore;
 import model.Utente;
 import model.Comprensorio;
 import view.ConsoleView;
-import util.UserGenerator;
+import util.UserUtil;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class UserController {
                         }
                     break;
                 case "2":
-                    if (this.login(UserGenerator.generateRandomUsername(), UserGenerator.generateRandomPassword()))
+                    if (this.login(UserUtil.generateRandomUsername(), UserUtil.generateRandomPassword()))
                         this.register();
                     // TODO : forse qua va un salvataggio su file
                     break;
@@ -139,62 +139,6 @@ public class UserController {
         this.view.showMessage("Registrazione completata con successo! Ora puoi effettuare il login.");
     }
 
-    /**
-     *  Verifica che lo username inserito sia valido. Deve essere non vuoto, senza spazi,
-     *  lungo massimo 20 caratteri e senza caratteri speciali.
-     * @param username lo username da verificare
-     * @return true se lo username è valido, false altrimenti
-     */
-    private boolean checkUsername(String username) {
-        if (username.isEmpty()) {
-            this.view.showMessage("Lo username non può essere vuoto.");
-            return false;
-        }
-        if (username.contains(" ")) {
-            this.view.showMessage("Lo username non può contenere spazi.");
-            return false;
-        }
-        if (username.length() > 20) {
-            this.view.showMessage("Lo username deve essere lungo massimo 20 caratteri.");
-            return false;
-        }
-        String specialCharacters = "[^a-zA-Z0-9]";
-        if (username.matches(specialCharacters)) {
-            this.view.showMessage("Lo username non può contenere caratteri speciali.");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Verifica che la password inserita sia valida. Deve essere lunga almeno 8 caratteri,
-     * contenere almeno una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale.
-     * @param password la password da verificare
-     * @return true se la password è valida, false altrimenti
-     */
-    private boolean checkPassword(String password) {
-        if (password.length() < 8) {
-            this.view.showMessage("La password deve contenere almeno 8 caratteri.");
-            return false;
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            this.view.showMessage("La password deve contenere almeno una lettera maiuscola.");
-            return false;
-        }
-        if (!password.matches(".*[a-z].*")) {
-            this.view.showMessage("La password deve contenere almeno una lettera minuscola.");
-            return false;
-        }
-        if (!password.matches(".*\\d.*")) {
-            this.view.showMessage("La password deve contenere almeno un numero.");
-            return false;
-        }
-        if (!password.matches(".*[!@#$%^&*].*")) {
-            this.view.showMessage("La password deve contenere almeno un carattere speciale (es. !@#$%^&*).");
-            return false;
-        }
-        return true;
-    }
 
     private void manageConfiguratore() {
         while (true) {
