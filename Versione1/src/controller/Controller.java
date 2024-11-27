@@ -36,7 +36,7 @@ public class Controller {
 
                         if (utente.isConfig()){
                             this.view.showMessage("Login effettuato con successo! Bentornato, " + utente.getUsername() + ".");
-                            this.view.showMenuConfiguratore();
+                            this.manageConfiguratore();
                         } else {
                             this.view.showMessage("TODO menu Fruitore");
                         }
@@ -64,9 +64,41 @@ public class Controller {
         // TODO forse qua va un salvataggio su file
     }
 
-     public Database getDatabase() {
-         return this.database;
-     }
+    private void manageConfiguratore() {
+        while (true) {
+            this.view.showMenuConfiguratore();
+            String choice = view.getInput("Cosa vuoi fare? ");
+            switch (choice) {
+                case "1":
+                    if (!this.database.getComprensori().isEmpty())
+                        this.view.showMessage(this.database.getComprensori().toString());
+                    else
+                        this.view.showMessage("Nessun comprensorio presente.");
+                    break;
+                case "2":
+                    // TODO: Visualizza gerarchie
+                    break;
+                case "3":
+                    // TODO: Visualizza fattori di conversione
+                    break;
+                case "4":
+                    Comprensorio comprensorio = this.createComprensorio();
+                    if (this.addComprensorio(comprensorio))
+                        this.view.showMessage("successo");
+                    else
+                        this.view.showMessage("fallito");
+                    break;
+                case "5":
+                    // TODO: Crea gerarchia
+                    break;
+                case "0":
+                    this.view.showMessage("Grazie per aver utilizzato il programma. Arrivederci!");
+                    return;
+                default:
+                    this.view.showMessage("Opzione non valida. Riprova.");
+            }
+        }
+    }
 
      public boolean addUtente(Utente utente) {
          return this.database.addUtente(utente);
@@ -80,9 +112,13 @@ public class Controller {
          return this.database.addGerarchia(gerarchia);
      }
 
+    /**
+     *
+     * @return true se l'utente è registrato correttamente, false altrimenti
+     */
     public boolean registerUtente(){
-        if (!defaultUtente())
-            return false;
+//        if (!defaultUtente())
+//            return false;
 
         String username = "";
         String password = "";
@@ -123,8 +159,7 @@ public class Controller {
     }
 
     /**
-     * Effettua il login con le credenziali di default.
-     * L'utente ha a disposizione tre tentativi.
+     *
      * @return true se il login va a buon fine, false altrimenti
      */
     private boolean defaultUtente(){
@@ -134,7 +169,7 @@ public class Controller {
         this.view.showMessage("Effettua il login con le seguenti credenziali:");
         this.view.showMessage("Username: " + usernameDefault);
         this.view.showMessage("Password: " + passwordDefault);
-        for (int i=0; i<3; i++) {
+        for (int i=2; i>=0; i--) {
             String username = this.view.getInput("Inserisci username: ");
             String password = this.view.getInput("Inserisci password: ");
 
@@ -142,19 +177,56 @@ public class Controller {
                 return true;
             }
 
-            this.view.showMessage("Credenziali non valide. Tentativi rimasti: " + (2-i));
+            this.view.showMessage("Credenziali non valide. Tentativi rimasti: " + (i));
         }
         this.view.showMessage("Login non riuscito. Riprova più tardi.");
         return false;
     }
     /**
+     * Effettua il login di un utente nel sistema. L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
+     * Viene richiesto all'utente di inserire username e password.
      *
-     * @return
+     * @return l'utente loggato, null se le credenziali non sono valide
      */
     public Utente loginUtente(){
         String username = this.view.getInput("Inserisci username: ");
         String password = this.view.getInput("Inserisci password: ");
 
         return this.database.loginUtente(username, password);
+    }
+
+    public Comprensorio createComprensorio(){
+
+        while (true) {
+            String nome = this.view.getInput("Inserisci il nome del comprensorio: ");
+
+            if (nome.isBlank()) {
+                this.view.showMessage("nome non valido");
+                continue;
+            }
+            if (this.database.hasComprensorio(nome)){
+                this.view.showMessage("Comprensorio già esistente");
+                continue;
+            }
+            Comprensorio comprensorio = new Comprensorio(nome);
+            String comune = "";
+            while(true){
+                 comune = this.view.getInput("Inserisci il nome del comprensorio: ");
+                if (comune.isBlank()) {
+                    this.view.showMessage("nome non valido");
+                    continue;
+                }
+                if (comprensorio.addComune(comune)){
+                    this.view.showMessage("Comune già esistente");
+                    continue;
+                }
+
+
+
+            }
+
+            // crea comprensorio
+        }
+        return comprensorio;
     }
 }

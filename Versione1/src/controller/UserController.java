@@ -32,39 +32,6 @@ public class UserController {
     }
 
 
-
-
-
-
-    private void manageConfiguratore() {
-        while (true) {
-            view.showMenuConfiguratore();
-            String choice = view.getInput("Cosa vuoi fare? ");
-            switch (choice) {
-                case "1":
-                    this.view.showMessage(this.visualizzaComprensori());
-                    break;
-                case "2":
-                    // TODO : Visualizza gerarchie
-                    break;
-                case "3":
-                    // Visualizza fattori di conversione
-                    break;
-                case "4":
-                    // Crea comprensorio
-                    break;
-                case "5":
-                    // Crea gerarchia
-                    break;
-                case "0":
-                    this.view.showMessage("Grazie per aver utilizzato il programma. Arrivederci!");
-                    return;
-                default:
-                    this.view.showMessage("Opzione non valida. Riprova.");
-            }
-        }
-    }
-
     private String visualizzaComprensori() {
         StringBuilder sb = new StringBuilder();
 

@@ -30,13 +30,20 @@ public class Comprensorio implements Serializable {
      * @return true se il comune è stato aggiunto, false altrimenti
      */
     public boolean addComune(String comune) {
-        for (String c : this.comuni) {
-            if (c.equals(comune)) {
-                return false;
-            }
+        if (this.hasComune(comune)) {
+            return false;
         }
         this.comuni.add(comune);
         return true;
+    }
+
+    public boolean hasComune(String comune) {
+        for (String c : this.comuni) {
+            if (c.equals(comune)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

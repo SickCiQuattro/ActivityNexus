@@ -27,13 +27,25 @@ public class Database {
     }
 
     public boolean addComprensorio(Comprensorio comprensorio) {
-        for (Comprensorio c : this.comprensori) {
-            if (c.getNome().equals(comprensorio.getNome())) {
-                return false;
-            }
+        if (comprensorio == null) {
+            return false;
         }
+
+        if (hasComprensorio(comprensorio.getNome())) {
+            return false;
+        }
+
         this.comprensori.add(comprensorio);
         return true;
+    }
+
+    public boolean hasComprensorio(String nome) {
+        for (Comprensorio c : this.comprensori) {
+            if (c.getNome().equals(nome)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Comprensorio> getComprensori() {
