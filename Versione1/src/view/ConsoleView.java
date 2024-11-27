@@ -1,7 +1,5 @@
 package view;
 
-import util.UserUtil;
-
 import java.util.Scanner;
 import java.util.List;
 
@@ -19,6 +17,10 @@ public class ConsoleView {
     private static final String BLUE = "\033[34m";
     private static final String CYAN = "\033[36m";
     private static final String YELLOW = "\033[33m";
+
+    // Costanti per i messaggi
+    private static final String WELCOME_MESSAGE = YELLOW + "Benvenuto in LogHorizon2!" + RESET;
+    private static final String CONFIGURATOR_MENU_TITLE = YELLOW + "MENU Configuratore" + RESET;
 
     /**
      * Mostra un messaggio sulla console.
@@ -49,7 +51,7 @@ public class ConsoleView {
                 CYAN + "2. Registrazione" + RESET,
                 RED + "0. Uscita" + RESET
         );
-        printMenuBox(YELLOW + "Benvenuto in LogHorizon2!" + RESET, menuItems);
+        printMenuBox(WELCOME_MESSAGE, menuItems);
     }
 
     /**
@@ -64,7 +66,7 @@ public class ConsoleView {
                 CYAN + "5. Crea Gerarchia" + RESET,
                 RED + "0. Uscita" + RESET
         );
-        printMenuBox(YELLOW + "MENU Configuratore" + RESET, menuItems);
+        printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
     }
 
     /**
@@ -73,27 +75,25 @@ public class ConsoleView {
      * @param title il titolo del riquadro
      * @param menuItems la lista delle voci del menu
      */
-    public void printMenuBox(String title, List<String> menuItems) {
-        // Calcola la larghezza del riquadro in base alla voce più lunga
-        int maxWidth = Math.max(stripANSI(title).length(), menuItems.stream().mapToInt(this::stripANSILength).max().orElse(0));
-        int boxWidth = maxWidth + 4; // Aggiunge spazio per margini laterali
-
-        // Stampa la parte superiore del riquadro
+    private void printMenuBox(String title, List<String> menuItems) {
+        int boxWidth = calculateBoxWidth(title, menuItems);
         printLine(boxWidth);
-
-        // Stampa il titolo centrato
         System.out.println(centerText(title, boxWidth));
-
-        // Stampa una linea di separazione
         printLine(boxWidth);
-
-        // Stampa le voci del menu
-        for (String item : menuItems) {
-            System.out.println(formatMenuItem(item, boxWidth));
-        }
-
-        // Stampa la parte inferiore del riquadro
+        menuItems.forEach(item -> System.out.println(formatMenuItem(item, boxWidth)));
         printLine(boxWidth);
+    }
+
+    /**
+     * Calcola la larghezza del riquadro in base alla voce più lunga.
+     *
+     * @param title il titolo del riquadro
+     * @param menuItems la lista delle voci del menu
+     * @return la larghezza del riquadro
+     */
+    private int calculateBoxWidth(String title, List<String> menuItems) {
+        int maxWidth = Math.max(stripANSI(title).length(), menuItems.stream().mapToInt(this::stripANSILength).max().orElse(0));
+        return maxWidth + 4; // Aggiunge spazio per margini laterali
     }
 
     /**
