@@ -7,13 +7,13 @@ import java.util.Random;
 public class UserUtil {
     private static final String USERNAME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    private static final int USERNAME_LENGTH = 20;
-    private static final int PASSWORD_LENGTH = 8;
+    public static final int USERNAME_LENGTH = 20;
+    public static final int PASSWORD_LENGTH = 8;
 
     public static String generateRandomUsername() {
         Random random = new Random();
         StringBuilder username = new StringBuilder(USERNAME_LENGTH);
-        for (int i = 0; i < USERNAME_LENGTH; i++) {
+        for (int i = 0; i < 10; i++) {
             username.append(USERNAME_CHARS.charAt(random.nextInt(USERNAME_CHARS.length())));
         }
         return username.toString();
@@ -43,7 +43,7 @@ public class UserUtil {
      * @param username lo username da verificare
      * @return true se lo username è valido, false altrimenti
      */
-    private boolean checkUsername(String username) {
+    public static boolean checkUsername(String username) {
         return !username.isEmpty() && !username.contains(" ") && username.length() <= USERNAME_LENGTH && !username.matches("[^a-zA-Z0-9]");
     }
 
@@ -53,7 +53,7 @@ public class UserUtil {
      * @param password la password da verificare
      * @return true se la password è valida, false altrimenti
      */
-    private boolean checkPassword(String password) {
+    public static boolean checkPassword(String password) {
         return password.length() >= PASSWORD_LENGTH && password.matches(".*[A-Z].*") && password.matches(".*[a-z].*") && password.matches(".*\\d.*") && password.matches(".*[!@#$%^&*].*");
     }
 

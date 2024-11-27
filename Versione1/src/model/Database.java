@@ -15,13 +15,11 @@ public class Database {
     }
 
     public boolean addUtente(Utente utente) {
-        for (Utente u : this.utenti) {
-            if (u.getUsername().equals(utente.getUsername())) {
-                return false;
-            }
+        if(!hasUtente(utente.getUsername())) {
+            this.utenti.add(utente);
+            return true;
         }
-        this.utenti.add(utente);
-        return true;
+        return false;
     }
 
     public List<Utente> getUtenti() {
@@ -78,17 +76,25 @@ public class Database {
      * false se l'utente è stato loggato correttamente ed è di tipo Utente (in futuro Fruitore),
      * null se l'utente non è presente nel database.
      */
-    public Boolean loginUtente(String username, String password) {
+    public Utente loginUtente(String username, String password) {
         if (this.utenti.isEmpty()) {
             return null;
         }
 
-        for (Utente user : this.utenti) {
-            if (user.verificaCredenziali(username, password)) {
-                return user.isConfig();
+        for (Utente utente : this.utenti) {
+            if (utente.verificaCredenziali(username, password)) {
+                return utente;
             }
         }
         return null;
     }
 
+    public boolean hasUtente(String username) {
+        for (Utente utente : this.utenti) {
+            if (utente.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

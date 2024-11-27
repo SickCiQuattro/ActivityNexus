@@ -1,4 +1,4 @@
-import controller.UserController;
+import controller.Controller;
 import view.ConsoleView;
 
 /**
@@ -13,7 +13,7 @@ public class Main {
      */
     public static void main(String[] args) {
         ConsoleView view = new ConsoleView();
-        UserController controller = new UserController(view);
+        Controller controller = new Controller(view);
 
         controller.start();
     }
