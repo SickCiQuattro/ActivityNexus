@@ -8,8 +8,7 @@ import java.util.Set;
  * Classe che rappresenta il database del sistema.
  * Contiene le liste di utenti, comprensori e gerarchie.
  */
-public class Database implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Database {
     private Set<Utente> utenti;
     private Set<Comprensorio> comprensori;
     private Set<Gerarchia> gerarchie;
@@ -41,6 +40,15 @@ public class Database implements Serializable {
      */
     public Set<Utente> getUtenti() {
         return this.utenti;
+    }
+
+    /**
+     * Imposta la lista degli utenti nel database.
+     *
+     * @param utenti
+     */
+    public void setUtenti(Set<Utente> utenti) {
+        this.utenti = utenti;
     }
 
     /**
@@ -78,6 +86,15 @@ public class Database implements Serializable {
     }
 
     /**
+     * Imposta la lista dei comprensori nel database.
+     *
+     * @param comprensori
+     */
+    public void setComprensori(Set<Comprensorio> comprensori) {
+        this.comprensori = comprensori;
+    }
+
+    /**
      * Aggiunge una gerarchia al database.
      *
      * @param gerarchia la gerarchia da aggiungere
@@ -107,6 +124,15 @@ public class Database implements Serializable {
     public boolean registerUtente(String username, String password, boolean isConfig) {
         Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
         return this.addUtente(utente);
+    }
+
+    /**
+     * Imposta la lista delle gerarchie nel database.
+     *
+     * @param gerarchie
+     */
+    public void setGerarchie(Set<Gerarchia> gerarchie) {
+        this.gerarchie = gerarchie;
     }
 
     /**
@@ -157,32 +183,47 @@ public class Database implements Serializable {
         return sb.toString();
     }
 
-    public void serialize(String filePath) {
+
+    public void serializeUtenti(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this.utenti);
-            oos.writeObject(this.comprensori);
-            oos.writeObject(this.gerarchie);
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + e.getMessage());
         } catch (IOException e) {
-            System.err.println("Error during serialization: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Database deserialize(String filePath) {
-        Database db = new Database();
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
-            db.utenti = (Set<Utente>) ois.readObject();
-            db.comprensori = (Set<Comprensorio>) ois.readObject();
-            db.gerarchie = (Set<Gerarchia>) ois.readObject();
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("Error during deserialization: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.err.println("Class not found: " + e.getMessage());
+    public void deserializeUtenti(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.utenti = (Set<Utente>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        return db;
     }
+
+    public void serializeComprensori(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.comprensori);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserializeComprensori(String filePath) {
+        try  {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.comprensori = (Set<Comprensorio>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

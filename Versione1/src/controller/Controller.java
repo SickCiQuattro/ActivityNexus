@@ -3,7 +3,6 @@ package controller;
 import model.Database;
 import model.Utente;
 import model.Comprensorio;
-import model.Gerarchia;
 import util.UserUtil;
 import view.ConsoleView;
 
@@ -22,7 +21,8 @@ public class Controller {
     private static final String NO_COMPRENSORI = "Nessun comprensorio presente.";
     private static final String COMPRENSORIO_CREATED = "Comprensorio creato con successo!";
     private static final String OPERATION_CANCELLED = "Operazione annullata.";
-    private static final String FILE_PATH = "database.ser";
+    private static final String USERS_FILE_PATH = "src/data/utenti.ser";
+    private static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
 
     private Database database;
     private final ConsoleView view;
@@ -42,7 +42,8 @@ public class Controller {
      * Mostra il menu principale e gestisce le scelte dell'utente.
      */
     public void start() {
-        this.database = Database.deserialize(FILE_PATH);
+        this.database.deserializeUtenti(USERS_FILE_PATH);
+        this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
         while (true) {
             view.showMenu();
             String choice = view.getInput("Cosa vuoi fare? ");
@@ -51,10 +52,12 @@ public class Controller {
                     handleLogin();
                     break;
                 case "2":
-                    handleRegistration();
+                    boolean checkRegistration = handleRegistration();
+                    if (checkRegistration) {
+                        this.database.serializeUtenti(USERS_FILE_PATH);
+                    }
                     break;
                 case "0":
-                    this.database.serialize(FILE_PATH);
                     view.showMessage(EXIT_MESSAGE);
                     return;
                 default:
@@ -89,12 +92,10 @@ public class Controller {
     /**
      * Gestisce la registrazione dell'utente.
      */
-    private void handleRegistration() {
-        if (registerUtente()) {
-            view.showMessage(REGISTRATION_SUCCESS);
-        } else {
-            view.showMessage(REGISTRATION_FAILED);
-        }
+    private boolean handleRegistration() {
+        boolean checkRegistration = registerUtente();
+        view.showMessage(checkRegistration ? REGISTRATION_SUCCESS : REGISTRATION_FAILED);
+        return checkRegistration;
     }
 
     /**
@@ -116,7 +117,12 @@ public class Controller {
                     // TODO: Visualizza fattori di conversione
                     break;
                 case "4":
-                    view.showMessage(createComprensorio() ? COMPRENSORIO_CREATED : OPERATION_CANCELLED);
+                    if (createComprensorio()) {
+                        this.database.serializeComprensori(COMPRESORI_FILE_PATH);
+                        view.showMessage(COMPRENSORIO_CREATED);
+                    } else {
+                        view.showMessage(OPERATION_CANCELLED);
+                    }
                     break;
                 case "5":
                     // TODO: Crea gerarchia
