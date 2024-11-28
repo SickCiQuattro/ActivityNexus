@@ -8,6 +8,7 @@ import java.io.*;
  * Un utente può essere un utente normale o un configuratore.
  */
 public class Utente implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String username;
     private String password;
     private boolean isConfig = false;

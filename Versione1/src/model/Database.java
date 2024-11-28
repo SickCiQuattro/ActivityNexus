@@ -1,25 +1,27 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Classe che rappresenta il database del sistema.
  * Contiene le liste di utenti, comprensori e gerarchie.
  */
-public class Database {
-    private List<Utente> utenti;
-    private List<Comprensorio> comprensori;
-    private List<Gerarchia> gerarchie;
+public class Database implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private Set<Utente> utenti;
+    private Set<Comprensorio> comprensori;
+    private Set<Gerarchia> gerarchie;
 
     /**
      * Costruttore della classe Database.
      * Inizializza le liste di utenti, comprensori e gerarchie.
      */
     public Database() {
-        this.utenti = new ArrayList<>();
-        this.comprensori = new ArrayList<>();
-        this.gerarchie = new ArrayList<>();
+        this.utenti = new HashSet<>();
+        this.comprensori = new HashSet<>();
+        this.gerarchie = new HashSet<>();
     }
 
     /**
@@ -29,11 +31,7 @@ public class Database {
      * @return true se l'utente è stato aggiunto correttamente, false se l'utente è già presente
      */
     public boolean addUtente(Utente utente) {
-        if(!hasUtente(utente.getUsername())) {
-            this.utenti.add(utente);
-            return true;
-        }
-        return false;
+        return utente != null && this.utenti.add(utente);
     }
 
     /**
@@ -41,7 +39,7 @@ public class Database {
      *
      * @return la lista degli utenti
      */
-    public List<Utente> getUtenti() {
+    public Set<Utente> getUtenti() {
         return this.utenti;
     }
 
@@ -52,16 +50,7 @@ public class Database {
      * @return true se il comprensorio è stato aggiunto correttamente, false se il comprensorio è già presente o è null
      */
     public boolean addComprensorio(Comprensorio comprensorio) {
-        if (comprensorio == null) {
-            return false;
-        }
-
-        if (hasComprensorio(comprensorio.getNome())) {
-            return false;
-        }
-
-        this.comprensori.add(comprensorio);
-        return true;
+        return comprensorio != null && this.comprensori.add(comprensorio);
     }
 
     /**
@@ -84,7 +73,7 @@ public class Database {
      *
      * @return la lista dei comprensori
      */
-    public List<Comprensorio> getComprensori() {
+    public Set<Comprensorio> getComprensori() {
         return this.comprensori;
     }
 
@@ -95,13 +84,7 @@ public class Database {
      * @return true se la gerarchia è stata aggiunta correttamente, false se la gerarchia è già presente
      */
     public boolean addGerarchia(Gerarchia gerarchia) {
-        for (Gerarchia g : this.gerarchie) {
-            if (g.equals(gerarchia)) {
-                return false;
-            }
-        }
-        this.gerarchie.add(gerarchia);
-        return true;
+        return gerarchia != null && this.gerarchie.add(gerarchia);
     }
 
     /**
@@ -109,7 +92,7 @@ public class Database {
      *
      * @return la lista delle gerarchie
      */
-    public List<Gerarchia> getGerarchie() {
+    public Set<Gerarchia> getGerarchie() {
         return this.gerarchie;
     }
 
@@ -123,7 +106,7 @@ public class Database {
      */
     public boolean registerUtente(String username, String password, boolean isConfig) {
         Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
-        return addUtente(utente);
+        return this.addUtente(utente);
     }
 
     /**
@@ -172,5 +155,34 @@ public class Database {
             sb.append(c.toString()).append("\n\n");
         }
         return sb.toString();
+    }
+
+    public void serialize(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.utenti);
+            oos.writeObject(this.comprensori);
+            oos.writeObject(this.gerarchie);
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error during serialization: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Database deserialize(String filePath) {
+        Database db = new Database();
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
+            db.utenti = (Set<Utente>) ois.readObject();
+            db.comprensori = (Set<Comprensorio>) ois.readObject();
+            db.gerarchie = (Set<Gerarchia>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error during deserialization: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Class not found: " + e.getMessage());
+        }
+        return db;
     }
 }

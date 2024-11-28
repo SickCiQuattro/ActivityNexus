@@ -9,6 +9,7 @@ import java.util.HashMap;
  * I valori possono essere associati a una descrizione.
  */
 public class Campo implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private HashMap<String, String> dominio; // <valore, descrizione>
 

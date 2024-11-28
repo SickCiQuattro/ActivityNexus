@@ -3,7 +3,10 @@ package model;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.ArrayMultiTreeNode;
 
-public class Gerarchia {
+import java.io.Serializable;
+
+public class Gerarchia implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final TreeNode<Categoria> root;
 
     /**
@@ -12,6 +15,7 @@ public class Gerarchia {
      * @param rootCategoria la categoria radice della gerarchia
      */
     public Gerarchia(Categoria rootCategoria) {
+
         this.root = new ArrayMultiTreeNode<>(rootCategoria);
     }
 
@@ -23,32 +27,9 @@ public class Gerarchia {
      * @return true se la categoria figlio è stata aggiunta correttamente, false altrimenti
      */
     public boolean addCategoria(Categoria parentCategoria, Categoria childCategoria) {
-        TreeNode<Categoria> parentNode = findNode(root, parentCategoria);
-        if (parentNode != null) {
-            parentNode.add(new ArrayMultiTreeNode<>(childCategoria));
-            return true;
-        }
-        return false;
-    }
+        TreeNode<Categoria> parentNode = root.find(parentCategoria);
 
-    /**
-     * Trova un nodo nella gerarchia.
-     *
-     * @param currentNode il nodo corrente
-     * @param categoria la categoria da trovare
-     * @return il nodo trovato, o null se non trovato
-     */
-    private TreeNode<Categoria> findNode(TreeNode<Categoria> currentNode, Categoria categoria) {
-        if (currentNode.data().equals(categoria)) {
-            return currentNode;
-        }
-        for (TreeNode<Categoria> child : currentNode.subtrees()) {
-            TreeNode<Categoria> result = findNode(child, categoria);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
+        return parentNode != null && parentNode.add(new ArrayMultiTreeNode<>(childCategoria));
     }
 
     /**

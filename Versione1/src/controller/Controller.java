@@ -22,8 +22,9 @@ public class Controller {
     private static final String NO_COMPRENSORI = "Nessun comprensorio presente.";
     private static final String COMPRENSORIO_CREATED = "Comprensorio creato con successo!";
     private static final String OPERATION_CANCELLED = "Operazione annullata.";
+    private static final String FILE_PATH = "database.ser";
 
-    private final Database database;
+    private Database database;
     private final ConsoleView view;
 
     /**
@@ -41,6 +42,7 @@ public class Controller {
      * Mostra il menu principale e gestisce le scelte dell'utente.
      */
     public void start() {
+        this.database = Database.deserialize(FILE_PATH);
         while (true) {
             view.showMenu();
             String choice = view.getInput("Cosa vuoi fare? ");
@@ -52,6 +54,7 @@ public class Controller {
                     handleRegistration();
                     break;
                 case "0":
+                    this.database.serialize(FILE_PATH);
                     view.showMessage(EXIT_MESSAGE);
                     return;
                 default:
@@ -183,6 +186,10 @@ public class Controller {
             if (role.equalsIgnoreCase("n")) return false;
             view.showMessage("Input non valido. Riprova.");
         }
+    }
+
+    public Database getDatabase() {
+        return this.database;
     }
 
     /**

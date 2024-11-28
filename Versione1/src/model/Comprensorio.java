@@ -9,6 +9,7 @@ import java.util.ArrayList;
  * I comuni possono essere aggiunti o rimossi dalla lista.
  */
 public class Comprensorio implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private ArrayList<String> comuni;
 

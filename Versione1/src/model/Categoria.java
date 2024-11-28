@@ -7,6 +7,7 @@ import java.io.*;
  * Una categoria è costituita da un nome e da un campo.
  */
 public class Categoria implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private Campo campo = null;
 
