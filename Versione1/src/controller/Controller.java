@@ -152,7 +152,7 @@ public class Controller {
      */
     private String getUsername() {
         while (true) {
-            String username = view.getInput("Inserisci un nuovo username: ");
+            String username = view.getInput(String.format("Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ", UserUtil.USERNAME_LENGTH));
             if (UserUtil.checkUsername(username)) return username;
             view.showMessage("Username non valido. Riprova.");
         }
@@ -165,7 +165,7 @@ public class Controller {
      */
     private String getPassword() {
         while (true) {
-            String password = view.getInput("Inserisci una nuova password: ");
+            String password = view.getInput(String.format("Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ", UserUtil.PASSWORD_LENGTH));
             if (UserUtil.checkPassword(password)) return password;
             view.showMessage("Password non valida. Riprova.");
         }
@@ -205,7 +205,7 @@ public class Controller {
      */
     public boolean createComprensorio() {
         while (true) {
-            String nome = view.getInput("Inserisci il nome del comprensorio. Premi 0 per annullare:");
+            String nome = view.getInput("Inserisci il nome del comprensorio. Premi 0 per annullare: ");
             if (nome.isBlank()) {
                 view.showMessage("Nome non valido");
                 continue;
