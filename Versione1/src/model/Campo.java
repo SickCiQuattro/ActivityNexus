@@ -1,36 +1,36 @@
 package model;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Classe che rappresenta un campo di una categoria.
  * Un campo è costituito da un nome e da un dominio di valori.
  * I valori possono essere associati a una descrizione.
  */
-public class Campo implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Campo {
     private String nome;
-    private HashMap<String, String> dominio; // <valore, descrizione>
+    private Set<Attivita> dominio; // <valore, descrizione>
 
     /**
      * Costruisce un Campo con il nome specificato.
-     * Inizializza il dominio come un HashMap vuoto.
+     * Inizializza il dominio come un HashSet vuoto.
      *
      * @param nome il nome del campo
      */
     public Campo(String nome) {
         this.nome = nome;
-        this.dominio = new HashMap<>();
+        this.dominio = new HashSet<>();
     }
 
     /**
      * Costruisce un Campo con il nome e il dominio specificati.
      *
-     * @param nome il nome del campo
+     * @param nome    il nome del campo
      * @param dominio il dominio dei valori associati alle descrizioni
      */
-    public Campo(String nome, HashMap<String, String> dominio) {
+    public Campo(String nome, HashSet<Attivita> dominio) {
         this.nome = nome;
         this.dominio = dominio;
     }
@@ -49,96 +49,38 @@ public class Campo implements Serializable {
      *
      * @return il dominio dei valori
      */
-    public HashMap<String, String> getDominio() {
+    public Set<Attivita> getDominio() {
         return this.dominio;
     }
 
     /**
-     * Aggiunge un valore al dominio del campo se non è già presente.
-     * Al valore può essere associata anche una descrizione.
+     * Aggiunge un valore al dominio del campo.
      *
-     * @param valore il valore da aggiungere
-     * @param descrizione la descrizione associata al valore
-     * @return true se il valore è stato aggiunto, false altrimenti
+     * @param attivita il valore da aggiungere
+     * @return true se il valore è stato aggiunto correttamente, false altrimenti
      */
-    public boolean addValore(String valore, String descrizione) {
-        if (this.dominio.containsKey(valore)) {
-            return false;
-        }
-        this.dominio.put(valore, descrizione);
-        return true;
+    public boolean addAttivita(Attivita attivita) {
+        return attivita  != null && this.dominio.add(attivita);
     }
 
     /**
-     * Rimuove un valore dal dominio del campo se è presente.
-     *
-     * @param valore il valore da rimuovere
-     * @return true se il valore è stato rimosso, false altrimenti
+     * Controlla se una attività è presente nel dominio del campo.
+     * @param attivita l'attività da cercare
+     * @return true se l'attività è presente, false altrimenti
      */
-    public boolean removeValore(String valore) {
-        if (this.dominio.containsKey(valore)) {
-            this.dominio.remove(valore);
-            return true;
-        }
-        return false;
+    public boolean hasAttivita(Attivita attivita) {
+        return this.dominio.contains(attivita);
     }
 
-    /**
-     * Scrive l'oggetto Campo in un flusso di output.
-     *
-     * @param out il flusso di output
-     * @throws IOException se si verifica un errore di I/O
-     */
-    @Serial
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
-    /**
-     * Legge l'oggetto Campo da un flusso di input.
-     *
-     * @param in il flusso di input
-     * @throws IOException se si verifica un errore di I/O
-     * @throws ClassNotFoundException se la classe non viene trovata
-     */
-    @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    /**
-     * Restituisce una rappresentazione in stringa del campo.
-     * La stringa include il nome del campo e i valori nel dominio.
-     *
-     * @return una rappresentazione in stringa del campo
-     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Nome: ").append(this.nome).append("\n");
-        sb.append("Valori: \n");
-        for (String valore : this.dominio.keySet()) {
-            sb.append("\t").append(valore).append(" - ").append(this.dominio.get(valore)).append("\n");
+        sb.append(this.nome).append(":\n");
+        for (Attivita attivita : this.dominio) {
+            sb.append("\t").append(attivita).append("\n");
         }
+
         return sb.toString();
     }
 
-    /**
-    * Confronta questo campo con l'oggetto specificato.
-    * Il risultato è true se e solo se l'argomento non è null ed è un oggetto Campo che ha lo stesso nome di questo oggetto.
-    *
-    * @param obj l'oggetto da confrontare con questo Campo
-    * @return true se l'oggetto è uguale a questo Campo, false altrimenti
-    **/
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        Campo campo = (Campo) obj;
-        return nome.equals(campo.nome);
-    }
 }
