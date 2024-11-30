@@ -192,6 +192,19 @@ public class Database {
         return sb.toString();
     }
 
+    /**
+     * Restituisce una rappresentazione in stringa delle gerarchie nel database.
+     *
+     * @return una stringa che rappresenta le gerarchie
+     */
+    public String toStringGerarchie() {
+        StringBuilder sb = new StringBuilder();
+        for (Gerarchia c : this.gerarchie) {
+            sb.append(c.toString()).append("\n\n");
+        }
+        return sb.toString();
+    }
+
 
     public void serializeUtenti(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {

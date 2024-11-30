@@ -4,8 +4,6 @@ import model.*;
 import util.UserUtil;
 import view.ConsoleView;
 
-import java.util.HashSet;
-
 /**
  * Classe Controller che gestisce la logica dell'applicazione.
  * Si occupa di gestire le interazioni tra la vista e il modello.
@@ -48,16 +46,16 @@ public class Controller {
             view.showMenu();
             String choice = view.getInput("Cosa vuoi fare? ");
             switch (choice) {
-                case "1":
+                case "1": // Login
                     handleLogin();
                     break;
-                case "2":
+                case "2": // Registrazione
                     boolean checkRegistration = handleRegistration();
                     if (checkRegistration) {
                         this.database.serializeUtenti(USERS_FILE_PATH);
                     }
                     break;
-                case "0":
+                case "0": // Uscita
                     view.showMessage(EXIT_MESSAGE);
                     return;
                 default:
@@ -107,18 +105,18 @@ public class Controller {
             view.showMenuConfiguratore();
             String choice = view.getInput("Cosa vuoi fare? ");
             switch (choice) {
-                case "1":
+                case "1": // Visualizza comprensori
                     view.showMessage(this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
                     break;
-                case "2":
+                case "2": // Visualizza gerarchie
                     // TODO: Visualizza gerarchie
                     Campo campo = createCampo();
                     this.view.showMessage(campo.toString());
                     break;
-                case "3":
+                case "3": // Visualizza fattori di conversione
                     // TODO: Visualizza fattori di conversione
                     break;
-                case "4":
+                case "4": // Crea comprensorio
                     if (createComprensorio()) {
                         this.database.serializeComprensori(COMPRESORI_FILE_PATH);
                         view.showMessage(COMPRENSORIO_CREATED);
@@ -126,10 +124,10 @@ public class Controller {
                         view.showMessage(OPERATION_CANCELLED);
                     }
                     break;
-                case "5":
+                case "5": // Crea gerarchia
                     // TODO: Crea gerarchia
                     break;
-                case "0":
+                case "0": // Uscita
                     view.showMessage(EXIT_MESSAGE);
                     return;
                 default:
@@ -152,7 +150,7 @@ public class Controller {
         String password = getPassword();
         if (password == null) return false;
 
-        boolean isConfig = getUserRole();
+        boolean isConfig = getUserChoice("Sei un configuratore? (s/n): ");
         return database.registerUtente(username, password, isConfig);
     }
 
@@ -183,13 +181,13 @@ public class Controller {
     }
 
     /**
-     * Ottiene il ruolo dell'utente.
+     * Ottiene la scelta dell'utente.
      *
-     * @return true se l'utente è un configuratore, false altrimenti
+     * @return true se l'utente preme s, false se preme n
      */
-    private boolean getUserRole() {
+    private boolean getUserChoice(String messaggio) {
         while (true) {
-            String role = view.getInput("Sei un configuratore? (s/n): ");
+            String role = view.getInput(messaggio);
             if (role.equalsIgnoreCase("s")) return true;
             if (role.equalsIgnoreCase("n")) return false;
             view.showMessage("Input non valido. Riprova.");
@@ -280,7 +278,7 @@ public class Controller {
             createDominio(campo);
             if (campo.getDominio().isEmpty()) {
                 this.view.showMessage("Il campo deve contenere almeno un'attività");
-                // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo?
+                // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo? allora sei un utente coglione
             }
         } while (campo.getDominio().isEmpty());
 
@@ -289,7 +287,7 @@ public class Controller {
 
     /**
      * Crea un dominio di attività per un campo.
-     * // TODO: deve essere davvero void?
+     * // TODO: deve essere davvero void? si
      * @param campo il campo a cui aggiungere il dominio
      */
     private void createDominio(Campo campo) {
@@ -311,23 +309,16 @@ public class Controller {
 
             this.view.showMessage("Attività aggiunta con successo");
 
-            while (true) {
-                String scelta = this.view.getInput("Vuoi aggiungere un'altra attività? (s/n): ");
-                if (scelta.equalsIgnoreCase("s")) break;
-                if (scelta.equalsIgnoreCase("n")) {
-                    finished = true;
-                    break;
-                }
-                this.view.showMessage("Scelta non valida");
-            }
+            if (!getUserChoice("Vuoi aggiungere un'altra attività? (s/n): "))
+                finished = true;
         }
     }
 
     /**
-     * Effettua il login di un utente nel sistema con credenziali predefinite.
-     *
-     * @return true se il login va a buon fine, false altrimenti
-     */
+    * Effettua il login di un utente nel sistema con credenziali predefinite.
+    *
+    * @return true se il login va a buon fine, false altrimenti
+    */
     private boolean defaultUtente() {
         String usernameDefault = UserUtil.generateRandomUsername();
         String passwordDefault = UserUtil.generateRandomPassword();
