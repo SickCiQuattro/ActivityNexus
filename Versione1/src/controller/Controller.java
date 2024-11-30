@@ -1,10 +1,10 @@
 package controller;
 
-import model.Database;
-import model.Utente;
-import model.Comprensorio;
+import model.*;
 import util.UserUtil;
 import view.ConsoleView;
+
+import java.util.HashSet;
 
 /**
  * Classe Controller che gestisce la logica dell'applicazione.
@@ -108,10 +108,13 @@ public class Controller {
             String choice = view.getInput("Cosa vuoi fare? ");
             switch (choice) {
                 case "1":
-                    view.showMessage(database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
+                    view.showMessage(this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
                     break;
                 case "2":
                     // TODO: Visualizza gerarchie
+                    Campo campo = new Campo("Campo di prova");
+                    createDominio(campo);
+                    this.view.showMessage(campo.toString());
                     break;
                 case "3":
                     // TODO: Visualizza fattori di conversione
@@ -242,14 +245,49 @@ public class Controller {
      */
     private void addComuniToComprensorio(Comprensorio comprensorio) {
         while (true) {
-            String comune = view.getInput("Inserisci il nome del comune. Premi 0 per terminare: ");
+            String comune = this.view.getInput("Inserisci il nome del comune. Premi 0 per terminare: ");
             if (comune.isBlank()) {
-                view.showMessage("Nome non valido");
+                this.view.showMessage("Nome non valido");
                 continue;
             }
             if (comune.equals("0")) break;
             if (!comprensorio.addComune(comune)) {
-                view.showMessage("Comune già esistente");
+                this.view.showMessage("Comune già esistente");
+            }
+        }
+    }
+
+    private void createDominio(Campo campo) {
+        boolean finished = false;
+        while (!finished) {
+            String nomeAttivita = this.view.getInput("Inserisci il nome dell'attività. Premi 0 per terminare: ");
+            if (nomeAttivita.isBlank()) {
+                this.view.showMessage("Nome non valido");
+                continue;
+            }
+            if (nomeAttivita.equals("0")) break;
+            if (campo.hasAttivita(nomeAttivita)) {
+                this.view.showMessage("Attività già esistente");
+                continue;
+            }
+
+            String descrizione = this.view.getInput("Inserisci una descrizione a questa attività (facoltativa): ");
+            if (descrizione.isBlank()) {
+                campo.addAttivita(new Attivita(nomeAttivita));
+            } else {
+                campo.addAttivita(new Attivita(nomeAttivita, descrizione));
+            }
+
+            this.view.showMessage("Attività aggiunta con successo");
+
+            while (true) {
+                String scelta = this.view.getInput("Vuoi aggiungere un'altra attività? (s/n): ");
+                if (scelta.equalsIgnoreCase("s")) break;
+                if (scelta.equalsIgnoreCase("n")) {
+                    finished = true;
+                    break;
+                }
+                this.view.showMessage("Scelta non valida");
             }
         }
     }

@@ -60,7 +60,10 @@ public class Campo {
      * @return true se il valore è stato aggiunto correttamente, false altrimenti
      */
     public boolean addAttivita(Attivita attivita) {
-        return attivita  != null && this.dominio.add(attivita);
+        if (attivita == null) {
+            return false;
+        }
+        return this.dominio.add(attivita);
     }
 
     /**
@@ -72,14 +75,21 @@ public class Campo {
         return this.dominio.contains(attivita);
     }
 
+    public boolean hasAttivita(String nome) {
+        for (Attivita attivita : this.dominio) {
+            if (attivita.getNome().equals(nome)) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.nome).append(":\n");
         for (Attivita attivita : this.dominio) {
-            sb.append("\t").append(attivita).append("\n");
+            sb.append("\t").append(attivita.toString()).append("\n");
         }
-
         return sb.toString();
     }
 

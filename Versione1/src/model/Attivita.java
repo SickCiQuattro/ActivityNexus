@@ -28,7 +28,7 @@ public class Attivita {
     public String getDescrizione() {
         return this.descrizione;
     }
-
+    
     @Override
     public String toString() {
         return this.nome + (this.descrizione.isEmpty() ? "" : " - " + this.descrizione);

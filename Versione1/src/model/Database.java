@@ -30,7 +30,10 @@ public class Database {
      * @return true se l'utente è stato aggiunto correttamente, false se l'utente è già presente
      */
     public boolean addUtente(Utente utente) {
-        return utente != null && this.utenti.add(utente);
+        if (utente == null) {
+            return false;
+        }
+        return this.utenti.add(utente);
     }
 
     /**
@@ -58,7 +61,10 @@ public class Database {
      * @return true se il comprensorio è stato aggiunto correttamente, false se il comprensorio è già presente o è null
      */
     public boolean addComprensorio(Comprensorio comprensorio) {
-        return comprensorio != null && this.comprensori.add(comprensorio);
+        if (comprensorio == null) {
+            return false;
+        }
+        return this.comprensori.add(comprensorio);
     }
 
     /**
@@ -101,7 +107,10 @@ public class Database {
      * @return true se la gerarchia è stata aggiunta correttamente, false se la gerarchia è già presente
      */
     public boolean addGerarchia(Gerarchia gerarchia) {
-        return gerarchia != null && this.gerarchie.add(gerarchia);
+        if (gerarchia == null) {
+            return false;
+        }
+        return this.gerarchie.add(gerarchia);
     }
 
     /**
