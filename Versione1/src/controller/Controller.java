@@ -112,8 +112,7 @@ public class Controller {
                     break;
                 case "2":
                     // TODO: Visualizza gerarchie
-                    Campo campo = new Campo("Campo di prova");
-                    createDominio(campo);
+                    Campo campo = createCampo();
                     this.view.showMessage(campo.toString());
                     break;
                 case "3":
@@ -244,19 +243,55 @@ public class Controller {
      * @param comprensorio il comprensorio a cui aggiungere i comuni
      */
     private void addComuniToComprensorio(Comprensorio comprensorio) {
-        while (true) {
+        boolean finished = false;
+        while (!finished) {
             String comune = this.view.getInput("Inserisci il nome del comune. Premi 0 per terminare: ");
             if (comune.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if (comune.equals("0")) break;
+            if (comune.equals("0")) {
+                finished = true;
+                continue;
+            }
             if (!comprensorio.addComune(comune)) {
                 this.view.showMessage("Comune già esistente");
             }
         }
     }
 
+    /**
+     * Crea un campo di attività per un comprensorio.
+     * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere attività al campo.
+     * @return il campo creato
+     */
+    private Campo createCampo() {
+        String nome;
+        do {
+            nome = this.view.getInput("Inserisci il nome del campo: ");
+            if (nome.isBlank()) {
+                this.view.showMessage("Nome non valido");
+            }
+        } while (nome.isBlank());
+
+        Campo campo = new Campo(nome);
+
+        do {
+            createDominio(campo);
+            if (campo.getDominio().isEmpty()) {
+                this.view.showMessage("Il campo deve contenere almeno un'attività");
+                // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo?
+            }
+        } while (campo.getDominio().isEmpty());
+
+        return campo;
+    }
+
+    /**
+     * Crea un dominio di attività per un campo.
+     * // TODO: deve essere davvero void?
+     * @param campo il campo a cui aggiungere il dominio
+     */
     private void createDominio(Campo campo) {
         boolean finished = false;
         while (!finished) {
@@ -272,11 +307,7 @@ public class Controller {
             }
 
             String descrizione = this.view.getInput("Inserisci una descrizione a questa attività (facoltativa): ");
-            if (descrizione.isBlank()) {
-                campo.addAttivita(new Attivita(nomeAttivita));
-            } else {
-                campo.addAttivita(new Attivita(nomeAttivita, descrizione));
-            }
+            campo.addAttivita(descrizione.isBlank() ? new Attivita(nomeAttivita) : new Attivita(nomeAttivita, descrizione));
 
             this.view.showMessage("Attività aggiunta con successo");
 
