@@ -113,4 +113,14 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         Categoria root = (Categoria) this.root().data();
         return root.equals(otherRoot);
     }
+
+    /**
+     * Restituisce un hash code per questa gerarchia.
+     *
+     * @return un hash code per questa gerarchia
+     */
+    @Override
+    public int hashCode() {
+        return ((Categoria) this.root().data()).getNome().hashCode();
+    }
 }

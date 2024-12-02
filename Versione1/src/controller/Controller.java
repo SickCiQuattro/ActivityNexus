@@ -267,7 +267,7 @@ public class Controller {
     private Categoria createCategoria(boolean isRoot, String nomePadre) {
         String nome;
         while (true) {
-            nome = this.view.getInput("Inserisci il nome della categoria" + (isRoot ? "radice" : "figlia di " + (nomePadre)) + ": ");
+            nome = this.view.getInput("Inserisci il nome della categoria" + (isRoot ? " radice" : " figlia di " + (nomePadre)) + ": ");
             if (nome.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;

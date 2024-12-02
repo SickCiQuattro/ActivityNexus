@@ -153,4 +153,14 @@ public class Comprensorio implements Serializable {
         Comprensorio comprensorio = (Comprensorio) obj;
         return nome.equals(comprensorio.nome);
     }
+
+    /**
+     * Restituisce un hash code per questo comprensorio.
+     *
+     * @return un hash code per questo comprensorio
+     */
+    @Override
+    public int hashCode() {
+        return nome.hashCode();
+    }
 }
