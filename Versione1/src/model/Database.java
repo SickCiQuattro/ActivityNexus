@@ -144,6 +144,16 @@ public class Database {
         this.gerarchie = gerarchie;
     }
 
+    public boolean hasGerarchia (String nome) {
+        for (Gerarchia g : this.gerarchie) {
+            Categoria c = (Categoria) g.root().data();
+            if (c.getNome().equals(nome)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Effettua il login di un utente nel sistema.
      *

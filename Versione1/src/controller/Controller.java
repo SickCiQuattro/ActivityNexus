@@ -4,6 +4,8 @@ import model.*;
 import util.UserUtil;
 import view.ConsoleView;
 
+import java.util.Stack;
+
 /**
  * Classe Controller che gestisce la logica dell'applicazione.
  * Si occupa di gestire le interazioni tra la vista e il modello.
@@ -109,9 +111,8 @@ public class Controller {
                     view.showMessage(this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
                     break;
                 case "2": // Visualizza gerarchie
-                    // TODO: Visualizza gerarchie
-                    Campo campo = createCampo();
-                    this.view.showMessage(campo.toString());
+                    this.view.showMessage(this.database.getGerarchie().isEmpty() ? "Nessuna gerarchia presente." : this.database.toStringGerarchie());
+
                     break;
                 case "3": // Visualizza fattori di conversione
                     // TODO: Visualizza fattori di conversione
@@ -125,7 +126,13 @@ public class Controller {
                     }
                     break;
                 case "5": // Crea gerarchia
-                    // TODO: Crea gerarchia
+                    Gerarchia gerarchia = createGerarchia();
+                    if(gerarchia != null){
+                        this.database.addGerarchia(gerarchia);
+                        view.showMessage("Gerarchia creata con successo");
+                    }
+                    else
+                        view.showMessage("Creazione gerarchia fallita");
                     break;
                 case "0": // Uscita
                     view.showMessage(EXIT_MESSAGE);
@@ -256,6 +263,69 @@ public class Controller {
                 this.view.showMessage("Comune già esistente");
             }
         }
+    }
+
+
+    private Gerarchia createGerarchia() {
+        Gerarchia g = new Gerarchia(createCategoria(true, ""));
+
+        Stack<Gerarchia> stack = new Stack<>();
+        Categoria categoria = (Categoria) g.root().data();
+
+        for (int i=0; i < categoria.getCampo().getDominio().size(); i++) {
+            stack.push(g);
+        }
+
+        while (!stack.isEmpty()) {
+            Gerarchia theGoodFather = stack.peek();
+            Categoria categoriaPadre = (Categoria) theGoodFather.data();
+            String nomeCategoriaPadre = categoriaPadre.getNome();
+            Gerarchia gerarchia = new Gerarchia(createCategoria(false, nomeCategoriaPadre));
+            Categoria c = (Categoria) gerarchia.root().data();
+            Campo campo = c.getCampo();
+            Gerarchia padre = stack.pop();
+            padre.add(gerarchia);
+            if (campo != null){
+                for (int i=0; i < campo.getDominio().size(); i++) {
+                    stack.push(gerarchia);
+                }
+            }
+        }
+
+
+        return g;
+    }
+
+    /**
+     * Crea una categoria di attività per un comprensorio.
+     * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo di attività alla categoria.
+     * @return la categoria creata
+     */
+    private Categoria createCategoria(boolean isRoot, String nomePadre) {
+        String nome;
+        while (true) {
+            nome = this.view.getInput("Inserisci il nome della categoria " + (isRoot ? "radice: " : "figlia di " + (nomePadre)+ ": "));
+            if (nome.isBlank()) {
+                this.view.showMessage("Nome non valido");
+                continue;
+            }
+            if (isRoot && this.database.hasGerarchia(nome)) {
+                this.view.showMessage("Categoria già esistente");
+                continue;
+            }
+            break;
+        }
+
+        Campo campo;
+
+        boolean choice = this.getUserChoice("Vuoi aggiungere un campo di attività a questa categoria? (s/n): ");
+
+        if (isRoot || choice) {
+            campo = this.createCampo();
+            return new Categoria(nome, campo);
+        }
+
+        return new Categoria(nome);
     }
 
     /**

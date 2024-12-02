@@ -97,4 +97,18 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         traversePreOrder(action);
         return builder.toString();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Gerarchia)) {
+            return false;
+        }
+        Gerarchia other = (Gerarchia) obj;
+        Categoria otherRoot = (Categoria) other.root().data();
+        Categoria root = (Categoria) this.root().data();
+        return root.equals(otherRoot);
+    }
 }
