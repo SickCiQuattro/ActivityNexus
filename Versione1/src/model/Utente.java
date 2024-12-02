@@ -125,6 +125,16 @@ public class Utente implements Serializable {
             return false;
         }
         Utente utente = (Utente) obj;
-        return username.equals(utente.username);
+        return this.username.equals(utente.getUsername());
+    }
+
+    /**
+     * Restituisce un codice hash per questo utente.
+     *
+     * @return un codice hash per questo utente
+     */
+    @Override
+    public int hashCode() {
+        return this.username.hashCode();
     }
 }
