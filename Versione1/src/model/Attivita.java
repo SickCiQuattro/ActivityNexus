@@ -1,10 +1,13 @@
 package model;
 
+import java.io.*;
+
 /**
  * Classe che rappresenta un'attività.
  * Un'attività è costituita da un nome e da una descrizione opzionale.
  */
-public class Attivita {
+public class Attivita implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private String descrizione = "";
 
@@ -44,6 +47,29 @@ public class Attivita {
      */
     public String getDescrizione() {
         return this.descrizione;
+    }
+
+    /**
+     * Scrive l'oggetto Attivita in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Attivita da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
     }
 
     /**

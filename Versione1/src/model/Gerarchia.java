@@ -4,7 +4,7 @@ import com.scalified.tree.TraversalAction;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.LinkedMultiTreeNode;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -34,6 +34,29 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
     public boolean addCategoria(Categoria parentCategoria, Categoria childCategoria) {
         TreeNode<Categoria> parentNode = this.find(parentCategoria);
         return parentNode != null && parentNode.add(new LinkedMultiTreeNode<>(childCategoria));
+    }
+
+    /**
+     * Scrive l'oggetto Gerarchia in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Gerarchia da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
     }
 
     /**
@@ -76,7 +99,6 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                 for (int i = 0; i < nodeLevel; i++) {
                     builder.append("|  ");
                 }
-
                 builder.append("+- ").append("Nome: ").append(node.data().getNome()).append("\n");
 
                 if (!node.isLeaf())
@@ -119,8 +141,9 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      *
      * @return un hash code per questa gerarchia
      */
-    @Override
-    public int hashCode() {
-        return ((Categoria) this.root().data()).getNome().hashCode();
-    }
+    //@Override
+    //public int hashCode() {
+    //    return ((Categoria) this.root().data()).getNome().hashCode();
+        //return this.root().data().hashCode();
+    //}
 }
