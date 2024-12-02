@@ -1,3 +1,4 @@
+// src/view/ConsoleView.java
 package view;
 
 import java.util.Scanner;
@@ -22,6 +23,16 @@ public class ConsoleView {
     private static final String WELCOME_MESSAGE = YELLOW + "Benvenuto in LogHorizon2!" + RESET;
     private static final String CONFIGURATOR_MENU_TITLE = YELLOW + "MENU Configuratore" + RESET;
 
+    // Costanti per le voci del menu
+    private static final String MENU_LOGIN = GREEN + "1. Login" + RESET;
+    private static final String MENU_REGISTRATION = CYAN + "2. Registrazione" + RESET;
+    private static final String MENU_EXIT = RED + "0. Uscita" + RESET;
+    private static final String MENU_VIEW_COMPRENSORI = GREEN + "1. Visualizza Comprensori" + RESET;
+    private static final String MENU_VIEW_GERARCHIE = GREEN + "2. Visualizza Gerarchie" + RESET;
+    private static final String MENU_VIEW_CONVERSION_FACTORS = GREEN + "3. Visualizza Fattori di Conversione" + RESET;
+    private static final String MENU_CREATE_COMPRENSORIO = CYAN + "4. Crea Comprensorio" + RESET;
+    private static final String MENU_CREATE_GERARCHIA = CYAN + "5. Crea Gerarchia" + RESET;
+
     /**
      * Mostra un messaggio sulla console.
      *
@@ -39,7 +50,7 @@ public class ConsoleView {
      */
     public String getInput(String prompt) {
         System.out.print(prompt);
-        return scanner.nextLine();
+        return scanner.nextLine().trim(); // Rimuove spazi all'inizio e alla fine
     }
 
     /**
@@ -47,9 +58,9 @@ public class ConsoleView {
      */
     public void showMenu() {
         List<String> menuItems = List.of(
-                GREEN + "1. Login" + RESET,
-                CYAN + "2. Registrazione" + RESET,
-                RED + "0. Uscita" + RESET
+                MENU_LOGIN,
+                MENU_REGISTRATION,
+                MENU_EXIT
         );
         printMenuBox(WELCOME_MESSAGE, menuItems);
     }
@@ -59,12 +70,12 @@ public class ConsoleView {
      */
     public void showMenuConfiguratore() {
         List<String> menuItems = List.of(
-                GREEN + "1. Visualizza Comprensori" + RESET,
-                GREEN + "2. Visualizza Gerarchie" + RESET,
-                GREEN + "3. Visualizza Fattori di Conversione" + RESET,
-                CYAN + "4. Crea Comprensorio" + RESET,
-                CYAN + "5. Crea Gerarchia" + RESET,
-                RED + "0. Uscita" + RESET
+                MENU_VIEW_COMPRENSORI,
+                MENU_VIEW_GERARCHIE,
+                MENU_VIEW_CONVERSION_FACTORS,
+                MENU_CREATE_COMPRENSORIO,
+                MENU_CREATE_GERARCHIA,
+                MENU_EXIT
         );
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
     }

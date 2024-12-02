@@ -23,6 +23,8 @@ public class Database {
         this.gerarchie = new HashSet<>();
     }
 
+    // Metodi per la gestione degli utenti
+
     /**
      * Aggiunge un utente al database.
      *
@@ -53,6 +55,56 @@ public class Database {
     public void setUtenti(Set<Utente> utenti) {
         this.utenti = utenti;
     }
+
+    /**
+     * Registra un utente nel database. L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
+     *
+     * @param username lo username dell'Utente
+     * @param password la password dell'Utente
+     * @param isConfig true se l'utente è di tipo Configuratore, false altrimenti
+     * @return true se l'utente è stato registrato correttamente, false altrimenti
+     */
+    public boolean registerUtente(String username, String password, boolean isConfig) {
+        Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
+        return this.addUtente(utente);
+    }
+
+    /**
+     * Effettua il login di un utente nel sistema.
+     *
+     * @param username lo username dell'Utente
+     * @param password la password dell'Utente
+     * @return l'utente loggato se le credenziali sono corrette, null altrimenti
+     */
+    public Utente loginUtente(String username, String password) {
+        if (this.utenti.isEmpty()) {
+            return null;
+        }
+
+        for (Utente utente : this.utenti) {
+            if (utente.verificaCredenziali(username, password)) {
+                return utente;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Verifica se un utente è presente nel database.
+     *
+     * @param username lo username dell'utente
+     * @return true se l'utente è presente, false altrimenti
+     */
+    public boolean hasUtente(String username) {
+        for (Utente utente : this.utenti) {
+            if (utente.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Metodi per la gestione dei comprensori
 
     /**
      * Aggiunge un comprensorio al database.
@@ -100,6 +152,8 @@ public class Database {
         this.comprensori = comprensori;
     }
 
+    // Metodi per la gestione delle gerarchie
+
     /**
      * Aggiunge una gerarchia al database.
      *
@@ -114,25 +168,28 @@ public class Database {
     }
 
     /**
+     * Verifica se una gerarchia è presente nel database.
+     *
+     * @param nome il nome della gerarchia
+     * @return true se la gerarchia è presente, false altrimenti
+     */
+    public boolean hasGerarchia(String nome) {
+        for (Gerarchia g : this.gerarchie) {
+            Categoria c = (Categoria) g.root().data();
+            if (c.getNome().equals(nome)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Restituisce la lista delle gerarchie nel database.
      *
      * @return la lista delle gerarchie
      */
     public Set<Gerarchia> getGerarchie() {
         return this.gerarchie;
-    }
-
-    /**
-     * Registra un utente nel database. L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
-     *
-     * @param username lo username dell'Utente
-     * @param password la password dell'Utente
-     * @param isConfig true se l'utente è di tipo Configuratore, false altrimenti
-     * @return true se l'utente è stato registrato correttamente, false altrimenti
-     */
-    public boolean registerUtente(String username, String password, boolean isConfig) {
-        Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
-        return this.addUtente(utente);
     }
 
     /**
@@ -144,77 +201,7 @@ public class Database {
         this.gerarchie = gerarchie;
     }
 
-    public boolean hasGerarchia (String nome) {
-        for (Gerarchia g : this.gerarchie) {
-            Categoria c = (Categoria) g.root().data();
-            if (c.getNome().equals(nome)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Effettua il login di un utente nel sistema.
-     *
-     * @param username lo username dell'Utente
-     * @param password la password dell'Utente
-     * @return l'utente loggato se le credenziali sono corrette, null altrimenti
-     */
-    public Utente loginUtente(String username, String password) {
-        if (this.utenti.isEmpty()) {
-            return null;
-        }
-
-        for (Utente utente : this.utenti) {
-            if (utente.verificaCredenziali(username, password)) {
-                return utente;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Verifica se un utente è presente nel database.
-     *
-     * @param username lo username dell'utente
-     * @return true se l'utente è presente, false altrimenti
-     */
-    public boolean hasUtente(String username) {
-        for (Utente utente : this.utenti) {
-            if (utente.getUsername().equals(username)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Restituisce una rappresentazione in stringa dei comprensori nel database.
-     *
-     * @return una stringa che rappresenta i comprensori
-     */
-    public String toStringComprensori() {
-        StringBuilder sb = new StringBuilder();
-        for (Comprensorio c : this.comprensori) {
-            sb.append(c.toString()).append("\n\n");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Restituisce una rappresentazione in stringa delle gerarchie nel database.
-     *
-     * @return una stringa che rappresenta le gerarchie
-     */
-    public String toStringGerarchie() {
-        StringBuilder sb = new StringBuilder();
-        for (Gerarchia c : this.gerarchie) {
-            sb.append(c.toString()).append("\n\n");
-        }
-        return sb.toString();
-    }
-
+    // Metodi per la serializzazione e deserializzazione
 
     public void serializeUtenti(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
@@ -246,7 +233,7 @@ public class Database {
     }
 
     public void deserializeComprensori(String filePath) {
-        try  {
+        try {
             FileInputStream fis = new FileInputStream(filePath);
             if (fis.available() == 0) {
                 return;
@@ -258,4 +245,31 @@ public class Database {
         }
     }
 
+    // Metodi per la rappresentazione in stringa
+
+    /**
+     * Restituisce una rappresentazione in stringa dei comprensori nel database.
+     *
+     * @return una stringa che rappresenta i comprensori
+     */
+    public String toStringComprensori() {
+        StringBuilder sb = new StringBuilder();
+        for (Comprensorio c : this.comprensori) {
+            sb.append(c.toString()).append("\n\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Restituisce una rappresentazione in stringa delle gerarchie nel database.
+     *
+     * @return una stringa che rappresenta le gerarchie
+     */
+    public String toStringGerarchie() {
+        StringBuilder sb = new StringBuilder();
+        for (Gerarchia c : this.gerarchie) {
+            sb.append(c.toString()).append("\n\n");
+        }
+        return sb.toString();
+    }
 }

@@ -41,21 +41,21 @@ public class Categoria implements Serializable {
     }
 
     /**
-     * Restituisce il campo associato alla categoria.
-     *
-     * @return il campo associato alla categoria
-     */
-    public Campo getCampo() {
-        return this.campo;
-    }
-
-    /**
      * Imposta il nome della categoria.
      *
      * @param nome il nuovo nome della categoria
      */
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    /**
+     * Restituisce il campo associato alla categoria.
+     *
+     * @return il campo associato alla categoria
+     */
+    public Campo getCampo() {
+        return this.campo;
     }
 
     /**
@@ -101,6 +101,13 @@ public class Categoria implements Serializable {
         return "Nome: " + this.nome + "\n" + (this.campo != null ? "Campo: " + this.campo + "\n" : "");
     }
 
+    /**
+     * Confronta questa categoria con l'oggetto specificato.
+     * Il risultato è true se e solo se l'argomento non è null ed è un oggetto Categoria che ha lo stesso nome di questo oggetto.
+     *
+     * @param obj l'oggetto da confrontare con questa Categoria
+     * @return true se l'oggetto è uguale a questa Categoria, false altrimenti
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

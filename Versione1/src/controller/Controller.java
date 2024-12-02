@@ -3,7 +3,6 @@ package controller;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
-
 import java.util.Stack;
 
 /**
@@ -52,7 +51,7 @@ public class Controller {
                     handleLogin();
                     break;
                 case "2": // Registrazione
-                    boolean checkRegistration = handleRegistration();
+                    boolean checkRegistration = handleRegistration(); //TODO: serve un controllo più robusto ciao
                     if (checkRegistration) {
                         this.database.serializeUtenti(USERS_FILE_PATH);
                     }
@@ -91,6 +90,8 @@ public class Controller {
 
     /**
      * Gestisce la registrazione dell'utente.
+     *
+     * @return true se l'utente è registrato correttamente, false altrimenti
      */
     private boolean handleRegistration() {
         boolean checkRegistration = registerUtente();
@@ -144,6 +145,19 @@ public class Controller {
     }
 
     /**
+     * Effettua il login di un utente nel sistema.
+     * L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
+     * Viene richiesto all'utente di inserire username e password.
+     *
+     * @return l'utente loggato, null se le credenziali non sono valide
+     */
+    public Utente loginUtente() {
+        String username = view.getInput("Inserisci username: ");
+        String password = view.getInput("Inserisci password: ");
+        return database.loginUtente(username, password);
+    }
+
+    /**
      * Registra un nuovo utente nel sistema.
      *
      * @return true se l'utente è registrato correttamente, false altrimenti
@@ -159,63 +173,6 @@ public class Controller {
 
         boolean isConfig = getUserChoice("Sei un configuratore? (s/n): ");
         return database.registerUtente(username, password, isConfig);
-    }
-
-    /**
-     * Ottiene un username valido dall'utente.
-     *
-     * @return lo username valido, null se non valido
-     */
-    private String getUsername() {
-        while (true) {
-            String username = view.getInput(String.format("Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ", UserUtil.USERNAME_LENGTH));
-            if (UserUtil.checkUsername(username)) return username;
-            view.showMessage("Username non valido. Riprova.");
-        }
-    }
-
-    /**
-     * Ottiene una password valida dall'utente.
-     *
-     * @return la password valida, null se non valida
-     */
-    private String getPassword() {
-        while (true) {
-            String password = view.getInput(String.format("Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ", UserUtil.PASSWORD_LENGTH));
-            if (UserUtil.checkPassword(password)) return password;
-            view.showMessage("Password non valida. Riprova.");
-        }
-    }
-
-    /**
-     * Ottiene la scelta dell'utente.
-     *
-     * @return true se l'utente preme s, false se preme n
-     */
-    private boolean getUserChoice(String messaggio) {
-        while (true) {
-            String role = view.getInput(messaggio);
-            if (role.equalsIgnoreCase("s")) return true;
-            if (role.equalsIgnoreCase("n")) return false;
-            view.showMessage("Input non valido. Riprova.");
-        }
-    }
-
-    public Database getDatabase() {
-        return this.database;
-    }
-
-    /**
-     * Effettua il login di un utente nel sistema.
-     * L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
-     * Viene richiesto all'utente di inserire username e password.
-     *
-     * @return l'utente loggato, null se le credenziali non sono valide
-     */
-    public Utente loginUtente() {
-        String username = view.getInput("Inserisci username: ");
-        String password = view.getInput("Inserisci password: ");
-        return database.loginUtente(username, password);
     }
 
     /**
@@ -265,57 +222,62 @@ public class Controller {
         }
     }
 
-
+    /**
+     * Crea una nuova gerarchia nel sistema.
+     *
+     * @return la gerarchia creata
+     */
     private Gerarchia createGerarchia() {
-        Gerarchia g = new Gerarchia(createCategoria(true, ""));
-
-        Stack<Gerarchia> stack = new Stack<>();
-        Categoria categoria = (Categoria) g.root().data();
+        Gerarchia rootGerarchia = new Gerarchia(createCategoria(true, null));
+        Stack<Gerarchia> stack = new Stack<>(); // TODO: valutare utilizzo deque
+        Categoria categoria = (Categoria) rootGerarchia.root().data();
 
         for (int i=0; i < categoria.getCampo().getDominio().size(); i++) {
-            stack.push(g);
+            stack.push(rootGerarchia);
         }
+        //IntStream.range(0, categoria.getCampo().getDominio().size()).mapToObj(i -> rootGerarchia).forEach(stack::push);
 
         while (!stack.isEmpty()) {
-            Gerarchia theGoodFather = stack.peek();
-            Categoria categoriaPadre = (Categoria) theGoodFather.data();
-            String nomeCategoriaPadre = categoriaPadre.getNome();
+            Gerarchia theGoodFather = stack.peek(); // prendo il padre attuale per la visualizzazione
+            Categoria categoriaPadre = (Categoria) theGoodFather.data(); // prendo la categoria del padre
+            String nomeCategoriaPadre = categoriaPadre.getNome(); // prendo il nome della categoria del padre
             Gerarchia gerarchia = new Gerarchia(createCategoria(false, nomeCategoriaPadre));
-            Categoria c = (Categoria) gerarchia.root().data();
-            Campo campo = c.getCampo();
-            Gerarchia padre = stack.pop();
-            padre.add(gerarchia);
-            if (campo != null){
-                for (int i=0; i < campo.getDominio().size(); i++) {
+
+            Categoria c = (Categoria) gerarchia.root().data(); // prendo la categoria appena creata
+            Campo campo = c.getCampo(); // prendo il campo della categoria appena creata
+            Gerarchia padre = stack.pop(); // prendo il padre attuale
+            padre.add(gerarchia); // aggiungo la categoria appena creata al padre attuale
+            if (campo != null){ // se il campo non è nullo aggiungo le attività allo stack
+                for (int i=0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di attività
                     stack.push(gerarchia);
                 }
             }
         }
-
-
-        return g;
+        return rootGerarchia;
     }
 
     /**
      * Crea una categoria di attività per un comprensorio.
      * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo di attività alla categoria.
+     *
+     * @param isRoot indica se la categoria è radice
+     * @param nomePadre il nome della categoria padre
      * @return la categoria creata
      */
     private Categoria createCategoria(boolean isRoot, String nomePadre) {
         String nome;
         while (true) {
-            nome = this.view.getInput("Inserisci il nome della categoria " + (isRoot ? "radice: " : "figlia di " + (nomePadre)+ ": "));
+            nome = this.view.getInput("Inserisci il nome della categoria" + (isRoot ? "radice" : "figlia di " + (nomePadre)) + ": ");
             if (nome.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if (isRoot && this.database.hasGerarchia(nome)) {
+            if (isRoot && this.database.hasGerarchia(nome)) { // TODO: manca controllo per categorie stesso nome nella gerarchia
                 this.view.showMessage("Categoria già esistente");
                 continue;
             }
             break;
         }
-
         Campo campo;
 
         boolean choice = this.getUserChoice("Vuoi aggiungere un campo di attività a questa categoria? (s/n): ");
@@ -331,6 +293,7 @@ public class Controller {
     /**
      * Crea un campo di attività per un comprensorio.
      * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere attività al campo.
+     *
      * @return il campo creato
      */
     private Campo createCampo() {
@@ -357,7 +320,7 @@ public class Controller {
 
     /**
      * Crea un dominio di attività per un campo.
-     * // TODO: deve essere davvero void? si
+     *
      * @param campo il campo a cui aggiungere il dominio
      */
     private void createDominio(Campo campo) {
@@ -385,10 +348,50 @@ public class Controller {
     }
 
     /**
-    * Effettua il login di un utente nel sistema con credenziali predefinite.
-    *
-    * @return true se il login va a buon fine, false altrimenti
-    */
+     * Ottiene un username valido dall'utente.
+     *
+     * @return lo username valido, null se non valido
+     */
+    private String getUsername() {
+        while (true) {
+            String username = view.getInput(String.format("Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ", UserUtil.USERNAME_LENGTH));
+            if (UserUtil.checkUsername(username)) return username;
+            view.showMessage("Username non valido. Riprova.");
+        }
+    }
+
+    /**
+     * Ottiene una password valida dall'utente.
+     *
+     * @return la password valida, null se non valida
+     */
+    private String getPassword() {
+        while (true) {
+            String password = view.getInput(String.format("Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ", UserUtil.PASSWORD_LENGTH));
+            if (UserUtil.checkPassword(password)) return password;
+            view.showMessage("Password non valida. Riprova.");
+        }
+    }
+
+    /**
+     * Ottiene la scelta dell'utente.
+     *
+     * @return true se l'utente preme s, false se preme n
+     */
+    private boolean getUserChoice(String messaggio) {
+        while (true) {
+            String role = view.getInput(messaggio);
+            if (role.equalsIgnoreCase("s")) return true;
+            if (role.equalsIgnoreCase("n")) return false;
+            view.showMessage("Input non valido. Riprova.");
+        }
+    }
+
+    /**
+     * Effettua il login di un utente nel sistema con credenziali predefinite.
+     *
+     * @return true se il login va a buon fine, false altrimenti
+     */
     private boolean defaultUtente() {
         String usernameDefault = UserUtil.generateRandomUsername();
         String passwordDefault = UserUtil.generateRandomPassword();
@@ -405,5 +408,14 @@ public class Controller {
         }
         view.showMessage("Login non riuscito. Riprova più tardi.");
         return false;
+    }
+
+    /**
+     * Restituisce il database.
+     *
+     * @return il database
+     */
+    public Database getDatabase() {
+        return this.database;
     }
 }

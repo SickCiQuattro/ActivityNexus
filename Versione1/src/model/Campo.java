@@ -9,9 +9,10 @@ import java.util.Set;
  * Un campo è costituito da un nome e da un dominio di valori.
  * I valori possono essere associati a una descrizione.
  */
-public class Campo {
+public class Campo implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
-    private Set<Attivita> dominio; // <valore, descrizione>
+    private Set<Attivita> dominio;
 
     /**
      * Costruisce un Campo con il nome specificato.
@@ -45,6 +46,15 @@ public class Campo {
     }
 
     /**
+     * Imposta il nome del campo.
+     *
+     * @param nome il nuovo nome del campo
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
      * Restituisce il dominio dei valori associati alle descrizioni.
      *
      * @return il dominio dei valori
@@ -68,6 +78,7 @@ public class Campo {
 
     /**
      * Controlla se una attività è presente nel dominio del campo.
+     *
      * @param attivita l'attività da cercare
      * @return true se l'attività è presente, false altrimenti
      */
@@ -75,6 +86,12 @@ public class Campo {
         return this.dominio.contains(attivita);
     }
 
+    /**
+     * Controlla se una attività con il nome specificato è presente nel dominio del campo.
+     *
+     * @param nome il nome dell'attività da cercare
+     * @return true se l'attività è presente, false altrimenti
+     */
     public boolean hasAttivita(String nome) {
         for (Attivita attivita : this.dominio) {
             if (attivita.getNome().equals(nome)) {
@@ -83,6 +100,36 @@ public class Campo {
         }
         return false;
     }
+
+    /**
+     * Scrive l'oggetto Campo in un flusso di output.
+     *
+     * @param out il flusso di output
+     * @throws IOException se si verifica un errore di I/O
+     */
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    /**
+     * Legge l'oggetto Campo da un flusso di input.
+     *
+     * @param in il flusso di input
+     * @throws IOException se si verifica un errore di I/O
+     * @throws ClassNotFoundException se la classe non viene trovata
+     */
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    /**
+     * Restituisce una rappresentazione in stringa del campo.
+     * La stringa include il nome del campo e la lista delle attività nel dominio.
+     *
+     * @return una rappresentazione in stringa del campo
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -92,5 +139,4 @@ public class Campo {
         }
         return sb.toString();
     }
-
 }

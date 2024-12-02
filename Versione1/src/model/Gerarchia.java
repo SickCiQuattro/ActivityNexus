@@ -8,9 +8,12 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Stack;
 
+/**
+ * Classe che rappresenta una gerarchia di categorie.
+ * Una gerarchia è costituita da una categoria radice e da una struttura ad albero di categorie figlie.
+ */
 public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
     private static final long serialVersionUID = 1L;
-    //private final TreeNode<Categoria> root;
 
     /**
      * Costruisce una Gerarchia con la categoria radice specificata.
@@ -19,8 +22,6 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      */
     public Gerarchia(Categoria rootCategoria) {
         super(rootCategoria);
-
-        //this.root = new LinkedMultiTreeNode<>(rootCategoria);
     }
 
     /**
@@ -30,63 +31,57 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      * @param childCategoria la categoria figlio da aggiungere
      * @return true se la categoria figlio è stata aggiunta correttamente, false altrimenti
      */
-    public boolean addCategoria(Categoria parentCategoria, Categoria childCategoria) { // metodo di merda. usare add
+    public boolean addCategoria(Categoria parentCategoria, Categoria childCategoria) {
         TreeNode<Categoria> parentNode = this.find(parentCategoria);
-
         return parentNode != null && parentNode.add(new LinkedMultiTreeNode<>(childCategoria));
     }
 
     /**
-     * Returns the string representation of this object
+     * Restituisce una rappresentazione in stringa della gerarchia.
+     * La stringa include i nomi delle categorie e le attività associate.
      *
-     * @return string representation of this object
+     * @return una rappresentazione in stringa della gerarchia
      */
     @Override
     public String toString() {
-        Stack<Attivita>attivita = new Stack<>(); // stack per le attivita', vengono aggiunte in cima per una questione di ordine del TraveralAction
-        //final TreeNode<Categoria>[] lastParent = new TreeNode[]{null}; // per tenere traccia del nodo padre e non aggiungere attivita' doppie
-        final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>(); // per tenere traccia dei nodi padre e non aggiungere attivita' doppie
+        Stack<Attivita> attivita = new Stack<>();
+        final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>();
         final StringBuilder builder = new StringBuilder();
         builder.append("\n");
-        final int topNodeLevel = level(); // livello del nodo di partenza
+        final int topNodeLevel = level();
 
         TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
             @Override
             public void perform(TreeNode<Categoria> node) {
-                if(node.isRoot()) {
-                    //lastParent[0] = node;
+                if (node.isRoot()) {
                     lastParent.add(node);
                     Stack<Attivita> reverse = new Stack<>();
                     node.data().getCampo().getDominio().forEach(reverse::push);
-                    while(!reverse.isEmpty()){
+                    while (!reverse.isEmpty()) {
                         attivita.push(reverse.pop());
                     }
                 }
-                //if(!node.isRoot() && !node.parent().equals(lastParent[0])){
-                if(!node.isRoot() && !lastParent.contains(node.parent())){
-                    //lastParent[0] = node.parent();
+                if (!node.isRoot() && !lastParent.contains(node.parent())) {
                     lastParent.add(node.parent());
                     Stack<Attivita> reverse = new Stack<>();
                     node.parent().data().getCampo().getDominio().forEach(reverse::push);
-                    while(!reverse.isEmpty()){
+                    while (!reverse.isEmpty()) {
                         attivita.push(reverse.pop());
                     }
                 }
-                if(!node.isRoot())
+                if (!node.isRoot())
                     builder.append("Attivita': ").append(attivita.pop()).append("\n");
 
                 int nodeLevel = node.level() - topNodeLevel;
-                for (int i = 0; i < nodeLevel; i++) { // TODO: sarebbe interessante distingurere i rami con simboli diversi
-                    builder.append("|  "); // livello profondita
+                for (int i = 0; i < nodeLevel; i++) {
+                    builder.append("|  ");
                 }
-                //builder.append("|  ".repeat(Math.max(0, nodeLevel))); // modo alternativo per ripetere una stringa
 
                 builder.append("+- ").append("Nome: ").append(node.data().getNome()).append("\n");
 
-                if(!node.isLeaf())
+                if (!node.isLeaf())
                     builder.append("Campo: ").append(node.data().getCampo().getNome());
                 builder.append("\n\n");
-
             }
 
             @Override
@@ -98,6 +93,13 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         return builder.toString();
     }
 
+    /**
+     * Confronta questa gerarchia con l'oggetto specificato.
+     * Il risultato è true se e solo se l'argomento non è null ed è un oggetto Gerarchia che ha la stessa categoria radice di questo oggetto.
+     *
+     * @param obj l'oggetto da confrontare con questa Gerarchia
+     * @return true se l'oggetto è uguale a questa Gerarchia, false altrimenti
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
