@@ -67,7 +67,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      */
     @Override
     public String toString() {
-        Stack<Attivita> attivita = new Stack<>();
+        Stack<ValoreCampo> attivita = new Stack<>();
         final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>();
         final StringBuilder builder = new StringBuilder();
         builder.append("\n");
@@ -78,7 +78,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
             public void perform(TreeNode<Categoria> node) {
                 if (node.isRoot()) {
                     lastParent.add(node);
-                    Stack<Attivita> reverse = new Stack<>();
+                    Stack<ValoreCampo> reverse = new Stack<>();
                     node.data().getCampo().getDominio().forEach(reverse::push);
                     while (!reverse.isEmpty()) {
                         attivita.push(reverse.pop());
@@ -86,7 +86,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                 }
                 if (!node.isRoot() && !lastParent.contains(node.parent())) {
                     lastParent.add(node.parent());
-                    Stack<Attivita> reverse = new Stack<>();
+                    Stack<ValoreCampo> reverse = new Stack<>();
                     node.parent().data().getCampo().getDominio().forEach(reverse::push);
                     while (!reverse.isEmpty()) {
                         attivita.push(reverse.pop());

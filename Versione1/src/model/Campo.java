@@ -12,7 +12,7 @@ import java.util.Set;
 public class Campo implements Serializable {
     private static final long serialVersionUID = 1L;
     private String nome;
-    private Set<Attivita> dominio;
+    private Set<ValoreCampo> dominio;
 
     /**
      * Costruisce un Campo con il nome specificato.
@@ -31,7 +31,7 @@ public class Campo implements Serializable {
      * @param nome    il nome del campo
      * @param dominio il dominio dei valori associati alle descrizioni
      */
-    public Campo(String nome, HashSet<Attivita> dominio) {
+    public Campo(String nome, HashSet<ValoreCampo> dominio) {
         this.nome = nome;
         this.dominio = dominio;
     }
@@ -59,7 +59,7 @@ public class Campo implements Serializable {
      *
      * @return il dominio dei valori
      */
-    public Set<Attivita> getDominio() {
+    public Set<ValoreCampo> getDominio() {
         return this.dominio;
     }
 
@@ -69,7 +69,7 @@ public class Campo implements Serializable {
      * @param attivita il valore da aggiungere
      * @return true se il valore è stato aggiunto correttamente, false altrimenti
      */
-    public boolean addAttivita(Attivita attivita) {
+    public boolean addAttivita(ValoreCampo attivita) {
         if (attivita == null) {
             return false;
         }
@@ -82,7 +82,7 @@ public class Campo implements Serializable {
      * @param attivita l'attività da cercare
      * @return true se l'attività è presente, false altrimenti
      */
-    public boolean hasAttivita(Attivita attivita) {
+    public boolean hasAttivita(ValoreCampo attivita) {
         return this.dominio.contains(attivita);
     }
 
@@ -93,7 +93,7 @@ public class Campo implements Serializable {
      * @return true se l'attività è presente, false altrimenti
      */
     public boolean hasAttivita(String nome) {
-        for (Attivita attivita : this.dominio) {
+        for (ValoreCampo attivita : this.dominio) {
             if (attivita.getNome().equals(nome)) {
                 return true;
             }
@@ -134,7 +134,7 @@ public class Campo implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.nome).append(":\n");
-        for (Attivita attivita : this.dominio) {
+        for (ValoreCampo attivita : this.dominio) {
             sb.append("\t").append(attivita.toString()).append("\n");
         }
         return sb.toString();

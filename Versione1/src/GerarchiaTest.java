@@ -1,4 +1,4 @@
-import model.Attivita;
+import model.ValoreCampo;
 import model.Categoria;
 import model.Gerarchia;
 import model.Campo;
@@ -10,34 +10,34 @@ public class GerarchiaTest {
 
     public static void main(String[] args) {
 
-        HashSet<Attivita> dominioRoot = new HashSet<>();
-        dominioRoot.add(new Attivita("teoria", "desc1"));
-        dominioRoot.add(new Attivita("strumento", "desc2"));
+        HashSet<ValoreCampo> dominioRoot = new HashSet<>();
+        dominioRoot.add(new ValoreCampo("teoria", "desc1"));
+        dominioRoot.add(new ValoreCampo("strumento", "desc2"));
         Categoria categoriaroot = new Categoria("Lezioni di musica", new Campo("tipo", dominioRoot));
 
-        HashSet<Attivita> dominioLezTM = new HashSet<>();
-        dominioLezTM.add(new Attivita("solfeggio", "desc1"));
-        dominioLezTM.add(new Attivita("storia della musica", "desc2"));
+        HashSet<ValoreCampo> dominioLezTM = new HashSet<>();
+        dominioLezTM.add(new ValoreCampo("solfeggio", "desc1"));
+        dominioLezTM.add(new ValoreCampo("storia della musica", "desc2"));
         Categoria categoriaLezTM = new Categoria("Lezioni di teoria musicale", new Campo("materia", dominioLezTM));
 
         Categoria categoriaLezSolf = new Categoria("Lezioni di solfeggio");
 
         Categoria categoriaLezStMu= new Categoria("Lezioni di storia della musica");
 
-        HashSet<Attivita> dominioLezSM = new HashSet<>();
-        dominioLezSM.add(new Attivita("chitarra", "desc1"));
-        dominioLezSM.add(new Attivita("pianoforte", "desc2"));
+        HashSet<ValoreCampo> dominioLezSM = new HashSet<>();
+        dominioLezSM.add(new ValoreCampo("chitarra", "desc1"));
+        dominioLezSM.add(new ValoreCampo("pianoforte", "desc2"));
         Categoria categoriaLezSM = new Categoria("Lezioni di uno strumento musicale", new Campo("strumento", dominioLezSM));
 
-        HashSet<Attivita> dominioLezC = new HashSet<>();
-        dominioLezC.add(new Attivita("principianti", "desc1"));
+        HashSet<ValoreCampo> dominioLezC = new HashSet<>();
+        dominioLezC.add(new ValoreCampo("principianti", "desc1"));
         Categoria categoriaLezC = new Categoria("Lezioni di chitarra", new Campo("livello", dominioLezC));
 
         Categoria categoriaLezCP= new Categoria("Lezioni di chitarra per principianti");
 
-        HashSet<Attivita> dominioLezP = new HashSet<>();
-        dominioLezP.add(new Attivita("principianti", "desc1"));
-        dominioLezP.add(new Attivita("medio", "desc1"));
+        HashSet<ValoreCampo> dominioLezP = new HashSet<>();
+        dominioLezP.add(new ValoreCampo("principianti", "desc1"));
+        dominioLezP.add(new ValoreCampo("medio", "desc1"));
         Categoria categoriaLezP = new Categoria("Lezioni di pianoforte", new Campo("livello", dominioLezP));
 
         Categoria categoriaLezPP= new Categoria("Lezioni di pianoforte per principianti");

@@ -354,7 +354,7 @@ public class Controller {
             }
 
             String descrizione = this.view.getInput("Inserisci una descrizione a questa attività (facoltativa): ");
-            campo.addAttivita(descrizione.isBlank() ? new Attivita(nomeAttivita) : new Attivita(nomeAttivita, descrizione));
+            campo.addAttivita(descrizione.isBlank() ? new ValoreCampo(nomeAttivita) : new ValoreCampo(nomeAttivita, descrizione));
 
             this.view.showMessage("Attività aggiunta con successo");
 
