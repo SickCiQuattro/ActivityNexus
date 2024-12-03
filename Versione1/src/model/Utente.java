@@ -125,7 +125,7 @@ public class Utente implements Serializable {
             return false;
         }
         Utente utente = (Utente) obj;
-        return this.username.equals(utente.getUsername());
+        return this.username.equalsIgnoreCase(utente.getUsername());
     }
 
     /**
