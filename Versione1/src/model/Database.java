@@ -245,6 +245,35 @@ public class Database {
         }
     }
 
+    /**
+     * Serializza le gerarchie nel file specificato.
+     * @param filePath
+     */
+    public void serializeGerarchie(String filePath){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.gerarchie);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deserializza le gerarchie dal file specificato.
+     * @param filePath
+     */
+    public void deserializeGerarchie(String filePath){
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.gerarchie = (Set<Gerarchia>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Metodi per la rappresentazione in stringa
 
     /**
