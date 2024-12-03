@@ -117,6 +117,6 @@ public class Categoria implements Serializable {
             return false;
         }
         Categoria categoria = (Categoria) obj;
-        return nome.equals(categoria.nome);
+        return nome.equalsIgnoreCase(categoria.getNome());
     }
 }
