@@ -73,7 +73,7 @@ public class Comprensorio implements Serializable {
      */
     public boolean hasComune(String comune) {
         for (String c : this.comuni) {
-            if (c.equals(comune)) {
+            if (c.equalsIgnoreCase(comune)) {
                 return true;
             }
         }
@@ -151,7 +151,7 @@ public class Comprensorio implements Serializable {
             return false;
         }
         Comprensorio comprensorio = (Comprensorio) obj;
-        return nome.equals(comprensorio.nome);
+        return nome.equalsIgnoreCase(comprensorio.getNome());
     }
 
     /**
