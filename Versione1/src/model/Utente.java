@@ -6,6 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+/**
+ * La classe Utente rappresenta un utente del sistema.
+ * Ogni utente ha un username, una password protetta con hash e un salt casuale.
+ * L'utente può essere un fruitore o un configuratore.
+ */
 public class Utente implements Serializable {
     private static final long serialVersionUID = 1L;
     private String username;
@@ -42,6 +47,13 @@ public class Utente implements Serializable {
         return this.username.equals(username) && this.hashedPassword.equals(hashPassword(password, this.salt));
     }
 
+    /**
+     * Protegge la password dell'utente con un hash SHA-256.
+     * Questo metodo chiama il metodo {@link #generateSalt()} per generare un salt casuale.
+     * @param password
+     * @param salt
+     * @return password protetta con hash
+     */
     private String hashPassword(String password, byte[] salt) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -53,9 +65,14 @@ public class Utente implements Serializable {
         }
     }
 
+    /**
+     * Genera un salt casuale per proteggere la password.
+     * @see SecureRandom
+     * @return salt
+     */
     private byte[] generateSalt() {
         SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
+        byte[] salt = new byte[20];
         random.nextBytes(salt);
         return salt;
     }
