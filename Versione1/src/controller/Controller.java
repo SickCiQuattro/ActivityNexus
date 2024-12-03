@@ -3,9 +3,6 @@ package controller;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
-
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Stack;
 
 /**
