@@ -25,6 +25,33 @@ public class Comprensorio implements Serializable {
     }
 
     /**
+     * Restituisce il nome del comprensorio.
+     *
+     * @return il nome del comprensorio
+     */
+    public String getNome() {
+        return this.nome;
+    }
+
+    /**
+     * Imposta il nome del comprensorio.
+     *
+     * @param nome il nuovo nome del comprensorio
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
+     * Restituisce la lista dei comuni del comprensorio.
+     *
+     * @return la lista dei comuni
+     */
+    public ArrayList<String> getComuni() {
+        return this.comuni;
+    }
+
+    /**
      * Aggiunge un comune al comprensorio se non è già presente nella lista dei comuni.
      *
      * @param comune il nome del comune da aggiungere
@@ -38,9 +65,15 @@ public class Comprensorio implements Serializable {
         return true;
     }
 
+    /**
+     * Verifica se un comune è presente nella lista dei comuni.
+     *
+     * @param comune il nome del comune da verificare
+     * @return true se il comune è presente, false altrimenti
+     */
     public boolean hasComune(String comune) {
         for (String c : this.comuni) {
-            if (c.equals(comune)) {
+            if (c.equalsIgnoreCase(comune)) {
                 return true;
             }
         }
@@ -61,33 +94,6 @@ public class Comprensorio implements Serializable {
             }
         }
         return false;
-    }
-
-    /**
-     * Restituisce il nome del comprensorio.
-     *
-     * @return il nome del comprensorio
-     */
-    public String getNome() {
-        return this.nome;
-    }
-
-    /**
-     * Restituisce la lista dei comuni del comprensorio.
-     *
-     * @return la lista dei comuni
-     */
-    public ArrayList<String> getComuni() {
-        return this.comuni;
-    }
-
-    /**
-     * Imposta il nome del comprensorio.
-     *
-     * @param nome il nuovo nome del comprensorio
-     */
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     /**
@@ -145,6 +151,16 @@ public class Comprensorio implements Serializable {
             return false;
         }
         Comprensorio comprensorio = (Comprensorio) obj;
-        return nome.equals(comprensorio.nome);
+        return nome.equalsIgnoreCase(comprensorio.getNome());
+    }
+
+    /**
+     * Restituisce un hash code per questo comprensorio.
+     *
+     * @return un hash code per questo comprensorio
+     */
+    @Override
+    public int hashCode() {
+        return nome.hashCode();
     }
 }
