@@ -22,6 +22,7 @@ public class Controller {
     private static final String OPERATION_CANCELLED = "Operazione annullata.";
     private static final String USERS_FILE_PATH = "src/data/utenti.ser";
     private static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
+    private static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
 
     private Database database;
     private final ConsoleView view;
@@ -43,6 +44,7 @@ public class Controller {
     public void start() {
         this.database.deserializeUtenti(USERS_FILE_PATH);
         this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
+        this.database.deserializeGerarchie(GERARCHIE_FILE_PATH);
         while (true) {
             view.showMenu();
             String choice = view.getInput("Cosa vuoi fare? ");
@@ -131,6 +133,7 @@ public class Controller {
                     if(gerarchia != null){
                         this.database.addGerarchia(gerarchia);
                         view.showMessage("Gerarchia creata con successo");
+                        this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
                     }
                     else
                         view.showMessage("Creazione gerarchia fallita");
