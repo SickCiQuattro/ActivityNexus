@@ -61,13 +61,13 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
 
     /**
      * Restituisce una rappresentazione in stringa della gerarchia.
-     * La stringa include i nomi delle categorie e le attività associate.
+     * La stringa include i nomi delle categorie e i valori del campo associato alla categoria.
      *
      * @return una rappresentazione in stringa della gerarchia
      */
     @Override
     public String toString() {
-        Stack<ValoreCampo> attivita = new Stack<>();
+        Stack<ValoreCampo> valore = new Stack<>();
         final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>();
         final StringBuilder builder = new StringBuilder();
         builder.append("\n");
@@ -81,7 +81,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                     Stack<ValoreCampo> reverse = new Stack<>();
                     node.data().getCampo().getDominio().forEach(reverse::push);
                     while (!reverse.isEmpty()) {
-                        attivita.push(reverse.pop());
+                        valore.push(reverse.pop());
                     }
                 }
                 if (!node.isRoot() && !lastParent.contains(node.parent())) {
@@ -89,11 +89,11 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                     Stack<ValoreCampo> reverse = new Stack<>();
                     node.parent().data().getCampo().getDominio().forEach(reverse::push);
                     while (!reverse.isEmpty()) {
-                        attivita.push(reverse.pop());
+                        valore.push(reverse.pop());
                     }
                 }
                 if (!node.isRoot())
-                    builder.append("Attivita': ").append(attivita.pop()).append("\n");
+                    builder.append("Valore': ").append(valore.pop()).append("\n");
 
                 int nodeLevel = node.level() - topNodeLevel;
                 for (int i = 0; i < nodeLevel; i++) {

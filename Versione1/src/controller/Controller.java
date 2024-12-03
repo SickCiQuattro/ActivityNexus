@@ -253,8 +253,8 @@ public class Controller {
             Campo campo = c.getCampo(); // prendo il campo della categoria appena creata
             Gerarchia padre = stack.pop(); // prendo il padre attuale
             padre.add(gerarchia); // aggiungo la categoria appena creata al padre attuale
-            if (campo != null){ // se il campo non è nullo aggiungo le attività allo stack
-                for (int i=0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di attività
+            if (campo != null){ // se il campo non è nullo aggiungo i valori del campo nello stack
+                for (int i=0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di valori del campo
                     stack.push(gerarchia);
                 }
             }
@@ -263,8 +263,8 @@ public class Controller {
     }
 
     /**
-     * Crea una categoria di attività per un comprensorio.
-     * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo di attività alla categoria.
+     * Crea una categoria per una gerarchia.
+     * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo caratteristico alla categoria.
      *
      * @param nomePadre il nome della categoria padre
      * @param root la gerarchia radice, null se è la categoria radice
@@ -296,7 +296,7 @@ public class Controller {
         }
         Campo campo;
 
-        boolean choice = this.getUserChoice("Vuoi aggiungere un campo di attività a questa categoria? (s/n): ");
+        boolean choice = this.getUserChoice("Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ");
 
         if (root == null || choice) {
             campo = this.createCampo();
@@ -307,8 +307,8 @@ public class Controller {
     }
 
     /**
-     * Crea un campo di attività per un comprensorio.
-     * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere attività al campo.
+     * Crea un campo caratteristico per una categoria.
+     * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere un valori di dominio al campo.
      *
      * @return il campo creato
      */
@@ -326,7 +326,7 @@ public class Controller {
         do {
             createDominio(campo);
             if (campo.getDominio().isEmpty()) {
-                this.view.showMessage("Il campo deve contenere almeno un'attività");
+                this.view.showMessage("Il campo deve contenere almeno un valore di dominio");
                 // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo? allora sei un utente coglione
             }
         } while (campo.getDominio().isEmpty());
@@ -335,30 +335,31 @@ public class Controller {
     }
 
     /**
-     * Crea un dominio di attività per un campo.
+     * Crea un dominio di valori per un campo.
      *
      * @param campo il campo a cui aggiungere il dominio
      */
     private void createDominio(Campo campo) {
         boolean finished = false;
         while (!finished) {
-            String nomeAttivita = this.view.getInput("Inserisci il nome dell'attività. Premi 0 per terminare: ");
-            if (nomeAttivita.isBlank()) {
+            String nomeValore = this.view.getInput("Inserisci il nome del valore di dominio. Premi 0 per terminare: ");
+            if (nomeValore.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if (nomeAttivita.equals("0")) break;
-            if (campo.hasAttivita(nomeAttivita)) {
-                this.view.showMessage("Attività già esistente");
+            if (nomeValore.equals("0")) break;
+            if (campo.hasValore(nomeValore)) {
+                this.view.showMessage("Valore di dominio già esistente");
+
                 continue;
             }
 
-            String descrizione = this.view.getInput("Inserisci una descrizione a questa attività (facoltativa): ");
-            campo.addAttivita(descrizione.isBlank() ? new ValoreCampo(nomeAttivita) : new ValoreCampo(nomeAttivita, descrizione));
+            String descrizione = this.view.getInput("Inserisci una descrizione a questo valore di dominio (facoltativa): ");
+            campo.addValore(descrizione.isBlank() ? new ValoreCampo(nomeValore) : new ValoreCampo(nomeValore, descrizione));
 
-            this.view.showMessage("Attività aggiunta con successo");
+            this.view.showMessage("Valore di dominio aggiunta con successo");
 
-            if (!getUserChoice("Vuoi aggiungere un'altra attività? (s/n): "))
+            if (!getUserChoice("Vuoi aggiungere un altro valore di dominio? (s/n): "))
                 finished = true;
         }
     }

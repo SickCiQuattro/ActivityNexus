@@ -66,35 +66,35 @@ public class Campo implements Serializable {
     /**
      * Aggiunge un valore al dominio del campo.
      *
-     * @param attivita il valore da aggiungere
+     * @param valore il valore da aggiungere
      * @return true se il valore è stato aggiunto correttamente, false altrimenti
      */
-    public boolean addAttivita(ValoreCampo attivita) {
-        if (attivita == null) {
+    public boolean addValore(ValoreCampo valore) {
+        if (valore == null) {
             return false;
         }
-        return this.dominio.add(attivita);
+        return this.dominio.add(valore);
     }
 
     /**
-     * Controlla se una attività è presente nel dominio del campo.
+     * Controlla se un dato valore è presente nel dominio del campo.
      *
-     * @param attivita l'attività da cercare
-     * @return true se l'attività è presente, false altrimenti
+     * @param valore il valore da cercare
+     * @return true se il valore è presente, false altrimenti
      */
-    public boolean hasAttivita(ValoreCampo attivita) {
-        return this.dominio.contains(attivita);
+    public boolean hasValore(ValoreCampo valore) {
+        return this.dominio.contains(valore);
     }
 
     /**
-     * Controlla se una attività con il nome specificato è presente nel dominio del campo.
+     * Controlla se un valore con il nome specificato è presente nel dominio del campo.
      *
-     * @param nome il nome dell'attività da cercare
-     * @return true se l'attività è presente, false altrimenti
+     * @param nome il nome del valore da cercare
+     * @return true se il valore è presente, false altrimenti
      */
-    public boolean hasAttivita(String nome) {
-        for (ValoreCampo attivita : this.dominio) {
-            if (attivita.getNome().equals(nome)) {
+    public boolean hasValore(String nome) {
+        for (ValoreCampo valore : this.dominio) {
+            if (valore.getNome().equals(nome)) {
                 return true;
             }
         }
@@ -126,7 +126,7 @@ public class Campo implements Serializable {
 
     /**
      * Restituisce una rappresentazione in stringa del campo.
-     * La stringa include il nome del campo e la lista delle attività nel dominio.
+     * La stringa include il nome del campo e la lista dei valori nel dominio.
      *
      * @return una rappresentazione in stringa del campo
      */
@@ -134,8 +134,8 @@ public class Campo implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.nome).append(":\n");
-        for (ValoreCampo attivita : this.dominio) {
-            sb.append("\t").append(attivita.toString()).append("\n");
+        for (ValoreCampo valore : this.dominio) {
+            sb.append("\t").append(valore.toString()).append("\n");
         }
         return sb.toString();
     }
