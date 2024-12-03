@@ -3,6 +3,9 @@ package controller;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -130,13 +133,9 @@ public class Controller {
                     break;
                 case "5": // Crea gerarchia
                     Gerarchia gerarchia = createGerarchia();
-                    if(gerarchia != null){
-                        this.database.addGerarchia(gerarchia);
-                        view.showMessage("Gerarchia creata con successo");
-                        this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
-                    }
-                    else
-                        view.showMessage("Creazione gerarchia fallita");
+                    this.database.addGerarchia(gerarchia);
+                    view.showMessage("Gerarchia creata con successo");
+                    this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
                     break;
                 case "0": // Uscita
                     view.showMessage(EXIT_MESSAGE);
@@ -211,14 +210,21 @@ public class Controller {
         boolean finished = false;
         while (!finished) {
             String comune = this.view.getInput("Inserisci il nome del comune. Premi 0 per terminare: ");
+
             if (comune.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
+
             if (comune.equals("0")) {
-                finished = true;
+                if (comprensorio.getComuni().isEmpty()) {
+                    this.view.showMessage("Il comprensorio deve contenere almeno un comune");
+                } else {
+                    finished = true;
+                }
                 continue;
             }
+
             if (!comprensorio.addComune(comune)) {
                 this.view.showMessage("Comune già esistente");
             }
@@ -231,7 +237,7 @@ public class Controller {
      * @return la gerarchia creata
      */
     private Gerarchia createGerarchia() {
-        Gerarchia rootGerarchia = new Gerarchia(createCategoria(true, null));
+        Gerarchia rootGerarchia = new Gerarchia(createCategoria( null, null));
         Stack<Gerarchia> stack = new Stack<>(); // TODO: valutare utilizzo deque
         Categoria categoria = (Categoria) rootGerarchia.root().data();
 
@@ -244,7 +250,7 @@ public class Controller {
             Gerarchia theGoodFather = stack.peek(); // prendo il padre attuale per la visualizzazione
             Categoria categoriaPadre = (Categoria) theGoodFather.data(); // prendo la categoria del padre
             String nomeCategoriaPadre = categoriaPadre.getNome(); // prendo il nome della categoria del padre
-            Gerarchia gerarchia = new Gerarchia(createCategoria(false, nomeCategoriaPadre));
+            Gerarchia gerarchia = new Gerarchia(createCategoria(nomeCategoriaPadre, rootGerarchia));
 
             Categoria c = (Categoria) gerarchia.root().data(); // prendo la categoria appena creata
             Campo campo = c.getCampo(); // prendo il campo della categoria appena creata
@@ -263,29 +269,39 @@ public class Controller {
      * Crea una categoria di attività per un comprensorio.
      * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo di attività alla categoria.
      *
-     * @param isRoot indica se la categoria è radice
      * @param nomePadre il nome della categoria padre
+     * @param root la gerarchia radice, null se è la categoria radice
      * @return la categoria creata
      */
-    private Categoria createCategoria(boolean isRoot, String nomePadre) {
+    private Categoria createCategoria(String nomePadre, Gerarchia root) {
         String nome;
         while (true) {
-            nome = this.view.getInput("Inserisci il nome della categoria" + (isRoot ? " radice" : " figlia di " + (nomePadre)) + ": ");
+            nome = this.view.getInput("Inserisci il nome della categoria" + (root == null ? " radice" : " figlia di " + (nomePadre)) + ": ");
             if (nome.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if (isRoot && this.database.hasGerarchia(nome)) { // TODO: manca controllo per categorie stesso nome nella gerarchia
-                this.view.showMessage("Categoria già esistente");
-                continue;
+
+            if (root == null) { // TODO: manca controllo per categorie stesso nome nella gerarchia
+                if (this.database.hasGerarchia(nome)) {
+                    this.view.showMessage("Esiste già una gerarchia con questo nome");
+                    continue;
+                }
             }
+            else{
+                if(root.find(new Categoria(nome)) != null){
+                    this.view.showMessage("Categoria già esistente");
+                    continue;
+                }
+            }
+
             break;
         }
         Campo campo;
 
         boolean choice = this.getUserChoice("Vuoi aggiungere un campo di attività a questa categoria? (s/n): ");
 
-        if (isRoot || choice) {
+        if (root == null || choice) {
             campo = this.createCampo();
             return new Categoria(nome, campo);
         }
