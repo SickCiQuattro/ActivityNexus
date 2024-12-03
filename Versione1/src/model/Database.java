@@ -127,7 +127,7 @@ public class Database {
      */
     public boolean hasComprensorio(String nome) {
         for (Comprensorio c : this.comprensori) {
-            if (c.getNome().equals(nome)) {
+            if (c.getNome().equalsIgnoreCase(nome)) {
                 return true;
             }
         }
