@@ -67,17 +67,10 @@ public class GerarchiaTest {
         figlio7.add(figlio8);
         figlio7.add(figlio9);
 
-        Collection<Gerarchia> figli = figlio7.subtrees();
-
         //System.out.println(figli);
         //System.out.println(figlio5.subtrees().size());
         System.out.println(gerarchia);
         //System.out.println(figlio9.level());
 
-        Gerarchia lastElement = null;
-        for (Gerarchia figlio : figli) {
-            lastElement = figlio;
-        }
-        //System.out.println(lastElement.print());
     }
 }
