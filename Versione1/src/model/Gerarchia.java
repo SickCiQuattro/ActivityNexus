@@ -43,7 +43,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      * @param nodeLevel il livello del nodo
      * @return una stringa che rappresenta la struttura dell'albero
      */
-    private String printTree(TreeNode<Categoria> node, int nodeLevel) {
+    /*private String printTree(TreeNode<Categoria> node, int nodeLevel) {
         StringBuilder builder = new StringBuilder();
         Gerarchia parent, figlio, lastElement = null;
         Collection<Gerarchia> figli;
@@ -64,6 +64,28 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                 builder.append("|");
         }
         return builder.reverse().toString(); // inverte la stringa
+    }*/
+    private String printTree(TreeNode<Categoria> node, int nodeLevel) {
+        StringBuilder builder = new StringBuilder();
+        TreeNode<Categoria> currentNode = node;
+
+        for (int i = 1; i < nodeLevel; i++) {
+            currentNode = currentNode.parent();
+            builder.append("\t");
+            if (!isLastChild(currentNode)) {
+                builder.append("|");
+            }
+        }
+        return builder.reverse().toString();
+    }
+
+    private boolean isLastChild(TreeNode<Categoria> node) {
+        TreeNode<Categoria> parent = node.parent();
+        if (parent == null) {
+            return true;
+        }
+        Collection<TreeNode<Categoria>> siblings = (Collection<TreeNode<Categoria>>) parent.subtrees();
+        return node.equals(siblings.toArray()[siblings.size() - 1]);
     }
 
     /**

@@ -53,7 +53,7 @@ public class Controller {
                     handleLogin();
                     break;
                 case "2": // Registrazione
-                    boolean checkRegistration = handleRegistration(); //TODO: serve un controllo più robusto ciao
+                    boolean checkRegistration = handleRegistration();
                     if (checkRegistration) {
                         this.database.serializeUtenti(USERS_FILE_PATH);
                     }
@@ -241,8 +241,6 @@ public class Controller {
         for (int i=0; i < categoria.getCampo().getDominio().size(); i++) {
             stack.push(rootGerarchia);
         }
-        //IntStream.range(0, categoria.getCampo().getDominio().size()).mapToObj(i -> rootGerarchia).forEach(stack::push);
-
         while (!stack.isEmpty()) {
             Gerarchia theGoodFather = stack.peek(); // prendo il padre attuale per la visualizzazione
             Categoria categoriaPadre = (Categoria) theGoodFather.data(); // prendo la categoria del padre
@@ -278,32 +276,14 @@ public class Controller {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-
-            if (root == null) { // TODO: manca controllo per categorie stesso nome nella gerarchia
-                if (this.database.hasGerarchia(nome)) {
-                    this.view.showMessage("Esiste già una gerarchia con questo nome");
-                    continue;
-                }
+            if ((root == null && database.hasGerarchia(nome)) || (root != null && root.find(new Categoria(nome)) != null)) {
+                view.showMessage(root == null ? "Esiste già una gerarchia con questo nome" : "Categoria già esistente");
+                continue;
             }
-            else{
-                if(root.find(new Categoria(nome)) != null){
-                    this.view.showMessage("Categoria già esistente");
-                    continue;
-                }
-            }
-
             break;
         }
-        Campo campo;
-
-        boolean choice = this.getUserChoice("Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ");
-
-        if (root == null || choice) {
-            campo = this.createCampo();
-            return new Categoria(nome, campo);
-        }
-
-        return new Categoria(nome);
+        Campo campo = (root == null || getUserChoice("Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ")) ? createCampo() : null;
+        return new Categoria(nome, campo);
     }
 
     /**
@@ -320,9 +300,7 @@ public class Controller {
                 this.view.showMessage("Nome non valido");
             }
         } while (nome.isBlank());
-
         Campo campo = new Campo(nome);
-
         do {
             createDominio(campo);
             if (campo.getDominio().isEmpty()) {
@@ -330,7 +308,6 @@ public class Controller {
                 // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo? allora sei un utente coglione
             }
         } while (campo.getDominio().isEmpty());
-
         return campo;
     }
 
@@ -350,15 +327,12 @@ public class Controller {
             if (nomeValore.equals("0")) break;
             if (campo.hasValore(nomeValore)) {
                 this.view.showMessage("Valore di dominio già esistente");
-
                 continue;
             }
-
             String descrizione = this.view.getInput("Inserisci una descrizione a questo valore di dominio (facoltativa): ");
             campo.addValore(descrizione.isBlank() ? new ValoreCampo(nomeValore) : new ValoreCampo(nomeValore, descrizione));
 
             this.view.showMessage("Valore di dominio aggiunta con successo");
-
             if (!getUserChoice("Vuoi aggiungere un altro valore di dominio? (s/n): "))
                 finished = true;
         }
