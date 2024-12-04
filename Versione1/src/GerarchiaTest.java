@@ -4,6 +4,7 @@ import model.Gerarchia;
 import model.Campo;
 import com.scalified.tree.TreeNode;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 public class GerarchiaTest {
@@ -44,16 +45,16 @@ public class GerarchiaTest {
         Categoria categoriaLezPM= new Categoria("Lezioni di pianoforte di difficolta media");
 
 
-        TreeNode<Categoria> gerarchia = new Gerarchia(categoriaroot);
-        TreeNode<Categoria> figlio1 = new Gerarchia(categoriaLezTM);
-        TreeNode<Categoria> figlio2 = new Gerarchia(categoriaLezSolf);
-        TreeNode<Categoria> figlio3 = new Gerarchia(categoriaLezStMu);
-        TreeNode<Categoria> figlio4 = new Gerarchia(categoriaLezSM);
-        TreeNode<Categoria> figlio5 = new Gerarchia(categoriaLezC);
-        TreeNode<Categoria> figlio6 = new Gerarchia(categoriaLezCP);
-        TreeNode<Categoria> figlio7 = new Gerarchia(categoriaLezP);
-        TreeNode<Categoria> figlio8 = new Gerarchia(categoriaLezPP);
-        TreeNode<Categoria> figlio9 = new Gerarchia(categoriaLezPM);
+        Gerarchia gerarchia = new Gerarchia(categoriaroot);
+        Gerarchia figlio1 = new Gerarchia(categoriaLezTM);
+        Gerarchia figlio2 = new Gerarchia(categoriaLezSolf);
+        Gerarchia figlio3 = new Gerarchia(categoriaLezStMu);
+        Gerarchia figlio4 = new Gerarchia(categoriaLezSM);
+        Gerarchia figlio5 = new Gerarchia(categoriaLezC);
+        Gerarchia figlio6 = new Gerarchia(categoriaLezCP);
+        Gerarchia figlio7 = new Gerarchia(categoriaLezP);
+        Gerarchia figlio8 = new Gerarchia(categoriaLezPP);
+        Gerarchia figlio9 = new Gerarchia(categoriaLezPM);
 
 
         gerarchia.add(figlio1);
@@ -66,6 +67,17 @@ public class GerarchiaTest {
         figlio7.add(figlio8);
         figlio7.add(figlio9);
 
+        Collection<Gerarchia> figli = figlio7.subtrees();
+
+        //System.out.println(figli);
+        //System.out.println(figlio5.subtrees().size());
         System.out.println(gerarchia);
+        //System.out.println(figlio9.level());
+
+        Gerarchia lastElement = null;
+        for (Gerarchia figlio : figli) {
+            lastElement = figlio;
+        }
+        //System.out.println(lastElement.print());
     }
 }

@@ -297,7 +297,8 @@ public class Database {
     public String toStringGerarchie() {
         StringBuilder sb = new StringBuilder();
         for (Gerarchia c : this.gerarchie) {
-            sb.append(c.toString()).append("\n\n");
+            //sb.append(c.toString()).append("\n\n");
+            sb.append(c).append("\n\n");
         }
         return sb.toString();
     }
