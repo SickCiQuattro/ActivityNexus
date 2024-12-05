@@ -305,7 +305,6 @@ public class Controller {
             createDominio(campo);
             if (campo.getDominio().isEmpty()) {
                 this.view.showMessage("Il campo deve contenere almeno un valore di dominio");
-                // TODO: dare la possibiltò di annullare completamente l'operazione di creazione del campo? allora sei un utente coglione
             }
         } while (campo.getDominio().isEmpty());
         return campo;
@@ -332,7 +331,7 @@ public class Controller {
             String descrizione = this.view.getInput("Inserisci una descrizione a questo valore di dominio (facoltativa): ");
             campo.addValore(descrizione.isBlank() ? new ValoreCampo(nomeValore) : new ValoreCampo(nomeValore, descrizione));
 
-            this.view.showMessage("Valore di dominio aggiunta con successo");
+            this.view.showMessage("Valore di dominio aggiunto con successo");
             if (!getUserChoice("Vuoi aggiungere un altro valore di dominio? (s/n): "))
                 finished = true;
         }
