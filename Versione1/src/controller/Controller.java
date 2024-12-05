@@ -3,6 +3,9 @@ package controller;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -234,6 +237,8 @@ public class Controller {
      * @return la gerarchia creata
      */
     private Gerarchia createGerarchia() {
+        List<Gerarchia> categorieFoglia = new ArrayList<>();
+        int maxLevel = 0;
         Gerarchia rootGerarchia = new Gerarchia(createCategoria( null, null));
         Stack<Gerarchia> stack = new Stack<>(); // TODO: valutare utilizzo deque
         Categoria categoria = (Categoria) rootGerarchia.root().data();
@@ -251,12 +256,19 @@ public class Controller {
             Campo campo = c.getCampo(); // prendo il campo della categoria appena creata
             Gerarchia padre = stack.pop(); // prendo il padre attuale
             padre.add(gerarchia); // aggiungo la categoria appena creata al padre attuale
-            if (campo != null){ // se il campo non è nullo aggiungo i valori del campo nello stack
-                for (int i=0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di valori del campo
+            if (campo != null) { // se il campo non è nullo aggiungo i valori del campo nello stack
+                for (int i = 0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di valori del campo
                     stack.push(gerarchia);
                 }
+            } else {
+                if (gerarchia.level() > maxLevel) { // aggiunge la prima categoria foglia di ogni ramo
+                    maxLevel = gerarchia.level();
+                    categorieFoglia.add(gerarchia);
+                }
+
             }
         }
+        System.out.println("Categorie foglia: " + categorieFoglia);
         return rootGerarchia;
     }
 
