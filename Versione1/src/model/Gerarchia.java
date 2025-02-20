@@ -4,9 +4,7 @@ import com.scalified.tree.TraversalAction;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.LinkedMultiTreeNode;
 import java.io.*;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Classe che rappresenta una gerarchia di categorie.
@@ -14,6 +12,7 @@ import java.util.Stack;
  */
 public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
     private static final long serialVersionUID = 1L;
+    private FattoreConversione fattoreConversione = new FattoreConversione();
 
     /**
      * Costruisce una Gerarchia con la categoria radice specificata.
@@ -87,6 +86,32 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         Collection<TreeNode<Categoria>> siblings = (Collection<TreeNode<Categoria>>) parent.subtrees();
         return node.equals(siblings.toArray()[siblings.size() - 1]);
     }
+
+    public FattoreConversione getFattoreConversione() {
+        return fattoreConversione;
+    }
+
+    public ArrayList<TreeNode<Categoria>> getFoglie(){
+        ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
+        HashSet<Integer> livelloFoglie = new HashSet<>();
+
+        TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
+            @Override
+            public void perform(TreeNode<Categoria> node) {
+                if (node.isLeaf())
+                    if (livelloFoglie.add(node.level()))
+                        foglie.add(node);
+            }
+
+            @Override
+            public boolean isCompleted() {
+                return false;
+            }
+        };
+
+        return foglie;
+    }
+
 
     /**
      * Scrive l'oggetto Gerarchia in un flusso di output.
@@ -166,6 +191,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         traversePreOrder(action);
         return builder.toString();
     }
+
 
     /**
      * Restituisce un hash code per questa gerarchia.

@@ -200,6 +200,15 @@ public class Database {
         this.gerarchie = gerarchie;
     }
 
+    public Gerarchia getGerarchia(Categoria rootCategoria) {
+        for (Gerarchia g : this.gerarchie) {
+            if (g.root().data().equals(rootCategoria)) {
+                return g;
+            }
+        }
+        return null;
+    }
+
     // Metodi per la serializzazione e deserializzazione
 
     public void serializeUtenti(String filePath) {

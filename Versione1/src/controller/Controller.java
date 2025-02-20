@@ -1,5 +1,6 @@
 package controller;
 
+import com.scalified.tree.TreeNode;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
@@ -135,6 +136,9 @@ public class Controller {
                     Gerarchia gerarchia = createGerarchia();
                     this.database.addGerarchia(gerarchia);
                     view.showMessage("Gerarchia creata con successo");
+                    view.showMessage("Generazione dei fattori di conversione...");
+                    view.showMessage(gerarchia.toString());
+                    creaFattoriConversione(gerarchia);
                     this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
                     break;
                 case "0": // Uscita
@@ -142,6 +146,63 @@ public class Controller {
                     return;
                 default:
                     view.showMessage(INVALID_OPTION);
+            }
+        }
+    }
+
+    /**
+     * Crea i fattori di conversione per una gerarchia.
+     *
+     * @param gerarchia la gerarchia per cui creare i fattori di conversione
+     */
+    private void creaFattoriConversione(Gerarchia gerarchia) {
+        // Ottiene tutte le foglie della gerarchia
+        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFoglie();
+
+        // Rimuove la prima foglia e la imposta come foglia di riferimento
+        TreeNode<Categoria> fogliaRiferimento = foglie.remove(0);
+        gerarchia.getFattoreConversione().setNodoRiferimento(fogliaRiferimento.level());
+
+        // Itera su tutte le foglie rimanenti
+        for (TreeNode<Categoria> foglia : foglie) {
+            boolean validInput = false;
+
+            // Continua a chiedere l'input finché non è valido
+            while (!validInput) {
+                // Richiede all'utente di inserire il fattore di conversione
+                String value = view.getInput(String.format("Inserisci il fattore di conversione tra la categoria %s e la categoria %s", fogliaRiferimento.data().getNome(), foglia.data().getNome()));
+                // TODO: in caso aggiungere foglia.parent().data().getNome() per unicità
+
+                try {
+                    // Converte l'input in un valore double
+                    Double fattore = Double.parseDouble(value);
+
+                    // Controlla se il livello della foglia è maggiore del livello della foglia di riferimento
+                    if (foglia.level() > fogliaRiferimento.level()) {
+                        // Se il fattore è valido, lo aggiunge e imposta validInput a true
+                        if (fattore > 1 && fattore <= 2) {
+                            validInput = true;
+                            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
+                            view.showMessage("Fattore di conversione aggiunto");
+                        } else {
+                            // Mostra un messaggio di errore se il fattore non è valido
+                            view.showMessage("Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate.");
+                        }
+                    } else {
+                        // Se il fattore è valido, lo aggiunge e imposta validInput a true
+                        if (fattore >= 0.5 && fattore < 1) {
+                            validInput = true;
+                            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
+                            view.showMessage("Fattore di conversione aggiunto");
+                        } else {
+                            // Mostra un messaggio di errore se il fattore non è valido
+                            view.showMessage("Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.");
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    // Mostra un messaggio di errore se l'input non è un numero valido
+                    view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
+                }
             }
         }
     }
