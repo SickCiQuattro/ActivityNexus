@@ -119,4 +119,10 @@ public class Categoria implements Serializable {
         Categoria categoria = (Categoria) obj;
         return nome.equalsIgnoreCase(categoria.getNome());
     }
+
+    @Override
+    public int hashCode() {
+        return nome.toLowerCase().hashCode();
+    }
+
 }

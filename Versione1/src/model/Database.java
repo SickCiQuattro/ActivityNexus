@@ -1,6 +1,7 @@
 package model;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ public class Database {
     private Set<Utente> utenti;
     private Set<Comprensorio> comprensori;
     private Set<Gerarchia> gerarchie;
+    private ConversioneGerarchie conversioneGerarchie;
 
     /**
      * Costruttore della classe Database.
@@ -21,6 +23,7 @@ public class Database {
         this.utenti = new HashSet<>();
         this.comprensori = new HashSet<>();
         this.gerarchie = new HashSet<>();
+        this.conversioneGerarchie = new ConversioneGerarchie();
     }
 
     // Metodi per la gestione degli utenti
@@ -200,13 +203,13 @@ public class Database {
         this.gerarchie = gerarchie;
     }
 
-    public Gerarchia getGerarchia(Categoria rootCategoria) {
-        for (Gerarchia g : this.gerarchie) {
-            if (g.root().data().equals(rootCategoria)) {
-                return g;
-            }
-        }
-        return null;
+    public Gerarchia getGerarchia(int index) {
+        ArrayList<Gerarchia> gerarchieList = new ArrayList<>(this.gerarchie);
+        return gerarchieList.get(index);
+    }
+
+    public ConversioneGerarchie getConversioneGerarchie(){
+        return this.conversioneGerarchie;
     }
 
     // Metodi per la serializzazione e deserializzazione
@@ -281,6 +284,28 @@ public class Database {
             e.printStackTrace();
         }
     }
+
+    public void serializeConversioneGerarchie(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.conversioneGerarchie);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserializeConversioneGerarchie(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.conversioneGerarchie = (ConversioneGerarchie) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     // Metodi per la rappresentazione in stringa
 

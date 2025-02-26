@@ -27,7 +27,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      * Aggiunge una categoria come figlio di una categoria padre specificata.
      *
      * @param parentCategoria la categoria padre
-     * @param childCategoria la categoria figlio da aggiungere
+     * @param childCategoria  la categoria figlio da aggiungere
      * @return true se la categoria figlio è stata aggiunta correttamente, false altrimenti
      */
     public boolean addCategoria(Categoria parentCategoria, Categoria childCategoria) {
@@ -38,32 +38,10 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
     /**
      * Stampa la struttura dell'albero.
      *
-     * @param node il nodo corrente
+     * @param node      il nodo corrente
      * @param nodeLevel il livello del nodo
      * @return una stringa che rappresenta la struttura dell'albero
      */
-    /*private String printTree(TreeNode<Categoria> node, int nodeLevel) {
-        StringBuilder builder = new StringBuilder();
-        Gerarchia parent, figlio, lastElement = null;
-        Collection<Gerarchia> figli;
-
-        for(int i = 1; i < nodeLevel; i++) { // dal livello 2 in poi
-            parent = (Gerarchia) node.parent(); //parent = (Gerarchia) this.find(node.parent().data());
-            figlio = (Gerarchia) node;
-            for(int j = 0; j < i; j++) { // scorre i livelli verso la radice
-                parent = (Gerarchia) parent.parent();
-                figlio = (Gerarchia) figlio.parent();
-            }
-            figli = parent.subtrees(); // ricerca ultimo figlio del nodo padre
-            for (Gerarchia f : figli) {
-                lastElement = f;
-            }
-            builder.append("\t");
-            if (!lastElement.data().equals(figlio.data())) // se non è l'ultimo figlio si aggiunge il collegamento
-                builder.append("|");
-        }
-        return builder.reverse().toString(); // inverte la stringa
-    }*/
     private String printTree(TreeNode<Categoria> node, int nodeLevel) {
         StringBuilder builder = new StringBuilder();
         TreeNode<Categoria> currentNode = node;
@@ -91,7 +69,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         return fattoreConversione;
     }
 
-    public ArrayList<TreeNode<Categoria>> getFoglie(){
+    public ArrayList<TreeNode<Categoria>> getFoglie() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
         HashSet<Integer> livelloFoglie = new HashSet<>();
 
@@ -108,10 +86,9 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                 return false;
             }
         };
-
+        this.traversePreOrder(action);
         return foglie;
     }
-
 
     /**
      * Scrive l'oggetto Gerarchia in un flusso di output.
@@ -128,7 +105,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
      * Legge l'oggetto Gerarchia da un flusso di input.
      *
      * @param in il flusso di input
-     * @throws IOException se si verifica un errore di I/O
+     * @throws IOException            se si verifica un errore di I/O
      * @throws ClassNotFoundException se la classe non viene trovata
      */
     @Serial
@@ -160,8 +137,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                 if (node.isRoot()) {
                     lastParent.add(node); // aggiunge la radice alla lista dei padri
                     node.data().getCampo().getDominio().forEach(reverse::push); // inserisce i valori del campo nello stack
-                }
-                else if (!lastParent.contains(node.parent())) { // se il padre non è già stato preso in considerazione
+                } else if (!lastParent.contains(node.parent())) { // se il padre non è già stato preso in considerazione
                     lastParent.add(node.parent()); // aggiunge il padre alla lista dei padri
                     node.parent().data().getCampo().getDominio().forEach(reverse::push); // inserisce i valori del campo nello stack
                 }
@@ -173,8 +149,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                     builder.append(stampa).append("|\t\n") // riga collegamento padre-figlio
                             .append(stampa).append("|\tValore: ").append(valore.pop()).append("\n") // riga valore
                             .append(stampa).append("|---Nome: ").append(node.data().getNome()).append("\n"); // riga nome
-                }
-                else
+                } else
                     builder.append("Gerarchia: ").append(node.data().getNome()).append("\n"); // stampa il nome della gerarchia
 
                 if (!node.isLeaf()) { // se non è una foglia si aggiunge il campo
@@ -183,6 +158,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
                     builder.append("Campo: ").append(node.data().getCampo().getNome()).append("\n");
                 }
             }
+
             @Override
             public boolean isCompleted() {
                 return false;
@@ -193,14 +169,121 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
     }
 
 
-    /**
-     * Restituisce un hash code per questa gerarchia.
-     *
-     * @return un hash code per questa gerarchia
-     */
-    //@Override
-    //public int hashCode() {
-    //    return ((Categoria) this.root().data()).getNome().hashCode();
-        //return this.root().data().hashCode();
-    //}
+
+    public String toStringSelezioneFoglia() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("\n");
+        final int topNodeLevel = level();
+        final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>();
+        Stack<ValoreCampo> valore = new Stack<>();
+        final int[] leafCounter = {1};
+
+        TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
+            @Override
+            public void perform(TreeNode<Categoria> node) {
+                int nodeLevel = node.level() - topNodeLevel;
+                String stampa = printTree(node, nodeLevel);
+                Stack<ValoreCampo> reverse = new Stack<>();
+
+                if (node.isRoot()) {
+                    lastParent.add(node);
+                    node.data().getCampo().getDominio().forEach(reverse::push);
+                } else if (!lastParent.contains(node.parent())) {
+                    lastParent.add(node.parent());
+                    node.parent().data().getCampo().getDominio().forEach(reverse::push);
+                }
+                while (!reverse.isEmpty()) {
+                    valore.push(reverse.pop());
+                }
+                if (!node.isRoot()) {
+                    builder.append(stampa).append("|\t\n")
+                            .append(stampa).append("|\tValore: ").append(valore.pop()).append("\n")
+                            .append(stampa).append("|---");
+                    if (node.isLeaf()) {
+                        builder.append(" [").append(leafCounter[0]++).append("] ");
+                    }
+                    builder.append("Nome: ").append(node.data().getNome());
+                    builder.append("\n");
+                } else {
+                    builder.append("Gerarchia: ").append(node.data().getNome()).append("\n");
+                }
+                if (!node.isLeaf()) {
+                    if (!node.isRoot())
+                        builder.append(stampa).append("|\t");
+                    builder.append("Campo: ").append(node.data().getCampo().getNome()).append("\n");
+                }
+            }
+
+            @Override
+            public boolean isCompleted() {
+                return false;
+            }
+        };
+        traversePreOrder(action);
+        return builder.toString();
+    }
+
+    public String toStringFattoreConversione(double externalValue) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("\n");
+        final int topNodeLevel = level();
+        final HashSet<TreeNode<Categoria>> lastParent = new HashSet<>();
+        Stack<ValoreCampo> valore = new Stack<>();
+
+        TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
+            @Override
+            public void perform(TreeNode<Categoria> node) {
+                int nodeLevel = node.level() - topNodeLevel;
+                String stampa = printTree(node, nodeLevel);
+                Stack<ValoreCampo> reverse = new Stack<>();
+
+                if (node.isRoot()) {
+                    lastParent.add(node);
+                    node.data().getCampo().getDominio().forEach(reverse::push);
+                } else if (!lastParent.contains(node.parent())) {
+                    lastParent.add(node.parent());
+                    node.parent().data().getCampo().getDominio().forEach(reverse::push);
+                }
+                while (!reverse.isEmpty()) {
+                    valore.push(reverse.pop());
+                }
+                if (!node.isRoot()) {
+                    builder.append(stampa).append("|\t\n")
+                            .append(stampa).append("|\tValore: ").append(valore.pop()).append("\n")
+                            .append(stampa).append("|---Nome: ").append(node.data().getNome());
+                    if (node.isLeaf()) {
+                        Double conversionValue = externalValue * fattoreConversione.getFattoreConversione(fattoreConversione.getFogliaRiferimento().level(), node.level()); // vedi se invertire (sono troppo fuso per capire)
+                        builder.append(" [Conversione: ").append(conversionValue != null ? conversionValue : "N/A").append("]");
+                    }
+                    builder.append("\n");
+                } else {
+                    builder.append("Gerarchia: ").append(node.data().getNome()).append("\n");
+                }
+                if (!node.isLeaf()) {
+                    if (!node.isRoot())
+                        builder.append(stampa).append("|\t");
+                    builder.append("Campo: ").append(node.data().getCampo().getNome()).append("\n");
+                }
+            }
+
+            @Override
+            public boolean isCompleted() {
+                return false;
+            }
+        };
+        traversePreOrder(action);
+        return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Gerarchia other = (Gerarchia) obj;
+        return Objects.equals(this.root().data(), other.root().data());
+    }
 }
