@@ -282,7 +282,7 @@ public class Controller {
      */
     private void creaFattoriConversione(Gerarchia gerarchia) {
         // Ottiene tutte le foglie della gerarchia
-        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFoglie();
+        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFogliePerLivello();
 
         // Rimuove la prima foglia e la imposta come foglia di riferimento
         TreeNode<Categoria> fogliaRiferimento = foglie.removeFirst();

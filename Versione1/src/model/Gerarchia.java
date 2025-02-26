@@ -69,7 +69,7 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         return fattoreConversione;
     }
 
-    public ArrayList<TreeNode<Categoria>> getFoglie() {
+    public ArrayList<TreeNode<Categoria>> getFogliePerLivello() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
         HashSet<Integer> livelloFoglie = new HashSet<>();
 
@@ -88,6 +88,25 @@ public class Gerarchia extends LinkedMultiTreeNode implements Serializable {
         };
         this.traversePreOrder(action);
         return foglie;
+    }
+
+    public ArrayList<TreeNode<Categoria>> getFoglie() {
+        ArrayList<TreeNode<Categoria>> leafNodes = new ArrayList<>();
+        TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
+            @Override
+            public void perform(TreeNode<Categoria> node) {
+                if (node.isLeaf()) {
+                    leafNodes.add(node);
+                }
+            }
+
+            @Override
+            public boolean isCompleted() {
+                return false;
+            }
+        };
+        this.traversePreOrder(action);
+        return leafNodes;
     }
 
     /**
