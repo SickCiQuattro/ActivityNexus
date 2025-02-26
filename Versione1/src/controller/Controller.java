@@ -29,6 +29,11 @@ public class Controller {
     private static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
     private static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
     private static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
+    public static final String MSG_SCELTA_ERRATA = "La scelta deve essere un valore intero compreso tra 1 e %d.";
+    public static final String MSG_LISTA_GERARCHIE = "\nEcco una lista delle categorie radice delle gerarchie presenti. Le radici sono contrassegnate da un numero:";
+    public static final String MSG_SCELTA_GERARCHIA = "Inserisci il numero corrispondente alla gerarchia scelta: ";
+    public static final String MSG_LISTA_FOGLIE = "\nEcco la gerarchia scelta. Le foglie sono contrassegnate da un numero:";
+    public static final String MSG_SCELTA_FOGLIA = "Inserisci il numero corrispondente alla categoria foglia scelta: ";
 
     private Database database;
     private final ConsoleView view;
@@ -163,6 +168,7 @@ public class Controller {
     }
 
     private void visualizzaFattoriConversione() {
+        this.view.showMessage(String.format(MSG_LISTA_GERARCHIE));
         // gerarchie
         List<Gerarchia> gerarchieList = new ArrayList<>(this.database.getGerarchie());
         for (int i = 0; i < gerarchieList.size(); i++) {
@@ -171,11 +177,13 @@ public class Controller {
             this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
         }
 
+        this.view.showMessage("");
+
         int indiceScelta = 0;
         boolean validInput = false;
         int numScelte = this.database.getGerarchie().size();
         while (!validInput) {
-            String scelta = this.view.getInput("Seleziona Gerarchia: ");
+            String scelta = this.view.getInput(MSG_SCELTA_GERARCHIA);
 
             try{
                 indiceScelta = Integer.parseInt(scelta);
@@ -183,12 +191,16 @@ public class Controller {
                     validInput = true;
                     indiceScelta -= 1;
                 }
+                else{
+                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                }
             } catch (NumberFormatException e) {
-                this.view.showMessage(String.format("La scelta deve essere un valore intero compreso tra 1 e %d", numScelte));
+                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
             }
         }
 
         // foglie
+        this.view.showMessage(String.format(MSG_LISTA_FOGLIE));
         Gerarchia gerarchiaScelta = this.database.getGerarchia(indiceScelta);
         this.view.showMessage(gerarchiaScelta.toStringSelezioneFoglia());
 
@@ -198,19 +210,24 @@ public class Controller {
         numScelte = foglie.size();
 
         while(!validInput){
-            String scelta = this.view.getInput("Seleziona Foglia: ");
+            String scelta = this.view.getInput(MSG_SCELTA_FOGLIA);
             try{
                 indiceScelta = Integer.parseInt(scelta);
                 if (indiceScelta > 0 && indiceScelta <= numScelte){
                     validInput = true;
                     indiceScelta -= 1;
                 }
+                else{
+                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                }
             } catch (NumberFormatException e) {
-                this.view.showMessage(String.format("La scelta deve essere un valore intero compreso tra 1 e %d", numScelte));
+                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
             }
         }
 
         TreeNode<Categoria> fogliaScelta = foglie.get(indiceScelta);
+
+        this.view.showMessage(String.format("\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n", fogliaScelta.data().getNome()));
 
         // gerarchie
         gerarchieList = new ArrayList<>(this.database.getGerarchie());
@@ -220,11 +237,13 @@ public class Controller {
             this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
         }
 
+        this.view.showMessage("");
+
         indiceScelta = 0;
         validInput = false;
         numScelte = this.database.getGerarchie().size();
         while (!validInput) {
-            String scelta = this.view.getInput("Seleziona Gerarchia: ");
+            String scelta = this.view.getInput(String.format(MSG_SCELTA_GERARCHIA));
 
             try{
                 indiceScelta = Integer.parseInt(scelta);
@@ -232,8 +251,11 @@ public class Controller {
                     validInput = true;
                     indiceScelta -= 1;
                 }
+                else{
+                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                }
             } catch (NumberFormatException e) {
-                this.view.showMessage(String.format("La scelta deve essere un valore intero compreso tra 1 e %d", numScelte));
+                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
             }
         }
 
@@ -244,6 +266,8 @@ public class Controller {
         double c = 1;
         if (!gerarchiaScelta.equals(gerarchiaConversione))
             c = this.database.getConversioneGerarchie().getFattoreConversione(gerarchiaScelta.getFattoreConversione().getFogliaRiferimento().data(), gerarchiaConversione.getFattoreConversione().getFogliaRiferimento().data());
+
+        this.view.showMessage(String.format("\nEcco i fattori di conversione relativi alla categoria \"%s\":", fogliaScelta.data().getNome()));
 
         this.view.showMessage(gerarchiaConversione.toStringFattoreConversione(a*c));
     }
