@@ -11,7 +11,8 @@ import java.util.Stack;
 
 /**
  * Classe Controller che gestisce la logica dell'applicazione.
- * Si occupa di gestire le interazioni tra la vista e il modello.
+ * Si occupa di gestire le interazioni tra la vista e il modello,
+ * implementando tutte le funzionalità del sistema.
  */
 public class Controller {
     private static final String INVALID_OPTION = "Opzione non valida. Riprova.";
@@ -38,8 +39,13 @@ public class Controller {
     private Database database;
     private final ConsoleView view;
 
+    // -----------------------------------------------------------------------------------
+    // METODI PRINCIPALI
+    // -----------------------------------------------------------------------------------
+
     /**
      * Costruttore della classe Controller.
+     * Inizializza il database e collega la vista.
      *
      * @param view la vista console utilizzata per l'interazione con l'utente
      */
@@ -50,10 +56,11 @@ public class Controller {
 
     /**
      * Avvia il ciclo principale del controller.
-     * Mostra il menu principale e gestisce le scelte dell'utente.
+     * Carica i dati salvati, mostra il menu principale e gestisce le scelte
+     * dell'utente.
      */
     public void start() {
-        //TODO: controllo file vuoti o meno per la serializzazione
+        // TODO: controllo file vuoti o meno per la serializzazione
         this.database.deserializeUtenti(USERS_FILE_PATH);
         this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
         this.database.deserializeGerarchie(GERARCHIE_FILE_PATH);
@@ -81,7 +88,22 @@ public class Controller {
     }
 
     /**
+     * Restituisce il database gestito dal controller.
+     *
+     * @return il database contenente tutti i dati del sistema
+     */
+    public Database getDatabase() {
+        return this.database;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI GESTIONE MENU E SESSIONE
+    // -----------------------------------------------------------------------------------
+
+    /**
      * Gestisce il login dell'utente.
+     * Verifica le credenziali e indirizza l'utente al menu appropriato in base al
+     * tipo.
      */
     private void handleLogin() {
         if (database.getUtenti().isEmpty()) {
@@ -105,6 +127,7 @@ public class Controller {
 
     /**
      * Gestisce la registrazione dell'utente.
+     * Raccoglie i dati necessari e registra l'utente nel database.
      *
      * @return true se l'utente è registrato correttamente, false altrimenti
      */
@@ -116,7 +139,7 @@ public class Controller {
 
     /**
      * Gestisce il menu del configuratore.
-     * Mostra il menu e gestisce le scelte dell'utente configuratore.
+     * Mostra il menu specifico e gestisce le scelte dell'utente configuratore.
      */
     private void manageConfiguratore() {
         while (true) {
@@ -124,17 +147,18 @@ public class Controller {
             String choice = view.getInput("Cosa vuoi fare? ");
             switch (choice) {
                 case "1": // Visualizza comprensori
-                    view.showMessage(this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
+                    view.showMessage(
+                            this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
                     break;
                 case "2": // Visualizza gerarchie
-                    this.view.showMessage(this.database.getGerarchie().isEmpty() ? "Nessuna gerarchia presente." : this.database.toStringGerarchie());
+                    this.view.showMessage(this.database.getGerarchie().isEmpty() ? "Nessuna gerarchia presente."
+                            : this.database.toStringGerarchie());
 
                     break;
                 case "3": // Visualizza fattori di conversione
                     if (!this.database.getGerarchie().isEmpty()) {
                         visualizzaFattoriConversione();
-                    }
-                    else{
+                    } else {
                         this.view.showMessage("Nessuna gerarchia presente.");
                     }
                     break;
@@ -167,204 +191,16 @@ public class Controller {
         }
     }
 
-    private void visualizzaFattoriConversione() {
-        // Prima selezione: gerarchia origine
-        this.view.showMessage(MSG_LISTA_GERARCHIE);
-        Gerarchia gerarchiaOrigine = selezionaGerarchia();
-
-        // Selezione della foglia dalla gerarchia origine
-        this.view.showMessage(MSG_LISTA_FOGLIE);
-        this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
-
-        TreeNode<Categoria> fogliaScelta = selezionaFoglia(gerarchiaOrigine);
-
-        // Seconda selezione: gerarchia destinazione
-        this.view.showMessage(String.format("\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n",
-                fogliaScelta.data().getNome()));
-
-        Gerarchia gerarchiaDestinazione = selezionaGerarchia();
-
-        // Calcolo del fattore di conversione combinato
-        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione()
-                .getFattoreConversione(fogliaScelta.level(),
-                        gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
-
-        double fattoreInterGerarchia = 1.0;
-        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
-            fattoreInterGerarchia = this.database.getConversioneGerarchie().getFattoreConversione(
-                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
-                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
-        }
-
-        // Visualizzazione dei risultati
-        this.view.showMessage(String.format("\nEcco i fattori di conversione relativi alla categoria \"%s\":",
-                fogliaScelta.data().getNome()));
-
-        this.view.showMessage(gerarchiaDestinazione.toStringFattoreConversione(fattoreIntraGerarchia * fattoreInterGerarchia));
-    }
-
-    /**
-     * Mostra la lista delle gerarchie e chiede all'utente di selezionarne una.
-     * @return la gerarchia selezionata
-     */
-    private Gerarchia selezionaGerarchia() {
-        // Visualizzazione delle gerarchie
-        List<Gerarchia> gerarchieList = new ArrayList<>(this.database.getGerarchie());
-        for (int i = 0; i < gerarchieList.size(); i++) {
-            Gerarchia gerarchia = gerarchieList.get(i);
-            Categoria categoria = (Categoria)gerarchia.root().data();
-            this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
-        }
-        this.view.showMessage("");
-
-        // Selezione della gerarchia
-        int numScelte = this.database.getGerarchie().size();
-        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_GERARCHIA, numScelte) - 1;
-
-        return this.database.getGerarchia(indiceScelta);
-    }
-
-    /**
-     * Chiede all'utente di selezionare una foglia dalla gerarchia specificata.
-     * @param gerarchia la gerarchia da cui selezionare la foglia
-     * @return la foglia selezionata
-     */
-    private TreeNode<Categoria> selezionaFoglia(Gerarchia gerarchia) {
-        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFoglie();
-        int numScelte = foglie.size();
-        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_FOGLIA, numScelte) - 1;
-
-        return foglie.get(indiceScelta);
-    }
-
-    /**
-     * Richiede all'utente di inserire un indice valido.
-     * @param messaggio il messaggio da mostrare all'utente
-     * @param numScelte il numero massimo di scelte disponibili
-     * @return l'indice selezionato (a partire da 1)
-     */
-    private int richiediIndiceDaUtente(String messaggio, int numScelte) {
-        boolean validInput = false;
-        int indiceScelta = 0;
-
-        while (!validInput) {
-            String scelta = this.view.getInput(messaggio);
-            try {
-                indiceScelta = Integer.parseInt(scelta);
-                if (indiceScelta > 0 && indiceScelta <= numScelte) {
-                    validInput = true;
-                } else {
-                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-                }
-            } catch (NumberFormatException e) {
-                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-            }
-        }
-
-        return indiceScelta;
-    }
-
-    private void creaConversioneGerarchie(Gerarchia gerarchia) {
-        TreeNode<Categoria> fogliaRiferimento = gerarchia.getFattoreConversione().getFogliaRiferimento();
-        for (Gerarchia g : database.getGerarchie()){
-            TreeNode<Categoria> secondaFogliaRiferimento = g.getFattoreConversione().getFogliaRiferimento();
-            //TODO: inserisci anche il riferimento alle gerarchie in modo carino (un vero tesoro)
-            boolean validInput = false;
-
-            while (!validInput){
-                String value = this.view.getInput(String.format("Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ", fogliaRiferimento.data().getNome(), secondaFogliaRiferimento.data().getNome()));
-
-                try{
-                    double fattore = Double.parseDouble(value);
-                    if (fattore >= 0.5 && fattore <= 2){
-                        validInput = true;
-                        this.database.getConversioneGerarchie().addFattoreConversione(fogliaRiferimento.data(), secondaFogliaRiferimento.data(), fattore);
-                        view.showMessage("Fattore di conversione aggiunto");
-                    } else {
-                        view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
-                    }
-
-                } catch (NumberFormatException e) {
-                    view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
-                }
-            }
-        }
-    }
-
-    /**
-     * Crea i fattori di conversione per una gerarchia.
-     *
-     * @param gerarchia la gerarchia per cui creare i fattori di conversione
-     */
-    private void creaFattoriConversione(Gerarchia gerarchia) {
-        // Ottiene tutte le foglie della gerarchia
-        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFogliePerLivello();
-
-        // Rimuove la prima foglia e la imposta come foglia di riferimento
-        TreeNode<Categoria> fogliaRiferimento = foglie.removeFirst();
-        gerarchia.getFattoreConversione().setNodoRiferimento(fogliaRiferimento);
-
-        // Itera su tutte le foglie rimanenti
-        for (TreeNode<Categoria> foglia : foglie) {
-            boolean isSpecializzata = foglia.level() > fogliaRiferimento.level();
-            double minFattore = isSpecializzata ? 1.0 : 0.5;
-            double maxFattore = isSpecializzata ? 2.0 : 1.0;
-            String messaggioErrore = isSpecializzata
-                ? "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate."
-                : "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.";
-
-            // Richiede il fattore di conversione
-            double fattore = richiediEValidaFattore(
-                fogliaRiferimento.data().getNome(),
-                foglia.data().getNome(),
-                minFattore,
-                maxFattore,
-                messaggioErrore
-            );
-
-            // Arrotonda il fattore a due cifre decimali
-            fattore = Math.round(fattore * 100) / 100.0;
-
-            // Aggiunge il fattore di conversione
-            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
-            view.showMessage("Fattore di conversione aggiunto");
-        }
-    }
-
-    /**
-     * Richiede e valida un fattore di conversione dall'utente.
-     *
-     * @param categoriaOrigine nome della categoria di origine
-     * @param categoriaDestinazione nome della categoria di destinazione
-     * @param minFattore valore minimo accettabile
-     * @param maxFattore valore massimo accettabile
-     * @param messaggioErrore messaggio di errore per valori non validi
-     * @return fattore di conversione valido
-     */
-    private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
-                                        double minFattore, double maxFattore, String messaggioErrore) {
-        while (true) {
-            String value = view.getInput(String.format("Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ",
-                                         categoriaOrigine, categoriaDestinazione));
-            try {
-                double fattore = Double.parseDouble(value);
-                if (fattore >= minFattore && fattore <= maxFattore) {
-                    return fattore;
-                } else {
-                    view.showMessage(messaggioErrore);
-                }
-            } catch (NumberFormatException e) {
-                view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
-            }
-        }
-    }
+    // -----------------------------------------------------------------------------------
+    // METODI DI AUTENTICAZIONE E REGISTRAZIONE
+    // -----------------------------------------------------------------------------------
 
     /**
      * Effettua il login di un utente nel sistema.
      * L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
      * Viene richiesto all'utente di inserire username e password.
      *
-     * @return l'utente loggato, null se le credenziali non sono valide
+     * @return l'utente autenticato se le credenziali sono corrette, null altrimenti
      */
     public Utente loginUtente() {
         String username = view.getInput("Inserisci username: ");
@@ -374,24 +210,59 @@ public class Controller {
 
     /**
      * Registra un nuovo utente nel sistema.
+     * Richiede all'utente di inserire username, password e tipo di account.
      *
      * @return true se l'utente è registrato correttamente, false altrimenti
      */
     public boolean registerUtente() {
-        if (!defaultUtente()) return false;
+        if (!defaultUtente())
+            return false;
 
         String username = getUsername();
-        if (username == null) return false;
+        if (username == null)
+            return false;
 
         String password = getPassword();
-        if (password == null) return false;
+        if (password == null)
+            return false;
 
         boolean isConfig = getUserChoice("Sei un configuratore? (s/n): ");
         return database.registerUtente(username, password, isConfig);
     }
 
     /**
+     * Effettua il login di un utente con credenziali predefinite generate
+     * casualmente.
+     * Utilizzato come misura di sicurezza durante la registrazione.
+     *
+     * @return true se il login va a buon fine, false altrimenti
+     */
+    private boolean defaultUtente() {
+        String usernameDefault = UserUtil.generateRandomUsername();
+        String passwordDefault = UserUtil.generateRandomPassword();
+
+        view.showMessage("Effettua il login con le seguenti credenziali:");
+        view.showMessage("Username: " + usernameDefault);
+        view.showMessage("Password: " + passwordDefault);
+
+        for (int i = 2; i >= 0; i--) {
+            String username = view.getInput("Inserisci username: ");
+            String password = view.getInput("Inserisci password: ");
+            if (usernameDefault.equals(username) && passwordDefault.equals(password))
+                return true;
+            view.showMessage("Credenziali non valide. Tentativi rimasti: " + i);
+        }
+        view.showMessage("Login non riuscito. Riprova più tardi.");
+        return false;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DEI COMPRENSORI
+    // -----------------------------------------------------------------------------------
+
+    /**
      * Crea un nuovo comprensorio nel sistema.
+     * Richiede all'utente di inserire nome e comuni.
      *
      * @return true se il comprensorio è stato creato con successo, false altrimenti
      */
@@ -402,7 +273,8 @@ public class Controller {
                 view.showMessage("Nome non valido");
                 continue;
             }
-            if (nome.equals("0")) return false;
+            if (nome.equals("0"))
+                return false;
             if (database.hasComprensorio(nome)) {
                 view.showMessage("Comprensorio già esistente");
                 continue;
@@ -415,7 +287,9 @@ public class Controller {
     }
 
     /**
-     * Aggiunge comuni a un comprensorio.
+     * Aggiunge comuni a un comprensorio esistente.
+     * Continua a richiedere nomi di comuni finché l'utente non termina
+     * l'operazione.
      *
      * @param comprensorio il comprensorio a cui aggiungere i comuni
      */
@@ -444,19 +318,24 @@ public class Controller {
         }
     }
 
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DELLE GERARCHIE
+    // -----------------------------------------------------------------------------------
+
     /**
      * Crea una nuova gerarchia nel sistema.
+     * Costruisce l'intera struttura gerarchica con categorie e campi.
      *
      * @return la gerarchia creata
      */
     private Gerarchia createGerarchia() {
         List<Gerarchia> categorieFoglia = new ArrayList<>();
         int maxLevel = 0;
-        Gerarchia rootGerarchia = new Gerarchia(createCategoria( null, null));
+        Gerarchia rootGerarchia = new Gerarchia(createCategoria(null, null));
         Stack<Gerarchia> stack = new Stack<>(); // TODO: valutare utilizzo deque
         Categoria categoria = (Categoria) rootGerarchia.root().data();
 
-        for (int i=0; i < categoria.getCampo().getDominio().size(); i++) {
+        for (int i = 0; i < categoria.getCampo().getDominio().size(); i++) {
             stack.push(rootGerarchia);
         }
         while (!stack.isEmpty()) {
@@ -470,7 +349,8 @@ public class Controller {
             Gerarchia padre = stack.pop(); // prendo il padre attuale
             padre.add(gerarchia); // aggiungo la categoria appena creata al padre attuale
             if (campo != null) { // se il campo non è nullo aggiungo i valori del campo nello stack
-                for (int i = 0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di valori del campo
+                for (int i = 0; i < campo.getDominio().size(); i++) { // aggiungo n gerarchie dove n è il numero di
+                                                                      // valori del campo
                     stack.push(gerarchia);
                 }
             } else {
@@ -487,36 +367,43 @@ public class Controller {
 
     /**
      * Crea una categoria per una gerarchia.
-     * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo caratteristico alla categoria.
+     * Questo metodo chiama il metodo {@link #createCampo()} per aggiungere un campo
+     * caratteristico alla categoria.
      *
-     * @param nomePadre il nome della categoria padre
-     * @param root la gerarchia radice, null se è la categoria radice
+     * @param nomePadre il nome della categoria padre, null se è la categoria radice
+     * @param root      la gerarchia radice, null se è la categoria radice
      * @return la categoria creata
      */
     private Categoria createCategoria(String nomePadre, Gerarchia root) {
         String nome;
         while (true) {
-            //TODO: aggiungere rifermento al campo di appartenenza della categoria che si sta creando
-            nome = this.view.getInput("Inserisci il nome della categoria" + (root == null ? " radice" : " figlia di " + (nomePadre)) + ": ");
+            // TODO: aggiungere rifermento al campo di appartenenza della categoria che si
+            // sta creando
+            nome = this.view.getInput("Inserisci il nome della categoria"
+                    + (root == null ? " radice" : " figlia di " + (nomePadre)) + ": ");
             if (nome.isBlank()) {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if ((root == null && database.hasGerarchia(nome)) || (root != null && root.find(new Categoria(nome)) != null)) {
+            if ((root == null && database.hasGerarchia(nome))
+                    || (root != null && root.find(new Categoria(nome)) != null)) {
                 view.showMessage(root == null ? "Esiste già una gerarchia con questo nome" : "Categoria già esistente");
                 continue;
             }
             break;
         }
-        Campo campo = (root == null || getUserChoice("Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ")) ? createCampo() : null;
+        Campo campo = (root == null
+                || getUserChoice("Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ")) ? createCampo()
+                        : null;
         return new Categoria(nome, campo);
     }
 
     /**
      * Crea un campo caratteristico per una categoria.
-     * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere un valori di dominio al campo.
+     * Questo metodo chiama il metodo {@link #createDominio(Campo)} per aggiungere
+     * un valori di dominio al campo.
      *
-     * @return il campo creato
+     * @return il campo creato con il suo dominio
      */
     private Campo createCampo() {
         String nome;
@@ -538,6 +425,7 @@ public class Controller {
 
     /**
      * Crea un dominio di valori per un campo.
+     * Aggiunge uno o più valori con relative descrizioni.
      *
      * @param campo il campo a cui aggiungere il dominio
      */
@@ -549,13 +437,16 @@ public class Controller {
                 this.view.showMessage("Nome non valido");
                 continue;
             }
-            if (nomeValore.equals("0")) break;
+            if (nomeValore.equals("0"))
+                break;
             if (campo.hasValore(nomeValore)) {
                 this.view.showMessage("Valore di dominio già esistente");
                 continue;
             }
-            String descrizione = this.view.getInput("Inserisci una descrizione a questo valore di dominio (facoltativa): ");
-            campo.addValore(descrizione.isBlank() ? new ValoreCampo(nomeValore) : new ValoreCampo(nomeValore, descrizione));
+            String descrizione = this.view
+                    .getInput("Inserisci una descrizione a questo valore di dominio (facoltativa): ");
+            campo.addValore(
+                    descrizione.isBlank() ? new ValoreCampo(nomeValore) : new ValoreCampo(nomeValore, descrizione));
 
             this.view.showMessage("Valore di dominio aggiunto con successo");
             if (!getUserChoice("Vuoi aggiungere un altro valore di dominio? (s/n): "))
@@ -563,75 +454,281 @@ public class Controller {
         }
     }
 
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DEI FATTORI DI CONVERSIONE
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Visualizza i fattori di conversione tra gerarchie e categorie.
+     * Guida l'utente nella selezione di gerarchie e categorie per cui visualizzare
+     * le conversioni.
+     */
+    private void visualizzaFattoriConversione() {
+        // Prima selezione: gerarchia origine
+        this.view.showMessage(MSG_LISTA_GERARCHIE);
+        Gerarchia gerarchiaOrigine = selezionaGerarchia();
+
+        // Selezione della foglia dalla gerarchia origine
+        this.view.showMessage(MSG_LISTA_FOGLIE);
+        this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
+
+        TreeNode<Categoria> fogliaScelta = selezionaFoglia(gerarchiaOrigine);
+
+        // Seconda selezione: gerarchia destinazione
+        this.view.showMessage(String.format(
+                "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n",
+                fogliaScelta.data().getNome()));
+
+        Gerarchia gerarchiaDestinazione = selezionaGerarchia();
+
+        // Calcolo del fattore di conversione combinato
+        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione()
+                .getFattoreConversione(fogliaScelta.level(),
+                        gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
+
+        double fattoreInterGerarchia = 1.0;
+        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
+            fattoreInterGerarchia = this.database.getConversioneGerarchie().getFattoreConversione(
+                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
+                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
+        }
+
+        // Visualizzazione dei risultati
+        this.view.showMessage(String.format("\nEcco i fattori di conversione relativi alla categoria \"%s\":",
+                fogliaScelta.data().getNome()));
+
+        this.view.showMessage(
+                gerarchiaDestinazione.toStringFattoreConversione(fattoreIntraGerarchia * fattoreInterGerarchia));
+    }
+
+    /**
+     * Mostra la lista delle gerarchie e chiede all'utente di selezionarne una.
+     * 
+     * @return la gerarchia selezionata
+     */
+    private Gerarchia selezionaGerarchia() {
+        // Visualizzazione delle gerarchie
+        List<Gerarchia> gerarchieList = new ArrayList<>(this.database.getGerarchie());
+        for (int i = 0; i < gerarchieList.size(); i++) {
+            Gerarchia gerarchia = gerarchieList.get(i);
+            Categoria categoria = (Categoria) gerarchia.root().data();
+            this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
+        }
+        this.view.showMessage("");
+
+        // Selezione della gerarchia
+        int numScelte = this.database.getGerarchie().size();
+        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_GERARCHIA, numScelte) - 1;
+
+        return this.database.getGerarchia(indiceScelta);
+    }
+
+    /**
+     * Chiede all'utente di selezionare una foglia dalla gerarchia specificata.
+     * 
+     * @param gerarchia la gerarchia da cui selezionare la foglia
+     * @return la foglia selezionata
+     */
+    private TreeNode<Categoria> selezionaFoglia(Gerarchia gerarchia) {
+        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFoglie();
+        int numScelte = foglie.size();
+        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_FOGLIA, numScelte) - 1;
+
+        return foglie.get(indiceScelta);
+    }
+
+    /**
+     * Richiede all'utente di inserire un indice valido.
+     * 
+     * @param messaggio il messaggio da mostrare all'utente
+     * @param numScelte il numero massimo di scelte disponibili
+     * @return l'indice selezionato (a partire da 1)
+     */
+    private int richiediIndiceDaUtente(String messaggio, int numScelte) {
+        boolean validInput = false;
+        int indiceScelta = 0;
+
+        while (!validInput) {
+            String scelta = this.view.getInput(messaggio);
+            try {
+                indiceScelta = Integer.parseInt(scelta);
+                if (indiceScelta > 0 && indiceScelta <= numScelte) {
+                    validInput = true;
+                } else {
+                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                }
+            } catch (NumberFormatException e) {
+                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+            }
+        }
+
+        return indiceScelta;
+    }
+
+    /**
+     * Crea i fattori di conversione tra una nuova gerarchia e tutte le gerarchie
+     * esistenti.
+     * Per ogni coppia di gerarchie, richiede all'utente di inserire un fattore di
+     * conversione.
+     *
+     * @param gerarchia la nuova gerarchia per cui creare le conversioni
+     */
+    private void creaConversioneGerarchie(Gerarchia gerarchia) {
+        TreeNode<Categoria> fogliaRiferimento = gerarchia.getFattoreConversione().getFogliaRiferimento();
+        for (Gerarchia g : database.getGerarchie()) {
+            TreeNode<Categoria> secondaFogliaRiferimento = g.getFattoreConversione().getFogliaRiferimento();
+            // TODO: inserisci anche il riferimento alle gerarchie in modo carino (un vero
+            // tesoro)
+            boolean validInput = false;
+
+            while (!validInput) {
+                String value = this.view.getInput(String.format(
+                        "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ",
+                        fogliaRiferimento.data().getNome(), secondaFogliaRiferimento.data().getNome()));
+
+                try {
+                    double fattore = Double.parseDouble(value);
+                    if (fattore >= 0.5 && fattore <= 2) {
+                        validInput = true;
+                        this.database.getConversioneGerarchie().addFattoreConversione(fogliaRiferimento.data(),
+                                secondaFogliaRiferimento.data(), fattore);
+                        view.showMessage("Fattore di conversione aggiunto");
+                    } else {
+                        view.showMessage(
+                                "Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
+                    }
+
+                } catch (NumberFormatException e) {
+                    view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Crea i fattori di conversione tra le categorie foglia all'interno di una
+     * gerarchia.
+     * Imposta una foglia come riferimento e definisce i fattori di conversione per
+     * le altre.
+     *
+     * @param gerarchia la gerarchia per cui creare i fattori di conversione
+     */
+    private void creaFattoriConversione(Gerarchia gerarchia) {
+        // Ottiene tutte le foglie della gerarchia
+        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFogliePerLivello();
+
+        // Rimuove la prima foglia e la imposta come foglia di riferimento
+        TreeNode<Categoria> fogliaRiferimento = foglie.removeFirst();
+        gerarchia.getFattoreConversione().setNodoRiferimento(fogliaRiferimento);
+
+        // Itera su tutte le foglie rimanenti
+        for (TreeNode<Categoria> foglia : foglie) {
+            boolean isSpecializzata = foglia.level() > fogliaRiferimento.level();
+            double minFattore = isSpecializzata ? 1.0 : 0.5;
+            double maxFattore = isSpecializzata ? 2.0 : 1.0;
+            String messaggioErrore = isSpecializzata
+                    ? "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate."
+                    : "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.";
+
+            // Richiede il fattore di conversione
+            double fattore = richiediEValidaFattore(
+                    fogliaRiferimento.data().getNome(),
+                    foglia.data().getNome(),
+                    minFattore,
+                    maxFattore,
+                    messaggioErrore);
+
+            // Arrotonda il fattore a due cifre decimali
+            fattore = Math.round(fattore * 100) / 100.0;
+
+            // Aggiunge il fattore di conversione
+            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
+            view.showMessage("Fattore di conversione aggiunto");
+        }
+    }
+
+    /**
+     * Richiede e valida un fattore di conversione dall'utente.
+     *
+     * @param categoriaOrigine      nome della categoria di origine
+     * @param categoriaDestinazione nome della categoria di destinazione
+     * @param minFattore            valore minimo accettabile
+     * @param maxFattore            valore massimo accettabile
+     * @param messaggioErrore       messaggio di errore per valori non validi
+     * @return fattore di conversione valido
+     */
+    private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
+            double minFattore, double maxFattore, String messaggioErrore) {
+        while (true) {
+            String value = view.getInput(
+                    String.format("Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ",
+                            categoriaOrigine, categoriaDestinazione));
+            try {
+                double fattore = Double.parseDouble(value);
+                if (fattore >= minFattore && fattore <= maxFattore) {
+                    return fattore;
+                } else {
+                    view.showMessage(messaggioErrore);
+                }
+            } catch (NumberFormatException e) {
+                view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI SUPPORTO PER L'INPUT UTENTE
+    // -----------------------------------------------------------------------------------
+
     /**
      * Ottiene un username valido dall'utente.
+     * Verifica che lo username rispetti i requisiti di sicurezza.
      *
-     * @return lo username valido, null se non valido
+     * @return lo username valido, null se il processo è annullato
      */
     private String getUsername() {
         while (true) {
-            String username = view.getInput(String.format("Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ", UserUtil.USERNAME_LENGTH));
-            if (UserUtil.checkUsername(username)) return username;
+            String username = view.getInput(String.format(
+                    "Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ",
+                    UserUtil.USERNAME_LENGTH));
+            if (UserUtil.checkUsername(username))
+                return username;
             view.showMessage("Username non valido. Riprova.");
         }
     }
 
     /**
      * Ottiene una password valida dall'utente.
+     * Verifica che la password rispetti i requisiti minimi di sicurezza.
      *
-     * @return la password valida, null se non valida
+     * @return la password valida, null se il processo è annullato
      */
     private String getPassword() {
         while (true) {
-            String password = view.getInput(String.format("Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ", UserUtil.PASSWORD_LENGTH));
-            if (UserUtil.checkPassword(password)) return password;
+            String password = view.getInput(String.format(
+                    "Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ",
+                    UserUtil.PASSWORD_LENGTH));
+            if (UserUtil.checkPassword(password))
+                return password;
             view.showMessage("Password non valida. Riprova.");
         }
     }
 
     /**
-     * Ottiene la scelta dell'utente.
+     * Ottiene una scelta booleana dall'utente (sì/no).
+     * Continua a richiedere l'input finché non viene fornita una risposta valida.
      *
-     * @return true se l'utente preme s, false se preme n
+     * @param messaggio il messaggio da mostrare per richiedere la scelta
+     * @return true se la risposta è "s", false se è "n"
      */
     private boolean getUserChoice(String messaggio) {
         while (true) {
             String role = view.getInput(messaggio);
-            if (role.equalsIgnoreCase("s")) return true;
-            if (role.equalsIgnoreCase("n")) return false;
+            if (role.equalsIgnoreCase("s"))
+                return true;
+            if (role.equalsIgnoreCase("n"))
+                return false;
             view.showMessage("Input non valido. Riprova.");
         }
-    }
-
-    /**
-     * Effettua il login di un utente nel sistema con credenziali predefinite.
-     *
-     * @return true se il login va a buon fine, false altrimenti
-     */
-    private boolean defaultUtente() {
-        String usernameDefault = UserUtil.generateRandomUsername();
-        String passwordDefault = UserUtil.generateRandomPassword();
-
-        view.showMessage("Effettua il login con le seguenti credenziali:");
-        view.showMessage("Username: " + usernameDefault);
-        view.showMessage("Password: " + passwordDefault);
-
-        for (int i = 2; i >= 0; i--) {
-            String username = view.getInput("Inserisci username: ");
-            String password = view.getInput("Inserisci password: ");
-            if (usernameDefault.equals(username) && passwordDefault.equals(password)) return true;
-            view.showMessage("Credenziali non valide. Tentativi rimasti: " + i);
-        }
-        view.showMessage("Login non riuscito. Riprova più tardi.");
-        return false;
-    }
-
-    /**
-     * Restituisce il database.
-     *
-     * @return il database
-     */
-    public Database getDatabase() {
-        return this.database;
     }
 }
