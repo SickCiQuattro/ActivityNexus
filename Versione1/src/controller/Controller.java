@@ -36,6 +36,11 @@ public class Controller {
     public static final String MSG_LISTA_FOGLIE = "\nEcco la gerarchia scelta. Le foglie sono contrassegnate da un numero:";
     public static final String MSG_SCELTA_FOGLIA = "Inserisci il numero corrispondente alla categoria foglia scelta: ";
 
+    public static final String GERARCHIA_CREATED = "Gerarchia creata con successo!";
+    public static final String GERARCHIA_ADDED = "Gerarchia aggiunta al database con successo!";
+    public static final String NO_GERARCHIE = "Nessuna gerarchia presente nel sistema.";
+    public static final String CONVERSIONE_TITLE = "Generazione dei fattori di conversione...";
+
     private Database database;
     private final ConsoleView view;
 
@@ -60,30 +65,136 @@ public class Controller {
      * dell'utente.
      */
     public void start() {
-        // TODO: controllo file vuoti o meno per la serializzazione
-        this.database.deserializeUtenti(USERS_FILE_PATH);
-        this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
-        this.database.deserializeGerarchie(GERARCHIE_FILE_PATH);
-        this.database.deserializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
+        // Carica i dati prima di avviare l'applicazione
+        loadData();
+
+        // Ciclo principale dell'applicazione
         while (true) {
-            view.showMenu();
-            String choice = view.getInput("Cosa vuoi fare? ");
-            switch (choice) {
-                case "1": // Login
-                    handleLogin();
-                    break;
-                case "2": // Registrazione
-                    boolean checkRegistration = handleRegistration();
-                    if (checkRegistration) {
-                        this.database.serializeUtenti(USERS_FILE_PATH);
-                    }
-                    break;
-                case "0": // Uscita
-                    view.showMessage(EXIT_MESSAGE);
-                    return;
-                default:
-                    view.showMessage(INVALID_OPTION);
+            try {
+                // Mostra il menu principale e ottieni la scelta dell'utente
+                view.showMenu();
+                String choice = view.getInput("Cosa vuoi fare? ");
+
+                switch (choice) {
+                    case "1": // Login
+                        handleLogin();
+                        break;
+
+                    case "2": // Registrazione
+                        if (handleRegistration()) {
+                            salvaUtenti();
+                            view.showSuccessMessage("Dati utente salvati con successo");
+                        }
+                        break;
+
+                    case "0": // Uscita
+                        salvatutti();
+                        view.showMessage(EXIT_MESSAGE);
+                        return;
+
+                    default:
+                        view.showMessage(INVALID_OPTION);
+                }
+
+                // Pausa per dare il tempo all'utente di leggere i messaggi (opzionale)
+                // view.pressEnterToContinue();
+
+            } catch (Exception e) {
+                // Gestione errori imprevisti per evitare che l'applicazione si arresti
+                view.showErrorMessage("Si è verificato un errore: " + e.getMessage());
+                e.printStackTrace();
+                view.pressEnterToContinue();
             }
+        }
+    }
+
+    /**
+     * Carica tutti i dati dal disco.
+     * Gestisce automaticamente i file mancanti o vuoti.
+     */
+    private void loadData() {
+        view.showMessage("Caricamento dati in corso...");
+
+        try {
+            // Carica i dati utenti
+            if (fileEsistente(USERS_FILE_PATH)) {
+                this.database.deserializeUtenti(USERS_FILE_PATH);
+                view.showMessage("✓ Dati utenti caricati");
+            } else {
+                view.showMessage("✓ Nessun dato utente trovato, si parte da zero");
+            }
+
+            // Carica i dati comprensori
+            if (fileEsistente(COMPRESORI_FILE_PATH)) {
+                this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
+                view.showMessage("✓ Dati comprensori caricati");
+            } else {
+                view.showMessage("✓ Nessun comprensorio trovato, si parte da zero");
+            }
+
+            // Carica i dati gerarchie
+            if (fileEsistente(GERARCHIE_FILE_PATH)) {
+                this.database.deserializeGerarchie(GERARCHIE_FILE_PATH);
+                view.showMessage("✓ Dati gerarchie caricati");
+            } else {
+                view.showMessage("✓ Nessuna gerarchia trovata, si parte da zero");
+            }
+
+            // Carica i dati conversione gerarchie
+            if (fileEsistente(CONVERSIONE_FILE_PATH)) {
+                this.database.deserializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
+                view.showMessage("✓ Dati conversione gerarchie caricati");
+            } else {
+                view.showMessage("✓ Nessun dato di conversione trovato, si parte da zero");
+            }
+
+            view.showSuccessMessage("Caricamento dati completato con successo");
+            // view.pressEnterToContinue();
+
+        } catch (Exception e) {
+            view.showErrorMessage("Errore durante il caricamento dei dati: " + e.getMessage());
+            view.showMessage("L'applicazione continuerà con un database vuoto");
+            this.database = new Database();
+            view.pressEnterToContinue();
+        }
+    }
+
+    /**
+     * Verifica se un file esiste ed è non vuoto.
+     * 
+     * @param path percorso del file da verificare
+     * @return true se il file esiste ed è non vuoto, false altrimenti
+     */
+    private boolean fileEsistente(String path) {
+        java.io.File file = new java.io.File(path);
+        return file.exists() && file.length() > 0;
+    }
+
+    /**
+     * Salva i dati degli utenti su file.
+     */
+    private void salvaUtenti() {
+        try {
+            this.database.serializeUtenti(USERS_FILE_PATH);
+        } catch (Exception e) {
+            view.showErrorMessage("Errore durante il salvataggio degli utenti: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Salva tutti i dati su file prima di uscire dall'applicazione.
+     */
+    private void salvatutti() {
+        view.showMessage("Salvataggio dati in corso...");
+
+        try {
+            this.database.serializeUtenti(USERS_FILE_PATH);
+            this.database.serializeComprensori(COMPRESORI_FILE_PATH);
+            this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
+            this.database.serializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
+            view.showSuccessMessage("Dati salvati con successo");
+        } catch (Exception e) {
+            view.showErrorMessage("Errore durante il salvataggio dei dati: " + e.getMessage());
         }
     }
 
@@ -139,56 +250,150 @@ public class Controller {
 
     /**
      * Gestisce il menu del configuratore.
-     * Mostra il menu specifico e gestisce le scelte dell'utente configuratore.
+     * Mostra il menu specifico e gestisce le varie funzionalità disponibili per
+     * l'utente configuratore.
+     * Implementa operazioni di visualizzazione e creazione di comprensori,
+     * gerarchie e fattori di conversione.
      */
     private void manageConfiguratore() {
         while (true) {
-            view.showMenuConfiguratore();
-            String choice = view.getInput("Cosa vuoi fare? ");
-            switch (choice) {
-                case "1": // Visualizza comprensori
-                    view.showMessage(
-                            this.database.getComprensori().isEmpty() ? NO_COMPRENSORI : database.toStringComprensori());
-                    break;
-                case "2": // Visualizza gerarchie
-                    this.view.showMessage(this.database.getGerarchie().isEmpty() ? "Nessuna gerarchia presente."
-                            : this.database.toStringGerarchie());
+            try {
+                // Mostra il menu e ottiene la scelta dell'utente
+                view.showMenuConfiguratore();
+                String choice = view.getInput("Cosa vuoi fare? ");
 
-                    break;
-                case "3": // Visualizza fattori di conversione
-                    if (!this.database.getGerarchie().isEmpty()) {
-                        visualizzaFattoriConversione();
-                    } else {
-                        this.view.showMessage("Nessuna gerarchia presente.");
-                    }
-                    break;
-                case "4": // Crea comprensorio
-                    if (createComprensorio()) {
-                        this.database.serializeComprensori(COMPRESORI_FILE_PATH);
-                        view.showMessage(COMPRENSORIO_CREATED);
-                    } else {
-                        view.showMessage(OPERATION_CANCELLED);
-                    }
-                    break;
-                case "5": // Crea gerarchia
-                    Gerarchia gerarchia = createGerarchia();
-                    view.showMessage("Gerarchia creata con successo");
-                    view.showMessage("Generazione dei fattori di conversione...");
-                    view.showMessage(gerarchia.toString());
-                    creaFattoriConversione(gerarchia);
-                    creaConversioneGerarchie(gerarchia);
-                    if (this.database.addGerarchia(gerarchia))
-                        this.view.showMessage("Gerarchia aggiunta con successo");
-                    this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
-                    this.database.serializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
-                    break;
-                case "0": // Uscita
-                    view.showMessage(LOGOUT_MESSAGE);
-                    return;
-                default:
-                    view.showMessage(INVALID_OPTION);
+                switch (choice) {
+                    case "1": // Visualizza comprensori
+                        visualizzaComprensori();
+                        break;
+
+                    case "2": // Visualizza gerarchie
+                        visualizzaGerarchie();
+                        break;
+
+                    case "3": // Visualizza fattori di conversione
+                        if (verificaPresenzaGerarchie()) {
+                            visualizzaFattoriConversione();
+                        }
+                        break;
+
+                    case "4": // Crea comprensorio
+                        creaComprensorio();
+                        break;
+
+                    case "5": // Crea gerarchia
+                        creaGerarchia(GERARCHIA_CREATED, GERARCHIA_ADDED, CONVERSIONE_TITLE);
+                        break;
+
+                    case "0": // Uscita
+                        view.showMessage(LOGOUT_MESSAGE);
+                        return;
+
+                    default:
+                        view.showMessage(INVALID_OPTION);
+                }
+
+                // Pausa per permettere all'utente di leggere i risultati
+                view.pressEnterToContinue();
+
+            } catch (Exception e) {
+                // Gestione delle eccezioni generiche per garantire robustezza
+                view.showErrorMessage("Si è verificato un errore: " + e.getMessage());
+                view.pressEnterToContinue();
             }
         }
+    }
+
+    /**
+     * Visualizza i comprensori presenti nel sistema.
+     */
+    private void visualizzaComprensori() {
+        if (this.database.getComprensori().isEmpty()) {
+            view.showMessage(NO_COMPRENSORI);
+        } else {
+            view.showMessage("\n=== COMPRENSORI DISPONIBILI ===");
+            view.showMessage(database.toStringComprensori());
+        }
+    }
+
+    /**
+     * Visualizza le gerarchie presenti nel sistema.
+     */
+    private void visualizzaGerarchie() {
+        if (this.database.getGerarchie().isEmpty()) {
+            view.showMessage("Nessuna gerarchia presente nel sistema.");
+        } else {
+            view.showMessage("\n=== GERARCHIE DISPONIBILI ===");
+            view.showMessage(this.database.toStringGerarchie());
+        }
+    }
+
+    /**
+     * Verifica la presenza di gerarchie nel sistema.
+     * 
+     * @return true se ci sono gerarchie, false altrimenti
+     */
+    private boolean verificaPresenzaGerarchie() {
+        if (this.database.getGerarchie().isEmpty()) {
+            this.view.showErrorMessage(
+                    "Nessuna gerarchia presente nel sistema. Impossibile visualizzare fattori di conversione.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gestisce la creazione di un nuovo comprensorio.
+     */
+    private void creaComprensorio() {
+        view.showMessage("\n=== CREAZIONE NUOVO COMPRENSORIO ===");
+
+        if (createComprensorio()) {
+            this.database.serializeComprensori(COMPRESORI_FILE_PATH);
+            view.showSuccessMessage(COMPRENSORIO_CREATED);
+        } else {
+            view.showMessage(OPERATION_CANCELLED);
+        }
+    }
+
+    /**
+     * Gestisce la creazione di una nuova gerarchia e i relativi fattori di
+     * conversione.
+     * 
+     * @param messaggioCreazione messaggio da mostrare alla creazione della
+     *                           gerarchia
+     * @param messaggioAggiunta  messaggio da mostrare all'aggiunta della gerarchia
+     * @param titoloConversione  titolo da mostrare prima della generazione dei
+     *                           fattori
+     */
+    private void creaGerarchia(String messaggioCreazione, String messaggioAggiunta, String titoloConversione) {
+        view.showMessage("\n=== CREAZIONE NUOVA GERARCHIA ===");
+
+        // Creazione della gerarchia
+        Gerarchia gerarchia = createGerarchia();
+        view.showSuccessMessage(messaggioCreazione);
+
+        // Visualizzazione della struttura
+        view.showMessage("\n" + gerarchia.toString());
+
+        // Generazione dei fattori di conversione
+        view.showMessage("\n" + titoloConversione);
+        creaFattoriConversione(gerarchia);
+
+        // Generazione delle conversioni tra gerarchie (se esistono altre gerarchie)
+        if (!database.getGerarchie().isEmpty()) {
+            view.showMessage("\n=== CONVERSIONI TRA GERARCHIE ===");
+            creaConversioneGerarchie(gerarchia);
+        }
+
+        // Aggiunta della gerarchia al database
+        if (this.database.addGerarchia(gerarchia)) {
+            view.showSuccessMessage(messaggioAggiunta);
+        }
+
+        // Salvataggio dati
+        this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
+        this.database.serializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
     }
 
     // -----------------------------------------------------------------------------------
