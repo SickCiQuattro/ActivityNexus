@@ -48,7 +48,8 @@ public class ConversioneGerarchie implements Serializable {
         // Se non si trova il fattore diretto, si cerca quello inverso
         fattore = getFattore(seconda, prima);
         if (fattore != null && fattore != 0) {
-            return 1.0 / fattore;
+            fattore = 1.0 / fattore;
+            return Math.round(fattore * 100) / 100.0;
         }
 
         return null;
