@@ -1,7 +1,7 @@
 package model;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Classe che rappresenta un comprensorio geografico.
@@ -10,19 +10,48 @@ import java.util.ArrayList;
  */
 public class Comprensorio implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String nome;
-    private ArrayList<String> comuni;
+    private final List<String> comuni;
+
+    // -----------------------------------------------------------------------------------
+    // COSTRUTTORI
+    // -----------------------------------------------------------------------------------
 
     /**
      * Costruisce un Comprensorio con il nome specificato.
      * Inizializza la lista dei comuni come una ArrayList vuota.
      *
-     * @param nome il nome del comprensorio
+     * @param nome il nome del comprensorio (può essere null, ma non consigliato)
      */
     public Comprensorio(String nome) {
         this.nome = nome;
         this.comuni = new ArrayList<>();
     }
+
+    /**
+     * Costruisce un Comprensorio con il nome e la lista di comuni specificati.
+     *
+     * @param nome   il nome del comprensorio
+     * @param comuni la lista iniziale dei comuni (se null, viene creata una lista
+     *               vuota)
+     */
+    public Comprensorio(String nome, Collection<String> comuni) {
+        this.nome = nome;
+        this.comuni = new ArrayList<>();
+
+        if (comuni != null) {
+            for (String comune : comuni) {
+                if (comune != null && !hasComune(comune)) {
+                    this.comuni.add(comune);
+                }
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------------
+    // GETTER E SETTER
+    // -----------------------------------------------------------------------------------
 
     /**
      * Restituisce il nome del comprensorio.
@@ -43,35 +72,89 @@ public class Comprensorio implements Serializable {
     }
 
     /**
-     * Restituisce la lista dei comuni del comprensorio.
+     * Restituisce una copia non modificabile della lista dei comuni del
+     * comprensorio.
+     * Per modificare la lista dei comuni, utilizzare i metodi {@code addComune} e
+     * {@code removeComune}.
      *
-     * @return la lista dei comuni
+     * @return una lista non modificabile dei comuni
      */
-    public ArrayList<String> getComuni() {
-        return this.comuni;
+    public List<String> getComuni() {
+        return Collections.unmodifiableList(this.comuni);
     }
 
     /**
-     * Aggiunge un comune al comprensorio se non è già presente nella lista dei comuni.
+     * Restituisce il numero di comuni presenti nel comprensorio.
      *
-     * @param comune il nome del comune da aggiungere
+     * @return il numero di comuni
+     */
+    public int getNumeroComuniCount() {
+        return this.comuni.size();
+    }
+
+    /**
+     * Verifica se il comprensorio non contiene alcun comune.
+     *
+     * @return true se il comprensorio non contiene comuni, false altrimenti
+     */
+    public boolean isEmpty() {
+        return this.comuni.isEmpty();
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI GESTIONE DEI COMUNI
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Aggiunge un comune al comprensorio se non è già presente nella lista dei
+     * comuni.
+     * Il confronto tra nomi di comuni ignora la differenza tra maiuscole e
+     * minuscole.
+     *
+     * @param comune il nome del comune da aggiungere (se null, non viene aggiunto)
      * @return true se il comune è stato aggiunto, false altrimenti
      */
     public boolean addComune(String comune) {
-        if (this.hasComune(comune)) {
+        if (comune == null || hasComune(comune)) {
             return false;
         }
-        this.comuni.add(comune);
-        return true;
+        return this.comuni.add(comune);
+    }
+
+    /**
+     * Aggiunge tutti i comuni della collezione specificata al comprensorio.
+     * Vengono aggiunti solo i comuni non nulli e non già presenti.
+     *
+     * @param comuni la collezione di comuni da aggiungere
+     * @return il numero di comuni effettivamente aggiunti
+     */
+    public int addComuni(Collection<String> comuni) {
+        if (comuni == null) {
+            return 0;
+        }
+
+        int aggiunti = 0;
+        for (String comune : comuni) {
+            if (addComune(comune)) {
+                aggiunti++;
+            }
+        }
+        return aggiunti;
     }
 
     /**
      * Verifica se un comune è presente nella lista dei comuni.
+     * Il confronto tra nomi di comuni ignora la differenza tra maiuscole e
+     * minuscole.
      *
      * @param comune il nome del comune da verificare
-     * @return true se il comune è presente, false altrimenti
+     * @return true se il comune è presente, false altrimenti o se comune è null
      */
     public boolean hasComune(String comune) {
+        if (comune == null) {
+            return false;
+        }
+
         for (String c : this.comuni) {
             if (c.equalsIgnoreCase(comune)) {
                 return true;
@@ -82,14 +165,23 @@ public class Comprensorio implements Serializable {
 
     /**
      * Rimuove un comune dal comprensorio se è presente nella lista dei comuni.
+     * Il confronto tra nomi di comuni ignora la differenza tra maiuscole e
+     * minuscole.
      *
      * @param comune il nome del comune da rimuovere
-     * @return true se il comune è stato rimosso, false altrimenti
+     * @return true se il comune è stato rimosso, false altrimenti o se comune è
+     *         null
      */
     public boolean removeComune(String comune) {
-        for (String c : this.comuni) {
-            if (c.equals(comune)) {
-                this.comuni.remove(c);
+        if (comune == null) {
+            return false;
+        }
+
+        Iterator<String> it = this.comuni.iterator();
+        while (it.hasNext()) {
+            String c = it.next();
+            if (c.equalsIgnoreCase(comune)) {
+                it.remove();
                 return true;
             }
         }
@@ -97,27 +189,24 @@ public class Comprensorio implements Serializable {
     }
 
     /**
-     * Scrive l'oggetto Comprensorio in un flusso di output.
-     *
-     * @param out il flusso di output
-     * @throws IOException se si verifica un errore di I/O
+     * Rimuove tutti i comuni dal comprensorio.
      */
-    @Serial
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
+    public void clearComuni() {
+        this.comuni.clear();
     }
 
     /**
-     * Legge l'oggetto Comprensorio da un flusso di input.
+     * Restituisce un array contenente tutti i comuni del comprensorio.
      *
-     * @param in il flusso di input
-     * @throws IOException se si verifica un errore di I/O
-     * @throws ClassNotFoundException se la classe non viene trovata
+     * @return un array di stringhe contenente i nomi dei comuni
      */
-    @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
+    public String[] getComuniAsArray() {
+        return this.comuni.toArray(new String[0]);
     }
+
+    // -----------------------------------------------------------------------------------
+    // METODI OVERRIDE DI OBJECT
+    // -----------------------------------------------------------------------------------
 
     /**
      * Restituisce una rappresentazione in stringa del comprensorio.
@@ -129,15 +218,22 @@ public class Comprensorio implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Comprensorio: ").append(this.nome).append("\nComuni:\n");
-        for (String c : this.comuni) {
-            sb.append("\t").append(c).append("\n");
+
+        if (this.comuni.isEmpty()) {
+            sb.append("\t(nessun comune)\n");
+        } else {
+            for (String c : this.comuni) {
+                sb.append("\t").append(c).append("\n");
+            }
         }
+
         return sb.toString();
     }
 
     /**
      * Confronta questo comprensorio con l'oggetto specificato.
-     * Il risultato è true se e solo se l'argomento non è null ed è un oggetto Comprensorio che ha lo stesso nome di questo oggetto.
+     * Due comprensori sono considerati uguali se hanno lo stesso nome, ignorando
+     * la differenza tra maiuscole e minuscole.
      *
      * @param obj l'oggetto da confrontare con questo Comprensorio
      * @return true se l'oggetto è uguale a questo Comprensorio, false altrimenti
@@ -151,16 +247,18 @@ public class Comprensorio implements Serializable {
             return false;
         }
         Comprensorio comprensorio = (Comprensorio) obj;
-        return nome.equalsIgnoreCase(comprensorio.getNome());
+        return nome != null && nome.equalsIgnoreCase(comprensorio.getNome());
     }
 
     /**
-     * Restituisce un hash code per questo comprensorio.
+     * Calcola l'hash code per questo comprensorio.
+     * Coerentemente con equals(), l'hash code è basato sul nome del comprensorio
+     * convertito in minuscolo per ignorare differenze tra maiuscole e minuscole.
      *
-     * @return un hash code per questo comprensorio
+     * @return l'hash code del comprensorio
      */
     @Override
     public int hashCode() {
-        return nome.hashCode();
+        return nome != null ? nome.toLowerCase().hashCode() : 0;
     }
 }

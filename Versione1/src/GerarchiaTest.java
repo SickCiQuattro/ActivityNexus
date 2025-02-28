@@ -93,6 +93,6 @@ public class GerarchiaTest {
 //        for (TreeNode<Categoria> f : figli) {
 //            System.out.println(f.data());
 //        }
-        System.out.println(gerarchia.toStringSelezioneFoglia());
+        System.out.println(gerarchia);
     }
 }
