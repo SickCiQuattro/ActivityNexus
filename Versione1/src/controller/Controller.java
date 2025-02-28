@@ -168,30 +168,92 @@ public class Controller {
     }
 
     private void visualizzaFattoriConversione() {
-        this.view.showMessage(String.format(MSG_LISTA_GERARCHIE));
-        // gerarchie
+        // Prima selezione: gerarchia origine
+        this.view.showMessage(MSG_LISTA_GERARCHIE);
+        Gerarchia gerarchiaOrigine = selezionaGerarchia();
+
+        // Selezione della foglia dalla gerarchia origine
+        this.view.showMessage(MSG_LISTA_FOGLIE);
+        this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
+
+        TreeNode<Categoria> fogliaScelta = selezionaFoglia(gerarchiaOrigine);
+
+        // Seconda selezione: gerarchia destinazione
+        this.view.showMessage(String.format("\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n",
+                fogliaScelta.data().getNome()));
+
+        Gerarchia gerarchiaDestinazione = selezionaGerarchia();
+
+        // Calcolo del fattore di conversione combinato
+        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione()
+                .getFattoreConversione(fogliaScelta.level(),
+                        gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
+
+        double fattoreInterGerarchia = 1.0;
+        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
+            fattoreInterGerarchia = this.database.getConversioneGerarchie().getFattoreConversione(
+                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
+                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
+        }
+
+        // Visualizzazione dei risultati
+        this.view.showMessage(String.format("\nEcco i fattori di conversione relativi alla categoria \"%s\":",
+                fogliaScelta.data().getNome()));
+
+        this.view.showMessage(gerarchiaDestinazione.toStringFattoreConversione(fattoreIntraGerarchia * fattoreInterGerarchia));
+    }
+
+    /**
+     * Mostra la lista delle gerarchie e chiede all'utente di selezionarne una.
+     * @return la gerarchia selezionata
+     */
+    private Gerarchia selezionaGerarchia() {
+        // Visualizzazione delle gerarchie
         List<Gerarchia> gerarchieList = new ArrayList<>(this.database.getGerarchie());
         for (int i = 0; i < gerarchieList.size(); i++) {
             Gerarchia gerarchia = gerarchieList.get(i);
             Categoria categoria = (Categoria)gerarchia.root().data();
             this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
         }
-
         this.view.showMessage("");
 
-        int indiceScelta = 0;
-        boolean validInput = false;
+        // Selezione della gerarchia
         int numScelte = this.database.getGerarchie().size();
+        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_GERARCHIA, numScelte) - 1;
+
+        return this.database.getGerarchia(indiceScelta);
+    }
+
+    /**
+     * Chiede all'utente di selezionare una foglia dalla gerarchia specificata.
+     * @param gerarchia la gerarchia da cui selezionare la foglia
+     * @return la foglia selezionata
+     */
+    private TreeNode<Categoria> selezionaFoglia(Gerarchia gerarchia) {
+        ArrayList<TreeNode<Categoria>> foglie = gerarchia.getFoglie();
+        int numScelte = foglie.size();
+        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_FOGLIA, numScelte) - 1;
+
+        return foglie.get(indiceScelta);
+    }
+
+    /**
+     * Richiede all'utente di inserire un indice valido.
+     * @param messaggio il messaggio da mostrare all'utente
+     * @param numScelte il numero massimo di scelte disponibili
+     * @return l'indice selezionato (a partire da 1)
+     */
+    private int richiediIndiceDaUtente(String messaggio, int numScelte) {
+        boolean validInput = false;
+        int indiceScelta = 0;
+
         while (!validInput) {
-            String scelta = this.view.getInput(MSG_SCELTA_GERARCHIA);
-
-            try{
+            String scelta = this.view.getInput(messaggio);
+            try {
                 indiceScelta = Integer.parseInt(scelta);
-                if (indiceScelta > 0 && indiceScelta <= numScelte){
+                if (indiceScelta > 0 && indiceScelta <= numScelte) {
                     validInput = true;
-                    indiceScelta -= 1;
-                }
-                else{
+                } else {
                     this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
                 }
             } catch (NumberFormatException e) {
@@ -199,77 +261,7 @@ public class Controller {
             }
         }
 
-        // foglie
-        this.view.showMessage(String.format(MSG_LISTA_FOGLIE));
-        Gerarchia gerarchiaScelta = this.database.getGerarchia(indiceScelta);
-        this.view.showMessage(gerarchiaScelta.toStringSelezioneFoglia());
-
-        indiceScelta = 0;
-        validInput = false;
-        ArrayList<TreeNode<Categoria>> foglie = gerarchiaScelta.getFoglie();
-        numScelte = foglie.size();
-
-        while(!validInput){
-            String scelta = this.view.getInput(MSG_SCELTA_FOGLIA);
-            try{
-                indiceScelta = Integer.parseInt(scelta);
-                if (indiceScelta > 0 && indiceScelta <= numScelte){
-                    validInput = true;
-                    indiceScelta -= 1;
-                }
-                else{
-                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-                }
-            } catch (NumberFormatException e) {
-                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-            }
-        }
-
-        TreeNode<Categoria> fogliaScelta = foglie.get(indiceScelta);
-
-        this.view.showMessage(String.format("\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n", fogliaScelta.data().getNome()));
-
-        // gerarchie
-        gerarchieList = new ArrayList<>(this.database.getGerarchie());
-        for (int i = 0; i < gerarchieList.size(); i++) {
-            Gerarchia gerarchia = gerarchieList.get(i);
-            Categoria categoria = (Categoria)gerarchia.root().data();
-            this.view.showMessage("[" + (i + 1) + "] " + categoria.getNome());
-        }
-
-        this.view.showMessage("");
-
-        indiceScelta = 0;
-        validInput = false;
-        numScelte = this.database.getGerarchie().size();
-        while (!validInput) {
-            String scelta = this.view.getInput(String.format(MSG_SCELTA_GERARCHIA));
-
-            try{
-                indiceScelta = Integer.parseInt(scelta);
-                if (indiceScelta > 0 && indiceScelta <= numScelte){
-                    validInput = true;
-                    indiceScelta -= 1;
-                }
-                else{
-                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-                }
-            } catch (NumberFormatException e) {
-                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
-            }
-        }
-
-        // foglie
-        Gerarchia gerarchiaConversione = this.database.getGerarchia(indiceScelta);
-
-        double a = gerarchiaScelta.getFattoreConversione().getFattoreConversione(fogliaScelta.level(), gerarchiaScelta.getFattoreConversione().getFogliaRiferimento().level());
-        double c = 1;
-        if (!gerarchiaScelta.equals(gerarchiaConversione))
-            c = this.database.getConversioneGerarchie().getFattoreConversione(gerarchiaScelta.getFattoreConversione().getFogliaRiferimento().data(), gerarchiaConversione.getFattoreConversione().getFogliaRiferimento().data());
-
-        this.view.showMessage(String.format("\nEcco i fattori di conversione relativi alla categoria \"%s\":", fogliaScelta.data().getNome()));
-
-        this.view.showMessage(gerarchiaConversione.toStringFattoreConversione(a*c));
+        return indiceScelta;
     }
 
     private void creaConversioneGerarchie(Gerarchia gerarchia) {
@@ -280,7 +272,7 @@ public class Controller {
             boolean validInput = false;
 
             while (!validInput){
-                String value = this.view.getInput(String.format("Inserisci il fattore di conversione tra la categoria %s e la categoria %s", fogliaRiferimento.data().getNome(), secondaFogliaRiferimento.data().getNome()));
+                String value = this.view.getInput(String.format("Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ", fogliaRiferimento.data().getNome(), secondaFogliaRiferimento.data().getNome()));
 
                 try{
                     double fattore = Double.parseDouble(value);
@@ -314,44 +306,55 @@ public class Controller {
 
         // Itera su tutte le foglie rimanenti
         for (TreeNode<Categoria> foglia : foglie) {
-            boolean validInput = false;
+            boolean isSpecializzata = foglia.level() > fogliaRiferimento.level();
+            double minFattore = isSpecializzata ? 1.0 : 0.5;
+            double maxFattore = isSpecializzata ? 2.0 : 1.0;
+            String messaggioErrore = isSpecializzata
+                ? "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate."
+                : "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.";
 
-            // Continua a chiedere l'input finché non è valido
-            while (!validInput) {
-                // Richiede all'utente di inserire il fattore di conversione
-                String value = view.getInput(String.format("Inserisci il fattore di conversione tra la categoria %s e la categoria %s: ", fogliaRiferimento.data().getNome(), foglia.data().getNome()));
-                // TODO: in caso aggiungere foglia.parent().data().getNome() per unicità
+            // Richiede il fattore di conversione
+            double fattore = richiediEValidaFattore(
+                fogliaRiferimento.data().getNome(),
+                foglia.data().getNome(),
+                minFattore,
+                maxFattore,
+                messaggioErrore
+            );
 
-                try {
-                    // Converte l'input in un valore double
-                    double fattore = Double.parseDouble(value);
+            // Arrotonda il fattore a due cifre decimali
+            fattore = Math.round(fattore * 100) / 100.0;
 
-                    // Controlla se il livello della foglia è maggiore del livello della foglia di riferimento
-                    if (foglia.level() > fogliaRiferimento.level()) {
-                        // Se il fattore è valido, lo aggiunge e imposta validInput a true
-                        if (fattore > 1 && fattore <= 2) {
-                            validInput = true;
-                            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
-                            view.showMessage("Fattore di conversione aggiunto");
-                        } else {
-                            // Mostra un messaggio di errore se il fattore non è valido
-                            view.showMessage("Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate.");
-                        }
-                    } else {
-                        // Se il fattore è valido, lo aggiunge e imposta validInput a true
-                        if (fattore >= 0.5 && fattore < 1) {
-                            validInput = true;
-                            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
-                            view.showMessage("Fattore di conversione aggiunto");
-                        } else {
-                            // Mostra un messaggio di errore se il fattore non è valido
-                            view.showMessage("Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.");
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    // Mostra un messaggio di errore se l'input non è un numero valido
-                    view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
+            // Aggiunge il fattore di conversione
+            gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
+            view.showMessage("Fattore di conversione aggiunto");
+        }
+    }
+
+    /**
+     * Richiede e valida un fattore di conversione dall'utente.
+     *
+     * @param categoriaOrigine nome della categoria di origine
+     * @param categoriaDestinazione nome della categoria di destinazione
+     * @param minFattore valore minimo accettabile
+     * @param maxFattore valore massimo accettabile
+     * @param messaggioErrore messaggio di errore per valori non validi
+     * @return fattore di conversione valido
+     */
+    private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
+                                        double minFattore, double maxFattore, String messaggioErrore) {
+        while (true) {
+            String value = view.getInput(String.format("Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ",
+                                         categoriaOrigine, categoriaDestinazione));
+            try {
+                double fattore = Double.parseDouble(value);
+                if (fattore >= minFattore && fattore <= maxFattore) {
+                    return fattore;
+                } else {
+                    view.showMessage(messaggioErrore);
                 }
+            } catch (NumberFormatException e) {
+                view.showMessage("Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.");
             }
         }
     }
@@ -493,6 +496,7 @@ public class Controller {
     private Categoria createCategoria(String nomePadre, Gerarchia root) {
         String nome;
         while (true) {
+            //TODO: aggiungere rifermento al campo di appartenenza della categoria che si sta creando
             nome = this.view.getInput("Inserisci il nome della categoria" + (root == null ? " radice" : " figlia di " + (nomePadre)) + ": ");
             if (nome.isBlank()) {
                 this.view.showMessage("Nome non valido");
