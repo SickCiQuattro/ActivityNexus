@@ -203,7 +203,7 @@ public class Database {
 
         StringBuilder sb = new StringBuilder();
         for (Comprensorio c : this.comprensori) {
-            sb.append(c.toString()).append("\n\n");
+            sb.append(c.toString()).append("\n");
         }
         return sb.toString();
     }

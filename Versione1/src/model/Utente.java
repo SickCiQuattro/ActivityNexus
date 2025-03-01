@@ -23,10 +23,10 @@ public class Utente implements Serializable {
     private String username;
 
     /** Password dell'utente salvata come hash per sicurezza. */
-    private String hashedPassword;
+    private final String hashedPassword;
 
     /** Salt casuale usato per proteggere la password da attacchi rainbow table. */
-    private byte[] salt;
+    private final byte[] salt;
 
     /**
      * Flag che indica se l'utente è un configuratore (true) o un fruitore (false).

@@ -195,7 +195,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
                 // Visualizzazione delle informazioni del nodo
                 if (nodo.isRoot()) {
                     // Visualizzazione radice
-                    builder.append("Gerarchia: ").append(nodo.data().getNome()).append("\n");
+                    builder.append("GERARCHIA: ").append(nodo.data().getNome()).append("\n");
                 } else {
                     // Visualizzazione nodo standard
                     ValoreCampo valoreDaMostrare = ottieniValoreNodo(nodo, valoriPerNodo);
@@ -219,7 +219,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
                     if (parametri.mostraFattoriConversione && nodo.isLeaf()) {
                         Double valoreConversione = calcolaFattoreConversione(nodo, parametri.fattoreEsterno);
                         builder.append(" [Conversione: ")
-                                .append(valoreConversione != null ? valoreConversione : "N/A")
+                                .append(valoreConversione != null ? String.format("%.2f", valoreConversione) : "N/A")
                                 .append("]");
                     }
 
@@ -422,8 +422,8 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      *
      * @return l'hash code basato sull'identità dell'oggetto
      */
-    //@Override // override funzionante per il toString
-    //public int hashCode() {
-    //    return System.identityHashCode(this);
-    //}
+    // @Override // override funzionante per il toString
+    // public int hashCode() {
+    // return System.identityHashCode(this);
+    // }
 }

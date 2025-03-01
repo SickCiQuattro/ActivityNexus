@@ -217,13 +217,13 @@ public class Comprensorio implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Comprensorio: ").append(this.nome).append("\nComuni:\n");
+        sb.append("COMPRENSORIO: ").append(this.nome).append("\nELENCO COMUNI:\n");
 
         if (this.comuni.isEmpty()) {
             sb.append("\t(nessun comune)\n");
         } else {
             for (String c : this.comuni) {
-                sb.append("\t").append(c).append("\n");
+                sb.append("|---").append(c).append("\n");
             }
         }
 

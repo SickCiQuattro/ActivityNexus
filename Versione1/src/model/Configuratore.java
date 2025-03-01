@@ -8,7 +8,6 @@ import java.io.Serializable;
  * amministrazione
  * per configurare il sistema, creare gerarchie e gestire altri aspetti del
  * sistema.
- * 
  * Il Configuratore ha sempre il flag isConfig impostato a true, che gli
  * conferisce
  * i permessi aggiuntivi rispetto a un normale Utente.
