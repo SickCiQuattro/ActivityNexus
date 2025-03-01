@@ -29,6 +29,7 @@ public class ConversioneGerarchie implements Serializable {
      * Restituisce il fattore di conversione tra due categorie.
      * Se il fattore di conversione non esiste nella direzione richiesta,
      * cerca la coppia invertita e restituisce l'inverso del fattore di conversione.
+     * Il fattore di conversione è arrotondato a due decimali.
      *
      * @param prima   la prima categoria
      * @param seconda la seconda categoria
@@ -42,7 +43,7 @@ public class ConversioneGerarchie implements Serializable {
 
         Double fattore = getFattore(prima, seconda);
         if (fattore != null) {
-            return fattore;
+            return Math.round(fattore * 100) / 100.0;
         }
 
         // Se non si trova il fattore diretto, si cerca quello inverso
