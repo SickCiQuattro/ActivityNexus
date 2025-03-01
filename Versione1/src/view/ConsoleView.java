@@ -85,7 +85,7 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     /** Messaggio di benvenuto con stile migliorato */
-    private static final String WELCOME_MESSAGE = BOLD + YELLOW + "Benvenuto in LogHorizon2!" + RESET;
+    private static final String WELCOME_MESSAGE = BOLD + YELLOW + "Benvenuto in ActivityNexus!" + RESET;
     /** Titolo del menu configuratore con stile migliorato */
     private static final String CONFIGURATOR_MENU_TITLE = BOLD + YELLOW + "MENU Configuratore" + RESET;
     /** Titolo del menu fruitore con stile migliorato */
@@ -344,20 +344,29 @@ public class ConsoleView {
      */
     private void displayAsciiLogo() {
         String[] logoLines = {
-                BLUE + "╔══════════════════════════════════════════════════════════╗" + RESET,
-                BLUE + "║" + CYAN + "   _                 _  _            _                  " + BLUE + "  ║" + RESET,
-                BLUE + "║" + CYAN + "  | |               | || |          (_)                 " + BLUE + "  ║" + RESET,
-                BLUE + "║" + CYAN + "  | |     ___   __ _| || | ___  _ __ _ _______  _ __   " + BLUE + "   ║" + RESET,
-                BLUE + "║" + CYAN + "  | |    / _ \\ / _` | || |/ _ \\| '__| |_  / _ \\| '_ \\  " + BLUE + "   ║"
+                BLUE + "╔═════════════════════════════════════════════════════════════════╗" + RESET,
+                BLUE + "║" + CYAN + "     █████     ██████  ████████ ██ ██    ██ ██ ████████ ██    ██ " + BLUE + "║"
                         + RESET,
-                BLUE + "║" + CYAN + "  | |___| (_) | (_| | || | (_) | |  | |/ / (_) | | | | " + BLUE + "   ║" + RESET,
-                BLUE + "║" + CYAN + "  |______\\___/ \\__, |_||_|\\___/|_|  |_/___\\___/|_| |_| " + BLUE + "   ║"
+                BLUE + "║" + CYAN + "    ██   ██    ██         ██    ██ ██    ██ ██    ██     ██  ██  " + BLUE + "║"
                         + RESET,
-                BLUE + "║" + CYAN + "                __/ |                                   " + BLUE + "  ║" + RESET,
-                BLUE + "║" + CYAN + "               |___/                              " + YELLOW + "2.0 " + BLUE
-                        + "    ║"
+                BLUE + "║" + CYAN + "   █████████   ██         ██    ██ ██    ██ ██    ██      ████   " + BLUE + "║"
                         + RESET,
-                BLUE + "╚══════════════════════════════════════════════════════════╝" + RESET
+                BLUE + "║" + CYAN + "  ██       ██  ██         ██    ██  ██  ██  ██    ██       ██    " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + CYAN + "  ██       ██  ██████     ██    ██   ████   ██    ██       ██    " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "                                                                 " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "           ███    ██ ███████ ██   ██ ██    ██ ███████            " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "           ████   ██ ██       ██ ██  ██    ██ ██                 " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "           ██ ██  ██ █████     ███   ██    ██ ███████            " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "           ██  ██ ██ ██       ██ ██  ██    ██      ██            " + BLUE + "║"
+                        + RESET,
+                BLUE + "║" + MAGENTA + "           ██   ████ ███████ ██   ██  ██████  ███████            " + BLUE + "║" + RESET,
+                BLUE + "╚═════════════════════════════════════════════════════════════════╝" + RESET
         };
 
         for (String line : logoLines) {
