@@ -4,6 +4,7 @@ import model.Gerarchia;
 import model.Campo;
 import com.scalified.tree.TreeNode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -69,8 +70,29 @@ public class GerarchiaTest {
 
         //System.out.println(figli);
         //System.out.println(figlio5.subtrees().size());
-        System.out.println(gerarchia);
+        //System.out.println(gerarchia);
         //System.out.println(figlio9.level());
+        //System.out.println(figlio9.root());
 
+        if (figlio9.root().data().equals(categoriaroot)) {
+            System.out.println("Test superato");
+        } else {
+            System.out.println("Test fallito");
+        }
+        //System.out.println(figlio9.data());
+
+        //
+        Categoria padre = (Categoria) figlio9.parent().data();
+        Categoria figlio = (Categoria) figlio9.data();
+        // System.out.println(padre.getNome());
+        // System.out.println(figlio.getNome());
+        //System.out.println(gerarchia);
+
+//        ArrayList<TreeNode<Categoria>> figli = gerarchia.getFoglie();
+//        figli.removeFirst();
+//        for (TreeNode<Categoria> f : figli) {
+//            System.out.println(f.data());
+//        }
+        System.out.println(gerarchia);
     }
 }

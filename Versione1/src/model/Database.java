@@ -1,35 +1,60 @@
 package model;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Classe che rappresenta il database del sistema.
- * Contiene le liste di utenti, comprensori e gerarchie.
+ * Contiene e gestisce le collezioni di utenti, comprensori e gerarchie.
+ * Fornisce funzionalità di persistenza dei dati attraverso la serializzazione.
  */
 public class Database {
+    // -----------------------------------------------------------------------------------
+    // ATTRIBUTI
+    // -----------------------------------------------------------------------------------
+
+    /** Collezione degli utenti registrati nel sistema */
     private Set<Utente> utenti;
+
+    /** Collezione dei comprensori geografici */
     private Set<Comprensorio> comprensori;
+
+    /** Collezione delle gerarchie di categorie */
     private Set<Gerarchia> gerarchie;
+
+    /** Oggetto di gestione dei fattori di conversione tra gerarchie */
+    private ConversioneGerarchie conversioneGerarchie;
+
+    // -----------------------------------------------------------------------------------
+    // COSTRUTTORE
+    // -----------------------------------------------------------------------------------
 
     /**
      * Costruttore della classe Database.
-     * Inizializza le liste di utenti, comprensori e gerarchie.
+     * Inizializza le collezioni di utenti, comprensori e gerarchie.
      */
     public Database() {
         this.utenti = new HashSet<>();
         this.comprensori = new HashSet<>();
         this.gerarchie = new HashSet<>();
+        this.conversioneGerarchie = new ConversioneGerarchie();
     }
 
-    // Metodi per la gestione degli utenti
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DEGLI UTENTI
+    // -----------------------------------------------------------------------------------
 
     /**
      * Aggiunge un utente al database.
      *
      * @param utente l'utente da aggiungere
-     * @return true se l'utente è stato aggiunto correttamente, false se l'utente è già presente
+     * @return true se l'utente è stato aggiunto correttamente, false se l'utente è
+     *         già presente o null
      */
     public boolean addUtente(Utente utente) {
         if (utente == null) {
@@ -39,25 +64,8 @@ public class Database {
     }
 
     /**
-     * Restituisce la lista degli utenti nel database.
-     *
-     * @return la lista degli utenti
-     */
-    public Set<Utente> getUtenti() {
-        return this.utenti;
-    }
-
-    /**
-     * Imposta la lista degli utenti nel database.
-     *
-     * @param utenti
-     */
-    public void setUtenti(Set<Utente> utenti) {
-        this.utenti = utenti;
-    }
-
-    /**
-     * Registra un utente nel database. L'utente può essere di tipo Utente (in futuro Fruitore) o Configuratore.
+     * Registra un utente nel database. L'utente può essere di tipo Utente (in
+     * futuro Fruitore) o Configuratore.
      *
      * @param username lo username dell'Utente
      * @param password la password dell'Utente
@@ -65,6 +73,9 @@ public class Database {
      * @return true se l'utente è stato registrato correttamente, false altrimenti
      */
     public boolean registerUtente(String username, String password, boolean isConfig) {
+        if (username == null || password == null || hasUtente(username)) {
+            return false;
+        }
         Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
         return this.addUtente(utente);
     }
@@ -74,10 +85,10 @@ public class Database {
      *
      * @param username lo username dell'Utente
      * @param password la password dell'Utente
-     * @return l'utente loggato se le credenziali sono corrette, null altrimenti
+     * @return l'utente autenticato se le credenziali sono corrette, null altrimenti
      */
     public Utente loginUtente(String username, String password) {
-        if (this.utenti.isEmpty()) {
+        if (username == null || password == null || this.utenti.isEmpty()) {
             return null;
         }
         for (Utente utente : this.utenti) {
@@ -95,6 +106,9 @@ public class Database {
      * @return true se l'utente è presente, false altrimenti
      */
     public boolean hasUtente(String username) {
+        if (username == null) {
+            return false;
+        }
         for (Utente utente : this.utenti) {
             if (utente.getUsername().equals(username)) {
                 return true;
@@ -103,13 +117,35 @@ public class Database {
         return false;
     }
 
-    // Metodi per la gestione dei comprensori
+    /**
+     * Restituisce la collezione degli utenti nel database.
+     * Per sicurezza, viene restituita una vista non modificabile della collezione.
+     *
+     * @return una vista non modificabile della collezione degli utenti
+     */
+    public Set<Utente> getUtenti() {
+        return Collections.unmodifiableSet(this.utenti);
+    }
+
+    /**
+     * Imposta la collezione degli utenti nel database.
+     *
+     * @param utenti la nuova collezione di utenti
+     */
+    public void setUtenti(Set<Utente> utenti) {
+        this.utenti = utenti != null ? new HashSet<>(utenti) : new HashSet<>();
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DEI COMPRENSORI
+    // -----------------------------------------------------------------------------------
 
     /**
      * Aggiunge un comprensorio al database.
      *
      * @param comprensorio il comprensorio da aggiungere
-     * @return true se il comprensorio è stato aggiunto correttamente, false se il comprensorio è già presente o è null
+     * @return true se il comprensorio è stato aggiunto correttamente, false se il
+     *         comprensorio è già presente o è null
      */
     public boolean addComprensorio(Comprensorio comprensorio) {
         if (comprensorio == null) {
@@ -121,12 +157,15 @@ public class Database {
     /**
      * Verifica se un comprensorio è presente nel database.
      *
-     * @param nome il nome del comprensorio
+     * @param nome il nome del comprensorio (case insensitive)
      * @return true se il comprensorio è presente, false altrimenti
      */
     public boolean hasComprensorio(String nome) {
+        if (nome == null) {
+            return false;
+        }
         for (Comprensorio c : this.comprensori) {
-            if (c.getNome().equalsIgnoreCase(nome)) {
+            if (c.getNome() != null && c.getNome().equalsIgnoreCase(nome)) {
                 return true;
             }
         }
@@ -134,30 +173,51 @@ public class Database {
     }
 
     /**
-     * Restituisce la lista dei comprensori nel database.
+     * Restituisce la collezione dei comprensori nel database.
+     * Per sicurezza, viene restituita una vista non modificabile della collezione.
      *
-     * @return la lista dei comprensori
+     * @return una vista non modificabile della collezione dei comprensori
      */
     public Set<Comprensorio> getComprensori() {
-        return this.comprensori;
+        return Collections.unmodifiableSet(this.comprensori);
     }
 
     /**
-     * Imposta la lista dei comprensori nel database.
+     * Imposta la collezione dei comprensori nel database.
      *
-     * @param comprensori
+     * @param comprensori la nuova collezione di comprensori
      */
     public void setComprensori(Set<Comprensorio> comprensori) {
-        this.comprensori = comprensori;
+        this.comprensori = comprensori != null ? new HashSet<>(comprensori) : new HashSet<>();
     }
 
-    // Metodi per la gestione delle gerarchie
+    /**
+     * Restituisce una rappresentazione in stringa dei comprensori nel database.
+     *
+     * @return una stringa che rappresenta i comprensori
+     */
+    public String toStringComprensori() {
+        if (comprensori.isEmpty()) {
+            return "Nessun comprensorio presente.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Comprensorio c : this.comprensori) {
+            sb.append(c.toString()).append("\n\n");
+        }
+        return sb.toString();
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DELLE GERARCHIE
+    // -----------------------------------------------------------------------------------
 
     /**
      * Aggiunge una gerarchia al database.
      *
      * @param gerarchia la gerarchia da aggiungere
-     * @return true se la gerarchia è stata aggiunta correttamente, false se la gerarchia è già presente
+     * @return true se la gerarchia è stata aggiunta correttamente, false se la
+     *         gerarchia è già presente o null
      */
     public boolean addGerarchia(Gerarchia gerarchia) {
         if (gerarchia == null) {
@@ -169,13 +229,16 @@ public class Database {
     /**
      * Verifica se una gerarchia è presente nel database.
      *
-     * @param nome il nome della gerarchia
+     * @param nome il nome della categoria radice della gerarchia
      * @return true se la gerarchia è presente, false altrimenti
      */
     public boolean hasGerarchia(String nome) {
+        if (nome == null) {
+            return false;
+        }
         for (Gerarchia g : this.gerarchie) {
-            Categoria c = (Categoria) g.root().data();
-            if (c.getNome().equals(nome)) {
+            Categoria c = g.root().data();
+            if (c != null && c.getNome().equals(nome)) {
                 return true;
             }
         }
@@ -183,25 +246,75 @@ public class Database {
     }
 
     /**
-     * Restituisce la lista delle gerarchie nel database.
+     * Restituisce la collezione delle gerarchie nel database.
+     * Per sicurezza, viene restituita una vista non modificabile della collezione.
      *
-     * @return la lista delle gerarchie
+     * @return una vista non modificabile della collezione delle gerarchie
      */
     public Set<Gerarchia> getGerarchie() {
-        return this.gerarchie;
+        return Collections.unmodifiableSet(this.gerarchie);
     }
 
     /**
-     * Imposta la lista delle gerarchie nel database.
+     * Imposta la collezione delle gerarchie nel database.
      *
-     * @param gerarchie
+     * @param gerarchie la nuova collezione di gerarchie
      */
     public void setGerarchie(Set<Gerarchia> gerarchie) {
-        this.gerarchie = gerarchie;
+        this.gerarchie = gerarchie != null ? new HashSet<>(gerarchie) : new HashSet<>();
     }
 
-    // Metodi per la serializzazione e deserializzazione
+    /**
+     * Restituisce una gerarchia specifica in base alla posizione nella lista.
+     *
+     * @param index l'indice della gerarchia da recuperare
+     * @return la gerarchia corrispondente all'indice specificato
+     * @throws IndexOutOfBoundsException se l'indice è fuori dai limiti
+     */
+    public Gerarchia getGerarchia(int index) {
+        ArrayList<Gerarchia> gerarchieList = new ArrayList<>(this.gerarchie);
+        return gerarchieList.get(index);
+    }
 
+    /**
+     * Restituisce una rappresentazione in stringa delle gerarchie nel database.
+     *
+     * @return una stringa che rappresenta le gerarchie
+     */
+    public String toStringGerarchie() {
+        if (gerarchie.isEmpty()) {
+            return "Nessuna gerarchia presente.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Gerarchia g : this.gerarchie) {
+            sb.append(g).append("\n\n");
+        }
+        return sb.toString();
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DELLE CONVERSIONI TRA GERARCHIE
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Restituisce l'oggetto di gestione delle conversioni tra gerarchie.
+     *
+     * @return l'oggetto ConversioneGerarchie
+     */
+    public ConversioneGerarchie getConversioneGerarchie() {
+        return this.conversioneGerarchie;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI SERIALIZZAZIONE E DESERIALIZZAZIONE
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Serializza la collezione degli utenti nel file specificato.
+     *
+     * @param filePath il percorso del file in cui salvare gli utenti
+     */
     public void serializeUtenti(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this.utenti);
@@ -210,6 +323,11 @@ public class Database {
         }
     }
 
+    /**
+     * Deserializza la collezione degli utenti dal file specificato.
+     *
+     * @param filePath il percorso del file da cui caricare gli utenti
+     */
     public void deserializeUtenti(String filePath) {
         try {
             FileInputStream fis = new FileInputStream(filePath);
@@ -223,6 +341,11 @@ public class Database {
         }
     }
 
+    /**
+     * Serializza la collezione dei comprensori nel file specificato.
+     *
+     * @param filePath il percorso del file in cui salvare i comprensori
+     */
     public void serializeComprensori(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this.comprensori);
@@ -231,6 +354,11 @@ public class Database {
         }
     }
 
+    /**
+     * Deserializza la collezione dei comprensori dal file specificato.
+     *
+     * @param filePath il percorso del file da cui caricare i comprensori
+     */
     public void deserializeComprensori(String filePath) {
         try {
             FileInputStream fis = new FileInputStream(filePath);
@@ -245,10 +373,11 @@ public class Database {
     }
 
     /**
-     * Serializza le gerarchie nel file specificato.
-     * @param filePath
+     * Serializza la collezione delle gerarchie nel file specificato.
+     *
+     * @param filePath il percorso del file in cui salvare le gerarchie
      */
-    public void serializeGerarchie(String filePath){
+    public void serializeGerarchie(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this.gerarchie);
         } catch (IOException e) {
@@ -257,10 +386,11 @@ public class Database {
     }
 
     /**
-     * Deserializza le gerarchie dal file specificato.
-     * @param filePath
+     * Deserializza la collezione delle gerarchie dal file specificato.
+     *
+     * @param filePath il percorso del file da cui caricare le gerarchie
      */
-    public void deserializeGerarchie(String filePath){
+    public void deserializeGerarchie(String filePath) {
         try {
             FileInputStream fis = new FileInputStream(filePath);
             if (fis.available() == 0) {
@@ -273,31 +403,36 @@ public class Database {
         }
     }
 
-    // Metodi per la rappresentazione in stringa
-
     /**
-     * Restituisce una rappresentazione in stringa dei comprensori nel database.
+     * Serializza l'oggetto di gestione delle conversioni tra gerarchie nel file
+     * specificato.
      *
-     * @return una stringa che rappresenta i comprensori
+     * @param filePath il percorso del file in cui salvare le conversioni
      */
-    public String toStringComprensori() {
-        StringBuilder sb = new StringBuilder();
-        for (Comprensorio c : this.comprensori) {
-            sb.append(c.toString()).append("\n\n");
+    public void serializeConversioneGerarchie(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.conversioneGerarchie);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return sb.toString();
     }
 
     /**
-     * Restituisce una rappresentazione in stringa delle gerarchie nel database.
+     * Deserializza l'oggetto di gestione delle conversioni tra gerarchie dal file
+     * specificato.
      *
-     * @return una stringa che rappresenta le gerarchie
+     * @param filePath il percorso del file da cui caricare le conversioni
      */
-    public String toStringGerarchie() {
-        StringBuilder sb = new StringBuilder();
-        for (Gerarchia c : this.gerarchie) {
-            sb.append(c).append("\n\n");
+    public void deserializeConversioneGerarchie(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.conversioneGerarchie = (ConversioneGerarchie) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        return sb.toString();
     }
 }
