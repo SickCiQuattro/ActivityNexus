@@ -10,6 +10,7 @@ import java.util.Objects;
  */
 public class Categoria implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final String NOME_NON_NULL = "Il nome della categoria non può essere null";
 
     private String nome;
     private Campo campo = null;
@@ -25,7 +26,7 @@ public class Categoria implements Serializable {
      * @throws NullPointerException se il nome è null
      */
     public Categoria(String nome) {
-        this.nome = Objects.requireNonNull(nome, "Il nome della categoria non può essere null");
+        this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
     }
 
     /**
@@ -36,7 +37,7 @@ public class Categoria implements Serializable {
      * @throws NullPointerException se il nome è null
      */
     public Categoria(String nome, Campo campo) {
-        this.nome = Objects.requireNonNull(nome, "Il nome della categoria non può essere null");
+        this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
         this.campo = campo;
     }
 
@@ -60,7 +61,7 @@ public class Categoria implements Serializable {
      * @throws NullPointerException se il nome è null
      */
     public void setNome(String nome) {
-        this.nome = Objects.requireNonNull(nome, "Il nome della categoria non può essere null");
+        this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
     }
 
     /**

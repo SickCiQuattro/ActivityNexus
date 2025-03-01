@@ -12,6 +12,7 @@ import java.util.Objects;
  */
 public class ValoreCampo implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final String NOME_NON_NULL = "Il nome del valore non può essere null";
 
     private String nome;
     private String descrizione;
@@ -38,7 +39,7 @@ public class ValoreCampo implements Serializable {
      * @throws NullPointerException se il nome è null
      */
     public ValoreCampo(String nome, String descrizione) {
-        this.nome = Objects.requireNonNull(nome, "Il nome del valore non può essere null");
+        this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
         this.descrizione = descrizione != null ? descrizione : "";
     }
 
@@ -62,7 +63,7 @@ public class ValoreCampo implements Serializable {
      * @throws NullPointerException se il nome è null
      */
     public void setNome(String nome) {
-        this.nome = Objects.requireNonNull(nome, "Il nome del valore non può essere null");
+        this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
     }
 
     /**

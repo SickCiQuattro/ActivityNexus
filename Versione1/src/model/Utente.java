@@ -16,6 +16,8 @@ import java.util.Objects;
  */
 public class Utente implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final String USERNAME_NON_NULL = "Username non può essere null";
+    public static final String HASHING_NON_DISPONIBILE = "Algoritmo di hashing non disponibile";
 
     /** Nome utente univoco che identifica l'utente nel sistema. */
     private String username;
@@ -55,7 +57,7 @@ public class Utente implements Serializable {
      * @param isConfig true se l'utente è un configuratore, false se è un fruitore
      */
     public Utente(String username, String password, boolean isConfig) {
-        this.username = Objects.requireNonNull(username, "Username non può essere null");
+        this.username = Objects.requireNonNull(username, USERNAME_NON_NULL);
         this.salt = generateSalt();
         this.hashedPassword = hashPassword(password, this.salt);
         this.isConfig = isConfig;
@@ -80,7 +82,7 @@ public class Utente implements Serializable {
      * @param username il nuovo nome utente
      */
     public void setUsername(String username) {
-        this.username = Objects.requireNonNull(username, "Username non può essere null");
+        this.username = Objects.requireNonNull(username, USERNAME_NON_NULL);
     }
 
     /**
@@ -133,7 +135,7 @@ public class Utente implements Serializable {
             byte[] hash = md.digest(password.getBytes());
             return Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Algoritmo di hashing non disponibile", e);
+            throw new RuntimeException(HASHING_NON_DISPONIBILE, e);
         }
     }
 

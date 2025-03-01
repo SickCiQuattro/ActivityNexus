@@ -23,6 +23,11 @@ import java.util.Objects;
  */
 public class FattoreConversione implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final String NODO_RIFERIMENTO_NON_NULL = "Il nodo di riferimento non può essere null";
+    public static final String LIVELLO_RIFERIMENTO_MINIMO = "Il livello di riferimento deve essere almeno 1";
+    public static final String FATTORE_CONVERSIONE_POSITIVO = "Il fattore di conversione deve essere positivo";
+    public static final String LIVELLO_RIFERIMENTO_NON_AGGIUNGIBILE = "Non è possibile aggiungere un fattore per il livello di riferimento";
+    public static final String LIVELLO_RIFERIMENTO_NON_RIMOVIBILE = "Non è possibile rimuovere il fattore per il livello di riferimento";
 
     /** Il nodo foglia che serve come riferimento per le conversioni */
     private TreeNode<Categoria> fogliaRiferimento;
@@ -49,7 +54,7 @@ public class FattoreConversione implements Serializable {
      */
     public void setNodoRiferimento(TreeNode<Categoria> fogliaRiferimento) {
         this.fogliaRiferimento = Objects.requireNonNull(fogliaRiferimento,
-                "Il nodo di riferimento non può essere null");
+                NODO_RIFERIMENTO_NON_NULL);
         this.setLivelloRiferimento(fogliaRiferimento.level());
     }
 
@@ -61,7 +66,7 @@ public class FattoreConversione implements Serializable {
      */
     public void setLivelloRiferimento(int livelloRiferimento) {
         if (livelloRiferimento < 1) {
-            throw new IllegalArgumentException("Il livello di riferimento deve essere almeno 1");
+            throw new IllegalArgumentException(LIVELLO_RIFERIMENTO_MINIMO);
         }
         this.livelloRiferimento = livelloRiferimento;
     }
@@ -128,10 +133,10 @@ public class FattoreConversione implements Serializable {
      */
     public void addFattoreConversione(int livello, double fattore) {
         if (fattore <= 0) {
-            throw new IllegalArgumentException("Il fattore di conversione deve essere positivo");
+            throw new IllegalArgumentException(FATTORE_CONVERSIONE_POSITIVO);
         }
         if (livello == livelloRiferimento) {
-            throw new IllegalArgumentException("Non è possibile aggiungere un fattore per il livello di riferimento");
+            throw new IllegalArgumentException(LIVELLO_RIFERIMENTO_NON_AGGIUNGIBILE);
         }
 
         fattoriConversione.put(livello, fattore);
@@ -147,7 +152,7 @@ public class FattoreConversione implements Serializable {
      */
     public boolean removeFattoreConversione(int livello) {
         if (livello == livelloRiferimento) {
-            throw new IllegalArgumentException("Non è possibile rimuovere il fattore per il livello di riferimento");
+            throw new IllegalArgumentException(LIVELLO_RIFERIMENTO_NON_RIMOVIBILE);
         }
 
         return fattoriConversione.remove(livello) != null;
