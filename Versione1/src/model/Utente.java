@@ -8,106 +8,37 @@ import java.util.Base64;
 import java.util.Objects;
 
 /**
- * Classe che rappresenta un utente nel sistema di gestione delle attività.
+ * Rappresenta un utente nel sistema con meccanismi di autenticazione sicura.
  * <p>
- * Questa classe implementa le funzionalità di base per la gestione degli
- * account utente,
- * inclusi meccanismi di sicurezza per la protezione delle credenziali. Ogni
- * utente è
- * identificato da un username univoco e ha una password che viene memorizzata
- * in modo
- * sicuro utilizzando tecniche di hashing con salt.
- * <p>
- * Il sistema supporta due tipologie di utenti:
+ * Supporta due tipi di utente:
  * <ul>
- * <li><b>Fruitori:</b> utenti standard che possono accedere e utilizzare le
- * funzionalità di base</li>
- * <li><b>Configuratori:</b> utenti con privilegi amministrativi che possono
- * modificare
- * le impostazioni del sistema e gestire le gerarchie di categorie</li>
+ * <li><b>Fruitori:</b> utenti standard con privilegi limitati</li>
+ * <li><b>Configuratori:</b> utenti con privilegi amministrativi</li>
  * </ul>
  * <p>
- * Caratteristiche di sicurezza implementate:
- * <ul>
- * <li>Hashing delle password con algoritmo SHA-256</li>
- * <li>Utilizzo di salt casuali per proteggere contro attacchi rainbow
- * table</li>
- * <li>Validazione delle credenziali senza memorizzare password in chiaro</li>
- * <li>Verifiche di non nullità per i campi critici</li>
- * </ul>
- * <p>
- * La classe implementa {@link Serializable} per consentire la persistenza degli
- * utenti,
- * assicurandosi che le credenziali siano memorizzate in modo sicuro anche
- * quando
- * serializzate.
+ * Implementa sicurezza con hashing SHA-256 e salt casuale.
  *
  * @see Configuratore
  * @see Fruitore
  * @see java.io.Serializable
  */
 public class Utente implements Serializable {
-    // Identificatore di versione per la serializzazione
     private static final long serialVersionUID = 1L;
 
-    // Costanti per messaggi di errore predefiniti, migliora la manutenibilità
+    // Costanti per messaggi di errore
     public static final String USERNAME_NON_NULL = "Username non può essere null";
     public static final String HASHING_NON_DISPONIBILE = "Algoritmo di hashing non disponibile";
 
-    /**
-     * Nome utente univoco che identifica l'utente nel sistema.
-     * <p>
-     * Lo username è l'identificatore principale dell'utente, utilizzato per
-     * il login e per distinguere gli utenti tra loro. Due utenti con lo stesso
-     * username sono considerati lo stesso utente dal sistema (vedi
-     * {@link #equals(Object)}).
-     */
+    /** Username univoco che identifica l'utente */
     private String username;
 
-    /**
-     * Password dell'utente salvata come hash per sicurezza.
-     * <p>
-     * La password non viene mai memorizzata in chiaro, ma viene salvato solo il suo
-     * hash ottenuto con l'algoritmo SHA-256 e combinato con un salt casuale.
-     * Questo campo è dichiarato come final perché una volta impostato al momento
-     * della
-     * creazione dell'utente, non può essere modificato direttamente.
-     * <p>
-     * L'hash è memorizzato in formato Base64 per una rappresentazione compatta.
-     * 
-     * @see #hashPassword(String, byte[])
-     */
+    /** Hash della password combinato con salt (SHA-256 in formato Base64) */
     private final String hashedPassword;
 
-    /**
-     * Salt casuale usato per proteggere la password da attacchi rainbow table.
-     * <p>
-     * Il salt è un valore binario casuale che viene combinato con la password
-     * prima di applicare la funzione di hash. L'uso del salt garantisce che:
-     * <ul>
-     * <li>Due utenti con la stessa password avranno hash diversi</li>
-     * <li>Gli attacchi basati su tabelle pre-calcolate (rainbow tables) sono
-     * inefficaci</li>
-     * </ul>
-     * <p>
-     * Il salt viene generato al momento della creazione dell'utente e salvato
-     * per essere riutilizzato durante la verifica delle credenziali.
-     * 
-     * @see #generateSalt()
-     */
+    /** Salt casuale per proteggere la password da attacchi rainbow table */
     private final byte[] salt;
 
-    /**
-     * Flag che indica se l'utente è un configuratore (true) o un fruitore (false).
-     * <p>
-     * Questo flag determina i privilegi dell'utente all'interno del sistema:
-     * <ul>
-     * <li>Se true, l'utente è un configuratore con privilegi amministrativi</li>
-     * <li>Se false, l'utente è un fruitore con privilegi standard</li>
-     * </ul>
-     * <p>
-     * Il valore predefinito è false, rappresentando un fruitore standard.
-     */
+    /** Flag che indica se l'utente è un configuratore (true) o fruitore (false) */
     private boolean isConfig = false;
 
     // -----------------------------------------------------------------------------------
@@ -116,23 +47,10 @@ public class Utente implements Serializable {
 
     /**
      * Costruisce un utente fruitore con username e password specificati.
-     * <p>
-     * Questo costruttore crea un utente standard (fruitore) con i privilegi base.
-     * La password fornita viene elaborata con un salt casuale e algoritmo SHA-256
-     * per garantire la sicurezza delle credenziali.
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * Utente fruitore = new Utente("mario_rossi", "password123");
-     * </pre>
      *
      * @param username nome utente univoco per identificare l'utente
-     * @param password password in chiaro che verrà trasformata in hash per la
-     *                 memorizzazione
+     * @param password password in chiaro che verrà trasformata in hash
      * @throws NullPointerException se username è null
-     * 
-     * @see #Utente(String, String, boolean)
      */
     public Utente(String username, String password) {
         // Delega al costruttore completo, specificando isConfig=false (utente fruitore)
@@ -141,36 +59,11 @@ public class Utente implements Serializable {
 
     /**
      * Costruisce un utente con username, password e tipo specificati.
-     * <p>
-     * Questo costruttore permette di specificare se l'utente è un configuratore
-     * (con privilegi amministrativi) o un fruitore (con privilegi standard).
-     * <p>
-     * Il processo di creazione include:
-     * <ol>
-     * <li>Validazione dello username (non può essere null)</li>
-     * <li>Generazione di un salt casuale</li>
-     * <li>Hashing della password con il salt generato</li>
-     * <li>Impostazione del flag che determina il tipo di utente</li>
-     * </ol>
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * // Creazione di un configuratore
-     * Utente admin = new Utente("admin", "securePassword", true);
-     * 
-     * // Creazione di un fruitore
-     * Utente user = new Utente("johndoe", "userPass", false);
-     * </pre>
      *
-     * @param username nome utente univoco per identificare l'utente
-     * @param password password in chiaro che verrà trasformata in hash per la
-     *                 memorizzazione
-     * @param isConfig true se l'utente è un configuratore, false se è un fruitore
+     * @param username nome utente univoco
+     * @param password password in chiaro
+     * @param isConfig true per configuratore, false per fruitore
      * @throws NullPointerException se username è null
-     * 
-     * @see #hashPassword(String, byte[])
-     * @see #generateSalt()
      */
     public Utente(String username, String password, boolean isConfig) {
         // Verifica che l'username non sia null, lanciando un'eccezione in caso
@@ -192,36 +85,21 @@ public class Utente implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Restituisce il nome utente.
-     * <p>
-     * Lo username è l'identificatore univoco dell'utente nel sistema,
-     * utilizzato per l'autenticazione e per distinguere gli utenti tra loro.
+     * Restituisce lo username dell'utente.
      *
-     * @return il nome utente (mai null dopo la creazione dell'utente)
-     * 
-     * @see #setUsername(String)
+     * @return lo username (mai null)
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Imposta un nuovo nome utente.
+     * Imposta un nuovo username per l'utente.
      * <p>
-     * Questo metodo consente di modificare l'identificativo dell'utente. Va usato
-     * con cautela
-     * se l'utente fa già parte di una collezione (come un Set) basata sullo
-     * username,
-     * poiché ciò potrebbe rendere l'utente irraggiungibile nella collezione.
-     * <p>
-     * Per garantire l'integrità del sistema, il nuovo username non può essere null.
+     * Usare con cautela se l'utente è già in una collezione basata su username.
      *
-     * @param username il nuovo nome utente da assegnare
-     * @throws NullPointerException se il nuovo username è null
-     * 
-     * @see #getUsername()
-     * @see #equals(Object)
-     * @see #hashCode()
+     * @param username il nuovo username
+     * @throws NullPointerException se username è null
      */
     public void setUsername(String username) {
         // Verifica che il nuovo username non sia null
@@ -229,22 +107,9 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Verifica se l'utente è un configuratore.
-     * <p>
-     * I configuratori hanno privilegi amministrativi che permettono loro di:
-     * <ul>
-     * <li>Modificare la struttura del sistema</li>
-     * <li>Creare e gestire gerarchie di categorie</li>
-     * <li>Definire fattori di conversione</li>
-     * <li>Configurare comprensori geografici</li>
-     * </ul>
-     * <p>
-     * I fruitori (non configuratori) hanno invece accesso limitato alle
-     * funzionalità
-     * di base dell'applicazione.
+     * Verifica se l'utente è un configuratore con privilegi amministrativi.
      *
-     * @return true se l'utente è un configuratore con privilegi amministrativi,
-     *         false se è un fruitore con privilegi standard
+     * @return true se configuratore, false se fruitore
      */
     public boolean isConfig() {
         return isConfig;
@@ -257,36 +122,11 @@ public class Utente implements Serializable {
     /**
      * Verifica le credenziali dell'utente.
      * <p>
-     * Questo metodo confronta lo username fornito con quello dell'utente e
-     * applica l'hashing alla password fornita per confrontarla con quella salvata.
-     * La verifica avviene senza mai memorizzare o esporre la password in chiaro.
-     * <p>
-     * Processo di verifica:
-     * <ol>
-     * <li>Controllo preliminare sui parametri (null safety)</li>
-     * <li>Confronto degli username (case-sensitive)</li>
-     * <li>Hashing della password fornita con lo stesso salt dell'utente</li>
-     * <li>Confronto degli hash delle password</li>
-     * </ol>
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * if (utente.verificaCredenziali("mario_rossi", "password123")) {
-     *     System.out.println("Accesso consentito");
-     * } else {
-     *     System.out.println("Credenziali non valide");
-     * }
-     * </pre>
+     * Confronta username e password con i valori memorizzati.
      *
      * @param username nome utente da verificare
      * @param password password da verificare
-     * @return true se le credenziali sono valide (username corrisponde e la
-     *         password
-     *         genera lo stesso hash), false altrimenti o se uno dei parametri è
-     *         null
-     * 
-     * @see #hashPassword(String, byte[])
+     * @return true se le credenziali sono valide, false altrimenti
      */
     public boolean verificaCredenziali(String username, String password) {
         // Controllo preventivo: se username o password sono null, le credenziali non
@@ -308,25 +148,12 @@ public class Utente implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Protegge la password dell'utente con un hash SHA-256 combinato con il salt.
-     * <p>
-     * Questo metodo implementa una funzione di hashing unidirezionale che:
-     * <ol>
-     * <li>Inizializza l'algoritmo di hashing SHA-256</li>
-     * <li>Aggiunge il salt ai dati da processare</li>
-     * <li>Calcola l'hash della password</li>
-     * <li>Codifica l'hash binario in formato Base64 per una rappresentazione
-     * compatta</li>
-     * </ol>
-     * <p>
-     * La funzione di hash SHA-256 è unidirezionale e resistente alle collisioni,
-     * rendendo quasi impossibile risalire alla password originale a partire
-     * dall'hash.
+     * Calcola l'hash SHA-256 di una password usando il salt specificato.
      *
-     * @param password la password in chiaro da proteggere
-     * @param salt     il salt da utilizzare per migliorare la sicurezza dell'hash
-     * @return password protetta con hash in formato stringa Base64
-     * @throws RuntimeException se l'algoritmo di hashing SHA-256 non è disponibile
+     * @param password la password in chiaro
+     * @param salt     il salt da aggiungere per maggiore sicurezza
+     * @return hash in formato Base64
+     * @throws RuntimeException se l'algoritmo SHA-256 non è disponibile
      */
     private String hashPassword(String password, byte[] salt) {
         try {
@@ -349,27 +176,9 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Genera un salt casuale per proteggere la password da attacchi con tabelle
-     * rainbow.
-     * <p>
-     * Il salt è un valore casuale che viene combinato con la password prima di
-     * applicare la funzione di hash. L'uso di un salt casuale garantisce che:
-     * <ul>
-     * <li>Due utenti con la stessa password avranno hash diversi</li>
-     * <li>Gli attacchi basati su tabelle pre-calcolate sono inefficaci</li>
-     * </ul>
-     * <p>
-     * Il metodo utilizza {@link SecureRandom} che fornisce un generatore di numeri
-     * pseudocasuali crittograficamente forte, adatto per applicazioni di sicurezza.
-     * <p>
-     * La dimensione del salt (20 byte) è sufficiente per garantire un'entropia
-     * adeguata
-     * e proteggere efficacemente contro attacchi di tipo dictionary o rainbow
-     * table.
+     * Genera un salt casuale di 20 byte per migliorare la sicurezza dell'hash.
      *
-     * @return salt casuale di 20 byte
-     * 
-     * @see java.security.SecureRandom
+     * @return array di 20 byte casuali
      */
     private byte[] generateSalt() {
         // Crea un'istanza di SecureRandom per generare numeri pseudocasuali sicuri
@@ -390,18 +199,8 @@ public class Utente implements Serializable {
 
     /**
      * Restituisce una rappresentazione testuale dell'utente.
-     * <p>
-     * La stringa generata include:
-     * <ul>
-     * <li>Lo username dell'utente</li>
-     * <li>Il tipo di utente (Configuratore o Fruitore)</li>
-     * </ul>
-     * <p>
-     * Questo metodo è utile per debugging, logging e visualizzazione
-     * nell'interfaccia utente.
-     * Non include informazioni sensibili come password o salt.
      *
-     * @return stringa formattata con username e tipo di utente
+     * @return stringa con username e tipo di utente
      */
     @Override
     public String toString() {
@@ -413,26 +212,11 @@ public class Utente implements Serializable {
     /**
      * Confronta questo utente con un altro oggetto.
      * <p>
-     * Due utenti sono considerati uguali se hanno lo stesso username, ignorando
-     * qualsiasi altra proprietà come la password o il tipo di utente
-     * (configuratore/fruitore).
-     * <p>
-     * Questo comportamento è coerente con l'idea che lo username sia
-     * l'identificatore
-     * univoco dell'utente nel sistema.
-     * <p>
-     * Implementazione:
-     * <ol>
-     * <li>Confronto di identità (stesso oggetto)</li>
-     * <li>Controllo di null e di tipo</li>
-     * <li>Confronto degli username</li>
-     * </ol>
+     * Due utenti sono uguali se hanno lo stesso username, indipendentemente
+     * da password o tipo.
      *
-     * @param obj l'oggetto da confrontare con questo utente
-     * @return true se l'oggetto è un Utente con lo stesso username,
-     *         false altrimenti
-     * 
-     * @see #hashCode()
+     * @param obj l'oggetto da confrontare
+     * @return true se l'oggetto è un Utente con lo stesso username
      */
     @Override
     public boolean equals(Object obj) {
@@ -454,22 +238,9 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Calcola l'hash code per questo utente basato sullo username.
-     * <p>
-     * Coerentemente con {@link #equals(Object)}, l'hash code è basato solo sullo
-     * username,
-     * che è l'identificatore univoco dell'utente nel sistema.
-     * <p>
-     * Questo garantisce che due utenti considerati uguali da {@code equals()}
-     * avranno
-     * lo stesso hash code, requisito fondamentale quando gli utenti vengono
-     * utilizzati
-     * come chiavi in strutture dati come HashMap o HashSet.
+     * Calcola l'hash code basato solo sullo username.
      *
-     * @return hash code dell'utente basato sullo username
-     * 
-     * @see #equals(Object)
-     * @see String#hashCode()
+     * @return hash code dello username
      */
     @Override
     public int hashCode() {

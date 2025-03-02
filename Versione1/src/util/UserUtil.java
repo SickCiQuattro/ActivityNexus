@@ -3,92 +3,38 @@ package util;
 import java.util.Random;
 
 /**
- * Classe di utilità per la gestione degli utenti nel sistema.
+ * Utilità per la gestione delle credenziali utente.
  * <p>
- * Questa classe fornisce funzionalità statiche per:
+ * Fornisce metodi per:
  * <ul>
- * <li>Generazione di username e password casuali ma sicuri</li>
- * <li>Validazione di credenziali secondo i requisiti di sicurezza definiti</li>
+ * <li>Generazione di username e password casuali e sicuri</li>
+ * <li>Validazione di credenziali secondo i requisiti di sicurezza</li>
  * </ul>
- * <p>
- * I metodi di generazione producono:
- * <ul>
- * <li>Username: stringhe alfanumeriche di lunghezza definita, facili da
- * leggere</li>
- * <li>Password: stringhe complesse con caratteri misti che rispettano i
- * requisiti
- * minimi di sicurezza (maiuscole, minuscole, numeri, caratteri speciali)</li>
- * </ul>
- * <p>
- * I metodi di validazione verificano che username e password rispettino i
- * criteri
- * stabiliti per il sistema, garantendo consistenza nei dati degli utenti.
- * <p>
- * Questa classe è pensata per essere usata sia durante la registrazione di
- * nuovi utenti
- * che durante il recupero di credenziali o la generazione di credenziali
- * temporanee.
  * 
  * @see model.Utente
  * @see model.Configuratore
  * @see model.Fruitore
  */
 public class UserUtil {
-    /**
-     * Insieme dei caratteri consentiti per gli username.
-     * <p>
-     * Include solo caratteri alfanumerici (lettere maiuscole, minuscole e numeri)
-     * per garantire username facilmente digitabili e privi di caratteri ambigui.
-     */
+    /** Caratteri consentiti per username (alfanumerici) */
     private static final String USERNAME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    /**
-     * Insieme dei caratteri consentiti per le password.
-     * <p>
-     * Include caratteri alfanumerici e caratteri speciali comuni per garantire
-     * password sufficientemente complesse.
-     */
+    /** Caratteri consentiti per password (alfanumerici e speciali) */
     private static final String PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
 
-    /**
-     * Lunghezza massima consentita per gli username.
-     * <p>
-     * Questo valore definisce sia la lunghezza degli username generati
-     * automaticamente
-     * che il limite massimo per gli username inseriti manualmente dagli utenti.
-     * 
-     * @see #generateRandomUsername()
-     * @see #checkUsername(String)
-     */
+    /** Lunghezza massima per gli username */
     public static final int USERNAME_LENGTH = 20;
 
-    /**
-     * Lunghezza minima richiesta per le password.
-     * <p>
-     * Questo valore definisce la lunghezza minima delle password per soddisfare
-     * i requisiti di sicurezza. Le password dovrebbero avere almeno questa
-     * lunghezza
-     * per essere considerate valide.
-     * 
-     * @see #generateRandomPassword()
-     * @see #checkPassword(String)
-     */
+    /** Lunghezza minima per le password */
     public static final int PASSWORD_LENGTH = 8;
 
     /**
-     * Genera uno username casuale alfanumerico.
+     * Genera uno username casuale alfanumerico di 10 caratteri.
      * <p>
-     * Lo username generato è composto da caratteri alfanumerici (lettere maiuscole,
-     * minuscole e numeri) e ha una lunghezza di 10 caratteri.
-     * <p>
-     * Nota: Sebbene la costante {@code USERNAME_LENGTH} sia definita come 20,
-     * questo metodo genera username di 10 caratteri. Questo potrebbe essere un
-     * aspetto da rivedere per garantire coerenza.
-     * <p>
-     * Esempio di output: "a7bF9xZ2pQ"
+     * Nota: Nonostante USERNAME_LENGTH sia 20, questa implementazione
+     * genera username di 10 caratteri.
      *
-     * @return uno username casuale alfanumerico di 10 caratteri
-     * 
+     * @return uno username casuale alfanumerico
      * @see #checkUsername(String)
      */
     public static String generateRandomUsername() {
@@ -110,23 +56,12 @@ public class UserUtil {
     /**
      * Genera una password casuale sicura.
      * <p>
-     * La password generata soddisfa i seguenti requisiti di sicurezza:
-     * <ul>
-     * <li>Contiene almeno una lettera maiuscola</li>
-     * <li>Contiene almeno una lettera minuscola</li>
-     * <li>Contiene almeno un numero</li>
-     * <li>Contiene almeno un carattere speciale</li>
-     * </ul>
+     * La password includerà almeno: una maiuscola, una minuscola,
+     * un numero e un carattere speciale.
      * <p>
-     * La password ha una lunghezza totale di {@code PASSWORD_LENGTH + 4} caratteri,
-     * poiché aggiunge 4 caratteri obbligatori (uno per ogni categoria) oltre ai
-     * caratteri
-     * casuali generati secondo la lunghezza standard.
-     * <p>
-     * Esempio di output: "aB1@5r7Z!"
+     * La lunghezza totale sarà PASSWORD_LENGTH + 4 caratteri.
      *
-     * @return una password casuale che soddisfa i requisiti di sicurezza
-     * 
+     * @return una password casuale sicura
      * @see #checkPassword(String)
      */
     public static String generateRandomPassword() {
@@ -161,19 +96,10 @@ public class UserUtil {
 
     /**
      * Estrae un carattere casuale da una stringa specificata.
-     * <p>
-     * Questo metodo di supporto facilita la selezione di un carattere casuale
-     * da un insieme definito di caratteri. Viene utilizzato principalmente dal
-     * metodo
-     * {@link #generateRandomPassword()} per garantire la presenza di specifici
-     * tipi di caratteri nella password generata.
      *
-     * @param chars  la stringa da cui estrarre un carattere casuale
-     * @param random l'istanza di Random da utilizzare per la generazione del numero
-     *               casuale
-     * @return un carattere casuale selezionato dalla stringa specificata
-     * 
-     * @see #generateRandomPassword()
+     * @param chars  la stringa da cui estrarre un carattere
+     * @param random generatore di numeri casuali
+     * @return un carattere casuale dalla stringa
      */
     private static char getRandomChar(String chars, Random random) {
         // Seleziona e restituisce un carattere casuale dalla stringa fornita
@@ -181,28 +107,18 @@ public class UserUtil {
     }
 
     /**
-     * Verifica la validità di uno username secondo i requisiti del sistema.
+     * Verifica la validità di uno username.
      * <p>
-     * Lo username deve rispettare i seguenti criteri:
+     * Requisiti:
      * <ul>
-     * <li>Non essere vuoto</li>
-     * <li>Non contenere spazi</li>
-     * <li>Non superare la lunghezza massima {@code USERNAME_LENGTH}</li>
-     * <li>Contenere solo caratteri alfanumerici (lettere e numeri)</li>
+     * <li>Non vuoto</li>
+     * <li>Senza spazi</li>
+     * <li>Max USERNAME_LENGTH caratteri</li>
+     * <li>Solo caratteri alfanumerici</li>
      * </ul>
-     * <p>
-     * Nota: c'è un possibile errore nell'espressione regolare usata per verificare
-     * l'assenza di caratteri speciali. Il pattern {@code "[^a-zA-Z0-9]"} cerca
-     * caratteri
-     * che NON sono alfanumerici, quindi la condizione dovrebbe essere modificata
-     * per
-     * verificare che non ci siano corrispondenze con questo pattern.
      *
      * @param username lo username da verificare
-     * @return true se lo username è valido e rispetta tutti i criteri, false
-     *         altrimenti
-     * 
-     * @see #generateRandomUsername()
+     * @return true se lo username è valido
      */
     public static boolean checkUsername(String username) {
         // Verifica che lo username:
@@ -218,26 +134,19 @@ public class UserUtil {
     }
 
     /**
-     * Verifica la validità di una password secondo i requisiti di sicurezza.
+     * Verifica la validità di una password.
      * <p>
-     * La password deve rispettare i seguenti criteri:
+     * Requisiti:
      * <ul>
-     * <li>Avere almeno {@code PASSWORD_LENGTH} caratteri</li>
-     * <li>Contenere almeno una lettera maiuscola</li>
-     * <li>Contenere almeno una lettera minuscola</li>
-     * <li>Contenere almeno un numero</li>
-     * <li>Contenere almeno un carattere speciale tra: !@#$%^&*</li>
+     * <li>Almeno PASSWORD_LENGTH caratteri</li>
+     * <li>Almeno una maiuscola</li>
+     * <li>Almeno una minuscola</li>
+     * <li>Almeno un numero</li>
+     * <li>Almeno un carattere speciale (!@#$%^&*)</li>
      * </ul>
-     * <p>
-     * Questi requisiti garantiscono un livello minimo di complessità per le
-     * password,
-     * aumentando la sicurezza degli account utente nel sistema.
      *
      * @param password la password da verificare
-     * @return true se la password è valida e rispetta tutti i criteri di sicurezza,
-     *         false altrimenti
-     * 
-     * @see #generateRandomPassword()
+     * @return true se la password è valida
      */
     public static boolean checkPassword(String password) {
         // Verifica che la password:

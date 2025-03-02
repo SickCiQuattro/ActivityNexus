@@ -3,39 +3,21 @@ package model;
 import java.io.Serializable;
 
 /**
- * Classe che rappresenta un utente Configuratore nel sistema.
+ * Rappresenta un utente con privilegi amministrativi nel sistema.
  * <p>
- * Un Configuratore è un tipo specializzato di utente con privilegi di
- * amministrazione
- * che gli permettono di modificare e configurare gli elementi strutturali del
- * sistema.
- * La classe eredita da {@link Utente} e rappresenta il ruolo con i massimi
- * privilegi
- * nell'applicazione.
- * <p>
- * Responsabilità specifiche del Configuratore:
+ * Un Configuratore può:
  * <ul>
- * <li>Creazione e gestione di comprensori geografici</li>
- * <li>Definizione delle gerarchie di categorizzazione delle attività</li>
- * <li>Configurazione dei fattori di conversione tra categorie</li>
- * <li>Impostazione dei parametri di sistema</li>
+ * <li>Gestire comprensori geografici</li>
+ * <li>Definire gerarchie di categorie</li>
+ * <li>Configurare fattori di conversione</li>
+ * <li>Impostare parametri di sistema</li>
  * </ul>
  * <p>
- * Il Configuratore ha sempre il flag {@code isConfig} impostato a {@code true},
- * che gli
- * conferisce accesso alle funzionalità di amministrazione non disponibili ai
- * fruitori
- * comuni del sistema. Questa distinzione è fondamentale per la sicurezza e il
- * controllo
- * degli accessi all'interno dell'applicazione.
- * <p>
- * La classe implementa {@link Serializable} per consentire la persistenza degli
- * oggetti
- * Configuratore insieme al resto del modello dati.
+ * Ha sempre il flag {@code isConfig=true}, garantendo accesso alle funzionalità
+ * amministrative non disponibili ai fruitori comuni.
  * 
  * @see Utente
  * @see Fruitore
- * @see java.io.Serializable
  */
 public class Configuratore extends Utente implements Serializable {
     // Identificatore di versione per la serializzazione
@@ -48,30 +30,14 @@ public class Configuratore extends Utente implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Costruisce un nuovo Configuratore con lo username e la password specificati.
+     * Costruisce un nuovo Configuratore con le credenziali specificate.
      * <p>
-     * Questo costruttore crea un'istanza di Configuratore invocando il costruttore
-     * della
-     * superclasse {@link Utente} e impostando automaticamente il flag
-     * {@code isConfig} a
-     * {@code true}. Questo garantisce che l'utente creato abbia sempre i privilegi
-     * di
-     * configurazione, indipendentemente da come viene istanziato.
-     * <p>
-     * La validazione dei parametri (controllo di null) viene delegata al
-     * costruttore della classe
-     * padre, che genererà eccezioni appropriate in caso di parametri non validi.
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * Configuratore admin = new Configuratore("admin", "password123");
-     * </pre>
+     * Inizializza l'utente con privilegi amministrativi, impostando
+     * automaticamente il flag {@code isConfig} a {@code true}.
      *
-     * @param username lo username del Configuratore (identificatore univoco)
-     * @param password la password del Configuratore per l'autenticazione
-     * @throws NullPointerException se username o password sono null (lanciata dal
-     *                              costruttore padre)
+     * @param username lo username del Configuratore
+     * @param password la password del Configuratore
+     * @throws NullPointerException se username o password sono null
      * 
      * @see Utente#Utente(String, String, boolean)
      */
@@ -89,23 +55,10 @@ public class Configuratore extends Utente implements Serializable {
     /**
      * Restituisce una rappresentazione testuale del Configuratore.
      * <p>
-     * Questo metodo estende il comportamento della superclasse
-     * {@link Utente#toString()},
-     * aggiungendo un prefisso che identifica esplicitamente questo utente come un
-     * Configuratore.
-     * Il formato della stringa risultante sarà:
-     * 
-     * <pre>
-     * "Configuratore: [rappresentazione dell'utente]"
-     * </pre>
-     * <p>
-     * Questa distinzione è utile quando si visualizzano liste di utenti di diverso
-     * tipo,
-     * permettendo di identificare immediatamente i Configuratori.
+     * Aggiunge il prefisso "Configuratore: " alla rappresentazione base dell'utente
+     * per facilitare l'identificazione del tipo nei report e nelle liste.
      *
-     * @return stringa che rappresenta il Configuratore, includendo il suo tipo e i
-     *         dettagli base
-     * 
+     * @return stringa che rappresenta il Configuratore
      * @see Utente#toString()
      */
     @Override

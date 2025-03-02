@@ -8,46 +8,17 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Classe che gestisce i fattori di conversione tra diversi livelli di una
- * gerarchia.
+ * Gestisce i fattori di conversione tra diversi livelli di una gerarchia.
  * <p>
- * Questa classe permette di definire un sistema di equivalenze quantitative tra
- * categorie posizionate a diversi livelli di una gerarchia. Il funzionamento si
- * basa
- * su un "nodo di riferimento" (tipicamente una foglia) rispetto al quale
- * vengono
- * definiti tutti i fattori di conversione.
+ * Definisce equivalenze quantitative tra categorie a diversi livelli gerarchici
+ * basandosi su un "nodo di riferimento" rispetto al quale vengono calcolate
+ * tutte le conversioni.
  * <p>
  * Concetti chiave:
  * <ul>
- * <li><b>Nodo di riferimento</b>: Un nodo foglia che funge da base per tutte le
- * conversioni</li>
- * <li><b>Livello di riferimento</b>: Il livello gerarchico del nodo di
- * riferimento</li>
- * <li><b>Fattore di conversione</b>: Valore che indica quante unità di un
- * livello
- * equivalgono a un'unità del livello di riferimento</li>
+ * <li><b>Nodo di riferimento</b>: Punto base per le conversioni</li>
+ * <li><b>Fattore di conversione</b>: Rapporto tra unità di diversi livelli</li>
  * </ul>
- * <p>
- * Esempio pratico: in una gerarchia di attività sportive, se prendiamo come
- * riferimento
- * "Nuoto agonistico" (livello 3), potremmo definire che:
- * <ul>
- * <li>1 unità di "Sport acquatici" (livello 1) = 0.8 unità di "Nuoto
- * agonistico"</li>
- * <li>1 unità di "Nuoto" (livello 2) = 0.9 unità di "Nuoto agonistico"</li>
- * </ul>
- * <p>
- * La classe calcola automaticamente le conversioni tra livelli diversi dal
- * riferimento,
- * ad esempio da "Sport acquatici" a "Nuoto".
- * <p>
- * ATTENZIONE: i metodi che accettano parametri numerici si aspettano che venga
- * passato
- * il livello del nodo (nodo.level()) e non il nodo stesso.
- * <p>
- * La classe implementa {@link Serializable} per consentire la persistenza dei
- * fattori di conversione.
  *
  * @see TreeNode
  * @see Categoria
@@ -64,31 +35,17 @@ public class FattoreConversione implements Serializable {
     public static final String LIVELLO_RIFERIMENTO_NON_AGGIUNGIBILE = "Non è possibile aggiungere un fattore per il livello di riferimento";
     public static final String LIVELLO_RIFERIMENTO_NON_RIMOVIBILE = "Non è possibile rimuovere il fattore per il livello di riferimento";
 
-    /**
-     * Il nodo foglia che serve come riferimento per le conversioni.
-     * Tutti i fattori di conversione sono definiti rispetto a questo nodo.
-     */
+    /** Nodo foglia che serve come riferimento per le conversioni */
     private TreeNode<Categoria> fogliaRiferimento;
 
-    /**
-     * Il livello nella gerarchia del nodo di riferimento.
-     * I livelli sono numerati a partire da 1 (radice).
-     */
+    /** Livello nella gerarchia del nodo di riferimento (numerato da 1) */
     private int livelloRiferimento = 1;
 
     /**
-     * Mappa che associa i livelli ai fattori di conversione rispetto al nodo di
-     * riferimento.
+     * Mappa che associa livelli a fattori di conversione.
      * <p>
-     * Chiave: il livello nella gerarchia (int)
-     * <p>
-     * Valore: il fattore di conversione che rappresenta quante unità di quel
-     * livello
-     * equivalgono a un'unità del livello di riferimento.
-     * <p>
-     * Esempio: se livelloRiferimento=3 e fattoriConversione.get(1)=0.8, significa
-     * che
-     * 1 unità di livello 1 equivale a 0.8 unità del livello di riferimento (3).
+     * Chiave: livello nella gerarchia.
+     * Valore: quante unità del livello equivalgono a un'unità del riferimento.
      */
     private final Map<Integer, Double> fattoriConversione = new HashMap<>();
 
@@ -97,27 +54,12 @@ public class FattoreConversione implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Imposta il nodo di riferimento per le conversioni e aggiorna il suo livello.
+     * Imposta il nodo di riferimento per le conversioni.
      * <p>
-     * Il nodo di riferimento è il punto rispetto al quale vengono definiti tutti
-     * i fattori di conversione. Tipicamente è un nodo foglia (es. "Nuoto
-     * agonistico").
-     * <p>
-     * Questo metodo imposta sia il nodo che aggiorna automaticamente il livello di
-     * riferimento basandosi sul livello del nodo nell'albero.
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * TreeNode&lt;Categoria&gt; nodoFoglia = gerarchia.findNode("Nuoto agonistico");
-     * fattoreConversione.setNodoRiferimento(nodoFoglia);
-     * </pre>
+     * Aggiorna automaticamente anche il livello di riferimento.
      *
-     * @param fogliaRiferimento il nodo da usare come riferimento per le conversioni
+     * @param fogliaRiferimento il nodo da usare come riferimento
      * @throws NullPointerException se fogliaRiferimento è null
-     * 
-     * @see #setLivelloRiferimento(int)
-     * @see #getFogliaRiferimento()
      */
     public void setNodoRiferimento(TreeNode<Categoria> fogliaRiferimento) {
         // Verifica che il nodo non sia null, lanciando un'eccezione in caso contrario
@@ -130,23 +72,9 @@ public class FattoreConversione implements Serializable {
 
     /**
      * Imposta il livello di riferimento per le conversioni.
-     * <p>
-     * Il livello di riferimento determina il punto base rispetto al quale
-     * vengono calcolate tutte le conversioni. Ogni livello nella gerarchia
-     * ha un valore numerico che parte da 1 (radice) e aumenta con la profondità.
-     * <p>
-     * Questo metodo è tipicamente chiamato automaticamente da
-     * {@link #setNodoRiferimento(TreeNode)},
-     * ma può essere utilizzato separatamente quando si conosce solo il livello
-     * senza
-     * avere il nodo specifico.
      *
      * @param livelloRiferimento il livello da usare come riferimento
-     * @throws IllegalArgumentException se il livello è inferiore a 1 (i livelli
-     *                                  partono da 1)
-     * 
-     * @see #getLivelloRiferimento()
-     * @see #setNodoRiferimento(TreeNode)
+     * @throws IllegalArgumentException se il livello è inferiore a 1
      */
     public void setLivelloRiferimento(int livelloRiferimento) {
         // Verifica che il livello sia valido (almeno 1, poiché i livelli partono da 1)
@@ -159,17 +87,9 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Restituisce il nodo foglia utilizzato come riferimento per le conversioni.
-     * <p>
-     * Questo nodo è il punto centrale del sistema di conversione, rispetto al quale
-     * vengono definiti tutti i fattori. Il fattore di conversione per questo nodo
-     * è sempre implicitamente 1.0.
+     * Restituisce il nodo foglia utilizzato come riferimento.
      *
-     * @return il nodo foglia di riferimento, può essere null se non è stato
-     *         impostato
-     * 
-     * @see #setNodoRiferimento(TreeNode)
-     * @see #getLivelloRiferimento()
+     * @return il nodo foglia di riferimento, può essere null
      */
     public TreeNode<Categoria> getFogliaRiferimento() {
         return fogliaRiferimento;
@@ -177,18 +97,8 @@ public class FattoreConversione implements Serializable {
 
     /**
      * Restituisce il livello del nodo di riferimento.
-     * <p>
-     * Il livello è un valore numerico che indica la profondità nella gerarchia,
-     * partendo da 1 per il nodo radice e aumentando con la profondità.
-     * <p>
-     * Conoscere questo livello è fondamentale per capire come funzionano le
-     * conversioni,
-     * poiché tutti i fattori sono definiti in relazione a questo punto di
-     * riferimento.
      *
      * @return il livello del nodo di riferimento
-     * 
-     * @see #setLivelloRiferimento(int)
      */
     public int getLivelloRiferimento() {
         return livelloRiferimento;
@@ -199,28 +109,13 @@ public class FattoreConversione implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Verifica se un fattore di conversione può essere aggiunto per un dato
-     * livello.
+     * Verifica se un fattore di conversione può essere aggiunto.
      * <p>
-     * Un fattore può essere aggiunto se sono soddisfatte entrambe queste
-     * condizioni:
-     * <ol>
-     * <li>Il livello è diverso dal livello di riferimento (per il quale il fattore
-     * è sempre 1.0)</li>
-     * <li>Non esiste già un fattore per quel livello (per evitare sovrascritture
-     * accidentali)</li>
-     * </ol>
-     * <p>
-     * Questo metodo è utile per verificare preventivamente se un'operazione di
-     * aggiunta
-     * avrà successo, prima di effettuarla.
+     * Un fattore può essere aggiunto se il livello è diverso dal riferimento
+     * e non esiste già un fattore per quel livello.
      *
-     * @param livello il livello per cui verificare la possibilità di aggiungere un
-     *                fattore
-     * @return true se è possibile aggiungere un fattore, false altrimenti
-     * 
-     * @see #addFattoreConversione(int, double)
-     * @see #hasFattoreConversione(int)
+     * @param livello il livello da verificare
+     * @return true se è possibile aggiungere un fattore
      */
     public boolean isAggiungibileFattoreConversione(int livello) {
         // Un fattore può essere aggiunto solo se:
@@ -231,24 +126,13 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Verifica se esiste già un fattore di conversione per un dato livello.
+     * Verifica se esiste un fattore di conversione per un livello.
      * <p>
-     * Il metodo restituisce true se:
-     * <ul>
-     * <li>Il livello è il livello di riferimento (che ha sempre fattore 1.0
-     * implicito)</li>
-     * <li>Oppure esiste un fattore specificamente definito per quel livello</li>
-     * </ul>
-     * <p>
-     * È utile prima di calcolare conversioni per verificare che i fattori necessari
-     * siano disponibili.
+     * Restituisce true per il livello di riferimento o se esiste un fattore
+     * definito.
      *
      * @param livello il livello da verificare
-     * @return true se esiste un fattore per il livello specificato, false
-     *         altrimenti
-     * 
-     * @see #getFattoreDiretto(int)
-     * @see #addFattoreConversione(int, double)
+     * @return true se esiste un fattore per il livello
      */
     public boolean hasFattoreConversione(int livello) {
         // Un fattore esiste se:
@@ -258,29 +142,15 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Aggiunge o aggiorna un fattore di conversione per un livello specifico.
+     * Aggiunge un fattore di conversione per un livello.
      * <p>
-     * Il fattore rappresenta quante unità del livello specificato equivalgono a
-     * un'unità del livello di riferimento. Ad esempio:
-     * <ul>
-     * <li>Se livelloRiferimento=3 (es. "Nuoto agonistico")</li>
-     * <li>E si imposta fattore=0.8 per livello=1 (es. "Sport acquatici")</li>
-     * <li>Significa che 1 unità di "Sport acquatici" equivale a 0.8 unità di "Nuoto
-     * agonistico"</li>
-     * </ul>
-     * <p>
-     * Il metodo impedisce di impostare fattori non validi (negativi o zero) o di
-     * impostare un fattore per il livello di riferimento (che è sempre 1.0 per
-     * definizione).
+     * Il fattore rappresenta quante unità del livello equivalgono a un'unità del
+     * riferimento.
      *
-     * @param livello il livello per cui impostare il fattore di conversione
+     * @param livello il livello per il fattore
      * @param fattore il valore del fattore di conversione
-     * @throws IllegalArgumentException se il fattore è minore o uguale a zero o se
-     *                                  il livello è uguale al livello di
-     *                                  riferimento
-     * 
-     * @see #getFattoreDiretto(int)
-     * @see #removeFattoreConversione(int)
+     * @throws IllegalArgumentException se fattore ≤ 0 o livello =
+     *                                  livelloRiferimento
      */
     public void addFattoreConversione(int livello, double fattore) {
         // Il fattore deve essere positivo (una conversione non può essere nulla o
@@ -301,33 +171,11 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Rimuove un fattore di conversione per un livello specifico.
-     * <p>
-     * Una volta rimosso, il fattore non sarà più disponibile per calcolare
-     * conversioni
-     * che coinvolgono quel livello. È possibile rimuovere solo i fattori per
-     * livelli
-     * diversi dal livello di riferimento.
-     * <p>
-     * Esempio di utilizzo:
-     * 
-     * <pre>
-     * // Se non abbiamo più bisogno della conversione per il livello 2
-     * boolean rimosso = fattoreConversione.removeFattoreConversione(2);
-     * if (rimosso) {
-     *     System.out.println("Fattore rimosso con successo");
-     * } else {
-     *     System.out.println("Il fattore non esisteva");
-     * }
-     * </pre>
+     * Rimuove un fattore di conversione.
      *
      * @param livello il livello per cui rimuovere il fattore
      * @return true se il fattore è stato rimosso, false se non esisteva
-     * @throws IllegalArgumentException se il livello è uguale al livello di
-     *                                  riferimento
-     * 
-     * @see #addFattoreConversione(int, double)
-     * @see #clearFattori()
+     * @throws IllegalArgumentException se il livello è uguale al riferimento
      */
     public boolean removeFattoreConversione(int livello) {
         // Non è possibile rimuovere il fattore per il livello di riferimento
@@ -341,21 +189,12 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Restituisce il fattore di conversione diretto per un livello specifico.
+     * Restituisce il fattore di conversione diretto rispetto al riferimento.
      * <p>
-     * Il fattore diretto è quello definito esplicitamente tra il livello
-     * specificato
-     * e il livello di riferimento. Non calcola conversioni tra livelli diversi dal
-     * riferimento (per questo uso c'è {@link #getFattoreConversione(int, int)}).
-     * <p>
-     * Per il livello di riferimento, il fattore è sempre 1.0 (identità).
+     * Per il livello di riferimento restituisce sempre 1.0.
      *
      * @param livello il livello per cui ottenere il fattore
-     * @return il fattore di conversione o 1.0 se è il livello di riferimento, null
-     *         se non esiste un fattore definito per quel livello
-     * 
-     * @see #getFattoreConversione(int, int)
-     * @see #addFattoreConversione(int, double)
+     * @return il fattore diretto, 1.0 per il riferimento, null se non definito
      */
     public Double getFattoreDiretto(int livello) {
         // Per il livello di riferimento, il fattore è sempre 1.0 per definizione
@@ -369,46 +208,20 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Calcola il fattore di conversione tra due livelli qualsiasi della gerarchia.
+     * Calcola il fattore di conversione tra due livelli qualsiasi.
      * <p>
-     * Questo è il metodo principale per ottenere conversioni tra livelli diversi.
-     * La conversione viene calcolata utilizzando il livello di riferimento come
-     * punto intermedio, seguendo questa logica:
-     * <p>
-     * <b>Casi possibili:</b>
+     * Casi gestiti:
      * <ol>
-     * <li>Se i livelli sono uguali: il fattore è 1.0 (stessa categoria)</li>
-     * <li>Dal livello di riferimento a un altro: restituisce direttamente il
-     * fattore definito</li>
-     * <li>Da un altro livello al riferimento: restituisce l'inverso del fattore
-     * definito</li>
-     * <li>Da un livello a un altro (entrambi diversi dal riferimento): calcola il
-     * rapporto
-     * tra i due fattori per ottenere la conversione indiretta</li>
+     * <li>Livelli uguali: fattore = 1.0</li>
+     * <li>Dal riferimento a un altro: restituisce il fattore diretto</li>
+     * <li>Da altro a riferimento: restituisce l'inverso del fattore</li>
+     * <li>Tra due livelli diversi dal riferimento: calcola il rapporto tra
+     * fattori</li>
      * </ol>
-     * <p>
-     * Esempio di calcolo:
-     * 
-     * <pre>
-     * // Se abbiamo:
-     * // - Livello riferimento = 3 (es. "Nuoto agonistico")
-     * // - Fattore livello 1 = 0.8 (1 unità "Sport acquatici" = 0.8 unità
-     * // "Nuoto agonistico")
-     * // - Fattore livello 2 = 0.9 (1 unità "Nuoto" = 0.9 unità "Nuoto
-     * // agonistico")
-     * 
-     * // Per convertire da livello 1 a livello 2:
-     * double fattore = fattoreConversione.getFattoreConversione(1, 2); // = 0.9/0.8 = 1.125
-     * // Significa: 1 unità di "Sport acquatici" equivale a 1.125 unità di
-     * // "Nuoto"
-     * </pre>
      *
-     * @param primoLivello   il livello di partenza della conversione
-     * @param secondoLivello il livello di arrivo della conversione
-     * @return il fattore di conversione calcolato, null se almeno uno dei livelli
-     *         non ha un fattore definito
-     * 
-     * @see #getFattoreDiretto(int)
+     * @param primoLivello   il livello di partenza
+     * @param secondoLivello il livello di arrivo
+     * @return il fattore calcolato, null se mancano i fattori necessari
      */
     public Double getFattoreConversione(int primoLivello, int secondoLivello) {
         // CASO 0: Se i livelli sono uguali, il fattore è 1 (identità)
@@ -460,16 +273,7 @@ public class FattoreConversione implements Serializable {
     /**
      * Rimuove tutti i fattori di conversione memorizzati.
      * <p>
-     * Questo metodo azzera il sistema di conversione, eliminando tutti i fattori
-     * precedentemente definiti. Il livello di riferimento viene mantenuto, quindi
-     * è possibile poi ridefinire nuovi fattori.
-     * <p>
-     * È utile quando si desidera riconfigurare completamente il sistema di
-     * conversione,
-     * ad esempio dopo aver cambiato il nodo di riferimento.
-     * 
-     * @see #removeFattoreConversione(int)
-     * @see #getNumeroFattori()
+     * Il livello di riferimento viene mantenuto.
      */
     public void clearFattori() {
         // Rimuove tutti i fattori di conversione dalla mappa
@@ -477,18 +281,11 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Restituisce il numero di fattori di conversione esplicitamente memorizzati.
+     * Restituisce il numero di fattori di conversione memorizzati.
      * <p>
-     * Questo conteggio non include il livello di riferimento, per il quale
-     * il fattore è sempre implicitamente 1.0 e non viene memorizzato nella mappa.
-     * <p>
-     * È utile per diagnostica e per verificare la completezza del sistema di
-     * conversione.
+     * Non include il livello di riferimento (implicito).
      *
-     * @return il numero di fattori di conversione definiti
-     * 
-     * @see #clearFattori()
-     * @see #hasFattoreConversione(int)
+     * @return il numero di fattori definiti
      */
     public int getNumeroFattori() {
         // Restituisce il numero di fattori memorizzati nella mappa

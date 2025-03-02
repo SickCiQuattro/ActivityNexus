@@ -35,6 +35,8 @@ import java.util.Stack;
  * @see view.ConsoleView
  */
 public class Controller {
+    // TODO: Dividere il Controller in classi più piccole per gestire le
+    // funzionalità specifiche
 
     private Database database;
     private final ConsoleView view;

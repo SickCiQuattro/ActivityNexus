@@ -4,91 +4,61 @@ import java.util.*;
 import java.io.IOException;
 
 /**
- * Classe che rappresenta l'interfaccia utente a console del sistema.
+ * Interfaccia utente a console con funzionalità avanzate di visualizzazione.
  * <p>
- * Fornisce metodi avanzati per visualizzare messaggi, menu interattivi, tabelle
- * e acquisire input dall'utente. Include funzionalità per la formattazione
- * del testo con colori ANSI, animazioni e layout strutturati.
- * <p>
- * Questa implementazione è progettata per migliorare l'esperienza utente
- * su terminali che supportano i codici di escape ANSI.
- *
- * @version 2.0
+ * Fornisce metodi per gestire input/output, menu interattivi e layout
+ * formattati con supporto ai colori ANSI.
  */
 public class ConsoleView {
     // -----------------------------------------------------------------------------------
     // ATTRIBUTI
     // -----------------------------------------------------------------------------------
 
-    /** Scanner per acquisire input dall'utente */
+    /** Scanner per input utente */
     private final Scanner scanner = new Scanner(System.in);
 
-    /** Flag che indica se il terminale supporta i codici ANSI */
-    private final boolean supportsAnsi = true; // Per Windows moderni e sistemi Unix
+    /** Flag per supporto codici ANSI */
+    private final boolean supportsAnsi = true;
 
     // -----------------------------------------------------------------------------------
     // COSTANTI PER LA FORMATTAZIONE
     // -----------------------------------------------------------------------------------
 
     // Codici di reset
-    /** Codice ANSI per ripristinare tutti gli attributi */
     private static final String RESET = "\033[0m";
 
     // Stili di testo
-    /** Codice ANSI per testo in grassetto */
     private static final String BOLD = "\033[1m";
-    /** Codice ANSI per testo sottolineato */
     private static final String UNDERLINE = "\033[4m";
-    /** Codice ANSI per testo lampeggiante */
     private static final String BLINK = "\033[5m";
-    /** Codice ANSI per testo invertito (sfondo/colore testo scambiati) */
     private static final String REVERSE = "\033[7m";
 
     // Colori testo
-    /** Codice ANSI per il colore nero */
     private static final String BLACK = "\033[30m";
-    /** Codice ANSI per il colore rosso */
     private static final String RED = "\033[31m";
-    /** Codice ANSI per il colore verde */
     private static final String GREEN = "\033[32m";
-    /** Codice ANSI per il colore giallo */
     private static final String YELLOW = "\033[33m";
-    /** Codice ANSI per il colore blu */
     private static final String BLUE = "\033[34m";
-    /** Codice ANSI per il colore magenta */
     private static final String MAGENTA = "\033[35m";
-    /** Codice ANSI per il colore ciano */
     private static final String CYAN = "\033[36m";
-    /** Codice ANSI per il colore bianco */
     private static final String WHITE = "\033[37m";
 
     // Colori sfondo
-    /** Codice ANSI per sfondo nero */
     private static final String BG_BLACK = "\033[40m";
-    /** Codice ANSI per sfondo rosso */
     private static final String BG_RED = "\033[41m";
-    /** Codice ANSI per sfondo verde */
     private static final String BG_GREEN = "\033[42m";
-    /** Codice ANSI per sfondo giallo */
     private static final String BG_YELLOW = "\033[43m";
-    /** Codice ANSI per sfondo blu */
     private static final String BG_BLUE = "\033[44m";
-    /** Codice ANSI per sfondo magenta */
     private static final String BG_MAGENTA = "\033[45m";
-    /** Codice ANSI per sfondo ciano */
     private static final String BG_CYAN = "\033[46m";
-    /** Codice ANSI per sfondo bianco */
     private static final String BG_WHITE = "\033[47m";
 
     // -----------------------------------------------------------------------------------
     // COSTANTI PER I MESSAGGI
     // -----------------------------------------------------------------------------------
 
-    /** Messaggio di benvenuto con stile migliorato */
     private static final String WELCOME_MESSAGE = BOLD + YELLOW + "Benvenuto in ActivityNexus!" + RESET;
-    /** Titolo del menu configuratore con stile migliorato */
     private static final String CONFIGURATOR_MENU_TITLE = BOLD + YELLOW + "MENU Configuratore" + RESET;
-    /** Titolo del menu fruitore con stile migliorato */
     private static final String USER_MENU_TITLE = BOLD + YELLOW + "MENU Fruitore" + RESET;
 
     // -----------------------------------------------------------------------------------
@@ -96,27 +66,16 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     // Menu principale
-    /** Voce del menu per il login con stile migliorato */
     private static final String MENU_LOGIN = GREEN + "1. Login" + RESET;
-    /** Voce del menu per la registrazione con stile migliorato */
     private static final String MENU_REGISTRATION = CYAN + "2. Registrazione" + RESET;
-    /** Voce del menu per l'uscita con stile migliorato */
     private static final String MENU_EXIT = RED + "0. Uscita" + RESET;
 
     // Menu configuratore
-    /** Voce del menu per visualizzare i comprensori con stile migliorato */
     private static final String MENU_VIEW_COMPRENSORI = GREEN + "1. Visualizza Comprensori" + RESET;
-    /** Voce del menu per visualizzare le gerarchie con stile migliorato */
     private static final String MENU_VIEW_GERARCHIE = GREEN + "2. Visualizza Gerarchie" + RESET;
-    /**
-     * Voce del menu per visualizzare i fattori di conversione con stile migliorato
-     */
     private static final String MENU_VIEW_CONVERSION_FACTORS = GREEN + "3. Visualizza Fattori di Conversione" + RESET;
-    /** Voce del menu per creare un comprensorio con stile migliorato */
     private static final String MENU_CREATE_COMPRENSORIO = CYAN + "4. Crea Comprensorio" + RESET;
-    /** Voce del menu per creare una gerarchia con stile migliorato */
     private static final String MENU_CREATE_GERARCHIA = CYAN + "5. Crea Gerarchia" + RESET;
-    /** Voce del menu per definire fattori di conversione con stile migliorato */
     private static final String MENU_DEFINE_CONVERSIONS = CYAN + "6. Definisci Fattori di Conversione" + RESET;
 
     // -----------------------------------------------------------------------------------
@@ -133,60 +92,46 @@ public class ConsoleView {
     }
 
     /**
-     * Mostra un messaggio di errore sulla console (in rosso).
-     * <p>
-     * Il messaggio viene evidenziato con un prefisso di errore
-     * e formattazione che lo rende facilmente riconoscibile.
+     * Mostra un messaggio di errore con formattazione rossa.
      *
-     * @param messaggio il messaggio di errore da visualizzare
+     * @param messaggio il messaggio di errore
      */
     public void showErrorMessage(String messaggio) {
         System.out.println(BG_RED + WHITE + " ERRORE " + RESET + " " + RED + messaggio + RESET);
     }
 
     /**
-     * Mostra un messaggio di successo sulla console (in verde).
-     * <p>
-     * Il messaggio viene evidenziato con un prefisso di successo
-     * e formattazione che lo rende facilmente riconoscibile.
+     * Mostra un messaggio di successo con formattazione verde.
      *
-     * @param messaggio il messaggio di successo da visualizzare
+     * @param messaggio il messaggio di successo
      */
     public void showSuccessMessage(String messaggio) {
         System.out.println(BG_GREEN + BLACK + " SUCCESSO " + RESET + " " + GREEN + messaggio + RESET);
     }
 
     /**
-     * Mostra un messaggio informativo sulla console (in blu).
-     * <p>
-     * Il messaggio viene evidenziato con un prefisso informativo
-     * e formattazione che lo rende facilmente riconoscibile.
+     * Mostra un messaggio informativo con formattazione blu.
      *
-     * @param messaggio il messaggio informativo da visualizzare
+     * @param messaggio il messaggio informativo
      */
     public void showInfoMessage(String messaggio) {
         System.out.println(BG_BLUE + WHITE + " INFO " + RESET + " " + BLUE + messaggio + RESET);
     }
 
     /**
-     * Mostra un messaggio di avviso sulla console (in giallo).
-     * <p>
-     * Il messaggio viene evidenziato con un prefisso di avviso
-     * e formattazione che lo rende facilmente riconoscibile.
+     * Mostra un messaggio di avviso con formattazione gialla.
      *
-     * @param messaggio il messaggio di avviso da visualizzare
+     * @param messaggio il messaggio di avviso
      */
     public void showWarningMessage(String messaggio) {
         System.out.println(BG_YELLOW + BLACK + " AVVISO " + RESET + " " + YELLOW + messaggio + RESET);
     }
 
     /**
-     * Ottiene un input testuale dall'utente dopo aver mostrato un prompt.
-     * <p>
-     * Il prompt viene evidenziato per distinguerlo dal resto dell'output.
+     * Ottiene input testuale dopo aver mostrato un prompt.
      *
-     * @param prompt il messaggio da mostrare all'utente per richiedere l'input
-     * @return l'input dell'utente con spazi iniziali e finali rimossi
+     * @param prompt il messaggio di richiesta
+     * @return l'input dell'utente con trim applicato
      */
     public String getInput(String prompt) {
         System.out.print(CYAN + prompt + RESET + " ");
@@ -194,14 +139,10 @@ public class ConsoleView {
     }
 
     /**
-     * Ottiene una password dall'utente nascondendo i caratteri digitati.
-     * <p>
-     * Nota: questa implementazione base non nasconde realmente i caratteri
-     * poiché Java console standard non supporta questa funzionalità.
-     * In un'implementazione reale si potrebbe usare System.console().readPassword()
+     * Ottiene una password dall'utente (senza mascheramento).
      *
-     * @param prompt il messaggio da mostrare all'utente per richiedere la password
-     * @return la password inserita dall'utente
+     * @param prompt il messaggio di richiesta
+     * @return la password inserita
      */
     public String getPasswordInput(String prompt) {
         System.out.print(MAGENTA + prompt + RESET + " ");
@@ -210,15 +151,12 @@ public class ConsoleView {
     }
 
     /**
-     * Ottiene un input numerico dall'utente con validazione del range.
-     * <p>
-     * Richiede ripetutamente l'input finché non viene inserito un numero valido
-     * all'interno del range specificato.
+     * Ottiene un input numerico con validazione del range.
      *
-     * @param prompt il messaggio da mostrare all'utente
-     * @param min    il valore minimo accettabile
-     * @param max    il valore massimo accettabile
-     * @return l'input numerico dell'utente entro i limiti specificati
+     * @param prompt il messaggio di richiesta
+     * @param min    valore minimo accettabile
+     * @param max    valore massimo accettabile
+     * @return il numero inserito entro il range specificato
      */
     public int getIntInput(String prompt, int min, int max) {
         while (true) {
@@ -237,13 +175,10 @@ public class ConsoleView {
     }
 
     /**
-     * Richiede una conferma all'utente (si/no).
-     * <p>
-     * Accetta varie forme di risposta affermativa (s, si, y, yes)
-     * o negativa (n, no) indipendentemente dal case.
+     * Richiede conferma (sì/no) all'utente.
      *
-     * @param prompt il messaggio da mostrare per richiedere la conferma
-     * @return true se l'utente conferma, false altrimenti
+     * @param prompt il messaggio di richiesta
+     * @return true per conferma, false per rifiuto
      */
     public boolean getConfirmation(String prompt) {
         while (true) {
@@ -259,9 +194,7 @@ public class ConsoleView {
     }
 
     /**
-     * Chiede all'utente di premere un tasto per continuare.
-     * <p>
-     * Mostra un messaggio formattato e attende che l'utente prema INVIO.
+     * Attende che l'utente prema INVIO per continuare.
      */
     public void pressEnterToContinue() {
         System.out.print(YELLOW + "▶ Premere INVIO per continuare..." + RESET);
@@ -270,13 +203,10 @@ public class ConsoleView {
 
     /**
      * Pulisce lo schermo del terminale.
-     * <p>
-     * Utilizza il codice ANSI per pulire lo schermo e riposizionare il cursore,
-     * oppure stampa righe vuote come fallback.
      */
     public void clearScreen() {
         if (supportsAnsi) {
-            System.out.print("\033[H\033[2J"); // Codice ANSI per pulire lo schermo
+            System.out.print("\033[H\033[2J");
             System.out.flush();
         } else {
             // Fallback per terminali che non supportano ANSI
@@ -291,7 +221,7 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Mostra il menu principale sulla console con logo ASCII art.
+     * Mostra il menu principale con logo ASCII art.
      */
     public void showMenu() {
         clearScreen();
@@ -306,7 +236,7 @@ public class ConsoleView {
     }
 
     /**
-     * Mostra il menu del configuratore sulla console.
+     * Mostra il menu per utenti configuratori.
      */
     public void showMenuConfiguratore() {
         clearScreen();
@@ -324,7 +254,7 @@ public class ConsoleView {
     }
 
     /**
-     * Mostra il menu del fruitore sulla console.
+     * Mostra il menu per utenti fruitori.
      */
     public void showMenuFruitore() {
         clearScreen();
@@ -364,7 +294,8 @@ public class ConsoleView {
                         + RESET,
                 BLUE + "║" + MAGENTA + "           ██  ██ ██ ██       ██ ██  ██    ██      ██            " + BLUE + "║"
                         + RESET,
-                BLUE + "║" + MAGENTA + "           ██   ████ ███████ ██   ██  ██████  ███████            " + BLUE + "║" + RESET,
+                BLUE + "║" + MAGENTA + "           ██   ████ ███████ ██   ██  ██████  ███████            " + BLUE + "║"
+                        + RESET,
                 BLUE + "╚═════════════════════════════════════════════════════════════════╝" + RESET
         };
 
@@ -379,14 +310,10 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Visualizza dati in formato tabellare.
-     * <p>
-     * Crea una tabella formattata con intestazioni di colonna e righe di dati,
-     * con bordi e allineamento appropriato.
+     * Visualizza dati in formato tabella con intestazioni e bordi.
      *
-     * @param headers le intestazioni delle colonne
-     * @param data    i dati da visualizzare (lista di righe, ogni riga è una lista
-     *                di celle)
+     * @param headers intestazioni delle colonne
+     * @param data    righe di dati (lista di liste, ogni lista è una riga)
      */
     public void displayTable(List<String> headers, List<List<String>> data) {
         if (headers == null || data == null)
@@ -420,8 +347,6 @@ public class ConsoleView {
 
     /**
      * Stampa un separatore orizzontale per la tabella.
-     *
-     * @param columnWidths le larghezze delle colonne
      */
     private void printTableSeparator(List<Integer> columnWidths) {
         System.out.print(BLUE + "+" + RESET);
@@ -433,10 +358,6 @@ public class ConsoleView {
 
     /**
      * Stampa una riga della tabella.
-     *
-     * @param cells        i contenuti delle celle
-     * @param columnWidths le larghezze delle colonne
-     * @param isHeader     true se è una riga di intestazione
      */
     private void printTableRow(List<String> cells, List<Integer> columnWidths, boolean isHeader) {
         System.out.print(BLUE + "|" + RESET);
@@ -450,11 +371,6 @@ public class ConsoleView {
 
     /**
      * Formatta una cella della tabella con padding e colorazione.
-     *
-     * @param content  il contenuto della cella
-     * @param width    la larghezza della colonna
-     * @param isHeader true se è una cella di intestazione
-     * @return la cella formattata
      */
     private String formatTableCell(String content, int width, boolean isHeader) {
         // Rimuovi eventuali codici ANSI per calcolare la lunghezza effettiva
@@ -474,14 +390,11 @@ public class ConsoleView {
     }
 
     /**
-     * Visualizza un indicatore di progresso per operazioni lunghe.
-     * <p>
-     * Mostra una barra di progresso animata mentre si attende il completamento
-     * di un'operazione.
+     * Visualizza una barra di progresso animata.
      *
-     * @param message    il messaggio da mostrare
-     * @param iterations il numero di iterazioni totali
-     * @param sleepMs    i millisecondi di attesa tra le iterazioni (simulazione)
+     * @param message    messaggio da mostrare
+     * @param iterations numero totale di iterazioni
+     * @param sleepMs    pausa tra iterazioni in millisecondi
      */
     public void showProgressBar(String message, int iterations, int sleepMs) {
         System.out.print(message + " ");
@@ -515,18 +428,10 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Stampa un riquadro contenente un menu con titolo e voci.
-     * <p>
-     * Crea un riquadro colorato e formattato con bordi, titolo centrato,
-     * voci di menu allineate e supporta separatori tra gruppi di voci.
-     * <p>
-     * Il metodo gestisce automaticamente l'adattamento della larghezza del riquadro
-     * in base alla lunghezza del titolo e delle voci del menu, garantendo un layout
-     * consistente e professionale.
+     * Crea un riquadro con titolo e voci di menu formattate.
      *
-     * @param titolo   il titolo del riquadro (può contenere codici di formattazione
-     *                 ANSI)
-     * @param vociMenu la lista delle voci del menu (può essere vuota)
+     * @param titolo   titolo del menu
+     * @param vociMenu lista delle voci del menu
      */
     private void printMenuBox(String titolo, List<String> vociMenu) {
         // Gestione di input null o vuoto
@@ -580,10 +485,6 @@ public class ConsoleView {
 
     /**
      * Calcola la larghezza necessaria per il riquadro del menu.
-     *
-     * @param titolo   il titolo del menu
-     * @param vociMenu le voci del menu
-     * @return la larghezza calcolata per il riquadro
      */
     private int calcolaLarghezzaRiquadro(String titolo, List<String> vociMenu) {
         int larghezzaMassima = Math.max(
@@ -599,8 +500,6 @@ public class ConsoleView {
 
     /**
      * Stampa una linea del bordo del riquadro.
-     *
-     * @param larghezza la larghezza della linea
      */
     private void stampaLinea(int larghezza) {
         System.out.println(BLUE + "+" + "-".repeat(larghezza - 2) + "+" + RESET);
@@ -608,10 +507,6 @@ public class ConsoleView {
 
     /**
      * Centra il testo all'interno della larghezza specificata.
-     *
-     * @param testo     il testo da centrare
-     * @param larghezza la larghezza totale disponibile
-     * @return il testo centrato con bordi
      */
     private String centraTesto(String testo, int larghezza) {
         String testoSenzaANSI = rimuoviANSI(testo);
@@ -625,10 +520,6 @@ public class ConsoleView {
 
     /**
      * Formatta una voce del menu all'interno del riquadro.
-     *
-     * @param voce      la voce del menu da formattare
-     * @param larghezza la larghezza totale disponibile
-     * @return la voce formattata con bordi
      */
     private String formattaVoceMenu(String voce, int larghezza) {
         String voceSenzaANSI = rimuoviANSI(voce);
@@ -638,19 +529,14 @@ public class ConsoleView {
     }
 
     /**
-     * Rimuove i codici ANSI da una stringa per calcolare correttamente la
-     * lunghezza.
-     *
-     * @param testo il testo contenente codici ANSI
-     * @return il testo senza codici ANSI
+     * Rimuove i codici ANSI da una stringa.
      */
     private String rimuoviANSI(String testo) {
         return testo.replaceAll("\033\\[[;\\d]*m", "");
     }
 
     /**
-     * Chiude lo scanner quando non è più necessario.
-     * Dovrebbe essere chiamato quando l'applicazione termina.
+     * Chiude lo scanner quando l'applicazione termina.
      */
     public void close() {
         scanner.close();
