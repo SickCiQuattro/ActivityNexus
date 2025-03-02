@@ -1,6 +1,8 @@
 package controller;
 
 import com.scalified.tree.TreeNode;
+
+import constants.ControllerConstants;
 import model.*;
 import util.UserUtil;
 import view.ConsoleView;
@@ -53,204 +55,6 @@ import java.util.Stack;
  * @see view.ConsoleView
  */
 public class Controller {
-
-    // 1. AppConstants.java
-    // Costanti per messaggi di interfaccia generale
-    public static final String INVALID_OPTION = "Opzione non valida. Riprova.";
-    public static final String EXIT_MESSAGE = "Grazie per aver utilizzato il programma. Arrivederci!";
-    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo.";
-    public static final String OPERATION_CANCELLED = "Operazione annullata.";
-    public static final String ERROR_GENERIC = "Si è verificato un errore: %s";
-    public static final String PROMPT_CHOICE = "Cosa vuoi fare? ";
-    public static final String ERROR_INVALID_INPUT = "Input non valido. Riprova.";
-
-    // Costanti per percorsi file
-    public static final String USERS_FILE_PATH = "src/data/utenti.ser";
-    public static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
-    public static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
-    public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
-
-    // Costanti per caricamento e salvataggio dati
-    public static final String LOADING_DATA = "Caricamento dati in corso...";
-    public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
-    public static final String LOADING_ITEM_EMPTY = "✓ Nessun %s trovato, si parte da zero";
-    public static final String LOADING_COMPLETE = "Caricamento dati completato con successo";
-    public static final String LOADING_ERROR = "Errore durante il caricamento dei dati: %s";
-    public static final String LOADING_DEFAULT = "L'applicazione continuerà con un database vuoto";
-
-    public static final String SAVING_DATA = "Salvataggio dati in corso...";
-    public static final String SAVING_SUCCESS = "Dati salvati con successo";
-    public static final String SAVING_ERROR = "Errore durante il salvataggio dei dati: %s";
-
-    // 2. UserConstants.java
-    public static final String NO_USERS_REGISTERED = "Nessun utente registrato. Effettua la registrazione.";
-    public static final String LOGIN_SUCCESS = "Login effettuato con successo! Bentornato, ";
-    public static final String LOGIN_FAILED = "Credenziali non valide. Riprova.";
-    public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo!";
-    public static final String REGISTRATION_FAILED = "Registrazione fallita. Utente già esistente. Riprova.";
-    public static final String SAVING_USERS_SUCCESS = "Dati utente salvati con successo";
-
-    // Costanti per autenticazione e registrazione
-    public static final String PROMPT_USERNAME = "Inserisci username: ";
-    public static final String PROMPT_PASSWORD = "Inserisci password: ";
-    public static final String PROMPT_NEW_USERNAME = "Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ";
-    public static final String PROMPT_NEW_PASSWORD = "Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ";
-    public static final String PROMPT_CONFIG_ROLE = "Sei un configuratore? (s/n): ";
-
-    public static final String DEFAULT_LOGIN_INTRO = "Effettua il login con le seguenti credenziali:";
-    public static final String DEFAULT_USERNAME_DISPLAY = "Username: %s";
-    public static final String DEFAULT_PASSWORD_DISPLAY = "Password: %s";
-    public static final String DEFAULT_LOGIN_INVALID = "Credenziali non valide. Tentativi rimasti: %d";
-    public static final String DEFAULT_LOGIN_FAILED = "Login non riuscito. Riprova più tardi.";
-
-    public static final String ERROR_INVALID_USERNAME = "Username non valido. Riprova.";
-    public static final String ERROR_INVALID_PASSWORD = "Password non valido. Riprova.";
-
-    // 3. ComprensoriConstants.java
-    // Costanti per titoli e sezioni
-    public static final String TITLE_COMPRENSORI = "\n=== COMPRENSORI DISPONIBILI ===";
-    public static final String TITLE_NEW_COMPRENSORIO = "\n=== CREAZIONE NUOVO COMPRENSORIO ===";
-
-    // Costanti per messaggi informativi
-    public static final String INFO_COMPRENSORIO_DESC = "Un comprensorio è un'area geografica che contiene più comuni.";
-    public static final String INFO_COMPRENSORIO_NEXT = "Dopo aver definito il nome del comprensorio, potrai aggiungere i comuni appartenenti ad esso.";
-    public static final String NO_COMPRENSORI = "Nessun comprensorio presente.";
-    public static final String COMPRENSORIO_CREATED = "Comprensorio creato con successo!";
-
-    // Costanti per comprensori - passi
-    public static final String STEP_NOME_COMPRENSORIO = "\n➤ PASSO 1: DEFINIZIONE DEL NOME DEL COMPRENSORIO";
-    public static final String STEP_COMUNI_COMPRENSORIO = "\n➤ PASSO 2: AGGIUNTA DEI COMUNI";
-
-    // Costanti per comprensori - prompts
-    public static final String PROMPT_NOME_COMPRENSORIO = "Inserisci il nome del comprensorio (premi 0 per annullare): ";
-    public static final String PROMPT_NOME_COMUNE = "Inserisci il nome del comune (premi 0 per terminare): ";
-    public static final String PROMPT_ADD_ALTRO_COMUNE = "Vuoi aggiungere un altro comune? (s/n): ";
-
-    // Costanti per comprensori - messaggi informativi
-    public static final String INFO_AGGIUNGI_COMUNI = "Ora puoi aggiungere i comuni che fanno parte del comprensorio '%s'.";
-    public static final String INFO_MINIMO_UN_COMUNE = "Ogni comprensorio deve contenere almeno un comune.";
-    public static final String INFO_COMUNI_AGGIUNTI = "Comuni aggiunti finora: %d";
-
-    // Costanti per comprensori - messaggi di errore
-    public static final String ERROR_NOME_VUOTO = "✗ Il nome del comprensorio non può essere vuoto.";
-    public static final String ERROR_NOME_CORTO = "✗ Il nome del comprensorio deve contenere almeno 3 caratteri.";
-    public static final String ERROR_NOME_DUPLICATO = "✗ Esiste già un comprensorio con questo nome.";
-    public static final String ERROR_COMUNE_VUOTO = "✗ Il nome del comune non può essere vuoto.";
-    public static final String ERROR_COMUNE_CORTO = "✗ Il nome del comune deve contenere almeno 2 caratteri.";
-    public static final String ERROR_COMUNE_DUPLICATO = "✗ Il comune '%s' è già presente in questo comprensorio.";
-    public static final String ERROR_NESSUN_COMUNE = "✗ Il comprensorio deve contenere almeno un comune.";
-    public static final String ERROR_CREAZIONE_ANNULLATA = "✗ Creazione comprensorio annullata: nessun comune aggiunto.";
-
-    // Costanti per comprensori - messaggi di successo
-    public static final String SUCCESS_COMPRENSORIO_AGGIUNTO = "✓ Comprensorio '%s' aggiunto con successo!";
-    public static final String SUCCESS_COMUNE_AGGIUNTO = "✓ Comune '%s' aggiunto al comprensorio '%s'";
-
-    // 4. GerarchieConstants.java
-    // Costanti per titoli e sezioni
-    public static final String TITLE_GERARCHIE = "\n=== GERARCHIE DISPONIBILI ===";
-    public static final String TITLE_NEW_GERARCHIA = "\n=== CREAZIONE NUOVA GERARCHIA ===";
-    public static final String TITLE_CREATE_GERARCHIA = "\n=== CREAZIONE GERARCHIA ===";
-    public static final String STEP_RADICE_GERARCHIA = "\n➤ PASSO 1: CREAZIONE CATEGORIA RADICE";
-    public static final String STEP_STRUTTURA_GERARCHIA = "\n➤ PASSO 2: STRUTTURAZIONE DELLA GERARCHIA";
-    public static final String STEP_COMPLETAMENTO_GERARCHIA = "\n➤ PASSO 3: COMPLETAMENTO";
-    public static final String TITLE_CAMPO_CARATTERISTICO = "\n== CREAZIONE CAMPO CARATTERISTICO ==";
-    public static final String TITLE_VALORI_DOMINIO = "\n== CREAZIONE VALORI DI DOMINIO ==";
-
-    // Costanti per messaggi informativi
-    public static final String NO_GERARCHIE = "Nessuna gerarchia presente nel sistema.";
-    public static final String NO_GERARCHIE_CONV = "Nessuna gerarchia presente nel sistema. Impossibile visualizzare fattori di conversione.";
-    public static final String INFO_GERARCHIA_DESC = "Una gerarchia è una struttura ad albero di categorie che rappresentano attività.";
-    public static final String INFO_GERARCHIA_PROCESS = "Il processo di creazione sarà guidato partendo dalla categoria radice.";
-    public static final String INFO_RADICE_DESC = "La categoria radice rappresenta il livello più alto della gerarchia.";
-    public static final String INFO_RADICE_CAMPO = "Deve avere un campo caratteristico che definisce le sottocategorie.";
-    public static final String INFO_STRUTTURA_DESC = "Ora procederemo a creare la struttura gerarchica completa.";
-    public static final String INFO_STRUTTURA_VALORI = "Per ogni valore del campo verranno create sottocategorie.";
-    public static final String INFO_CAMPO_DESC = "Un campo caratteristico descrive una proprietà della categoria.";
-    public static final String INFO_DOMINIO_DESC = "Il dominio è l'insieme dei possibili valori che il campo può assumere.";
-    public static final String INFO_DOMINIO_SOTTOCATEGORIE = "Ogni valore del dominio genererà una sottocategoria.";
-    public static final String INFO_CAMPO_PROPRIETA = "Un campo caratteristico definisce le proprietà della categoria";
-    public static final String INFO_CAMPO_FOGLIE = "e permette di creare sottocategorie. Le categorie senza campo sono foglie (attività concrete).";
-    public static final String INFO_CREAZIONE_SOTTOCATEGORIA = "\n-- Creazione sottocategoria %d/%d per '%s' --";
-    public static final String GERARCHIA_CREATED = "Gerarchia creata con successo!";
-    public static final String GERARCHIA_ADDED = "Gerarchia aggiunta al database con successo!";
-    public static final String CONVERSIONE_TITLE = "Generazione dei fattori di conversione...";
-
-    // Costanti per gerarchie - prompt
-    public static final String MSG_SCELTA_ERRATA = "La scelta deve essere un valore intero compreso tra 1 e %d.";
-    public static final String MSG_LISTA_GERARCHIE = "\nEcco una lista delle categorie radice delle gerarchie presenti. Le radici sono contrassegnate da un numero:";
-    public static final String MSG_SCELTA_GERARCHIA = "Inserisci il numero corrispondente alla gerarchia scelta: ";
-    public static final String MSG_LISTA_FOGLIE = "\nEcco la gerarchia scelta. Le foglie sono contrassegnate da un numero:";
-    public static final String MSG_SCELTA_FOGLIA = "Inserisci il numero corrispondente alla categoria foglia scelta: ";
-    public static final String PROMPT_NOME_CATEGORIA_RADICE = "Inserisci il nome della categoria radice: ";
-    public static final String PROMPT_NOME_SOTTOCATEGORIA = "Inserisci il nome della sottocategoria di '%s': ";
-    public static final String PROMPT_CAMPO_CARATTERISTICO = "Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ";
-    public static final String PROMPT_NOME_CAMPO = "Inserisci il nome del campo: ";
-    public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore #%d. Premi 0 per terminare: ";
-    public static final String PROMPT_DESCRIZIONE_VALORE = "Inserisci una descrizione per '%s' (facoltativa, premi INVIO per saltare): ";
-    public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio? (s/n): ";
-
-    // Costanti per gerarchie - messaggi di errore
-    public static final String ERROR_NOME_CATEGORIA_VUOTO = "✗ Nome non valido. Il nome non può essere vuoto.";
-    public static final String ERROR_NOME_GERARCHIA_DUPLICATO = "✗ Esiste già una gerarchia con questo nome";
-    public static final String ERROR_NOME_CATEGORIA_DUPLICATO = "✗ Esiste già una categoria con questo nome in questa gerarchia";
-    public static final String ERROR_CAMPO_VUOTO = "✗ Il nome del campo non può essere vuoto.";
-    public static final String ERROR_DOMINIO_VUOTO = "✗ Il campo deve contenere almeno un valore di dominio.";
-    public static final String ERROR_VALORE_VUOTO = "✗ Il nome del valore non può essere vuoto.";
-    public static final String ERROR_VALORE_DUPLICATO = "✗ Valore '%s' già esistente nel dominio.";
-    public static final String ERROR_RADICE_SENZA_CAMPO = "ERRORE: La categoria radice deve avere un campo caratteristico!";
-    public static final String ERROR_MINIMO_VALORE = "Devi inserire almeno un valore di dominio.";
-
-    // Costanti per gerarchie - messaggi di successo
-    public static final String SUCCESS_GERARCHIA_COMPLETATA = "Gerarchia completata con successo!";
-    public static final String SUCCESS_CATEGORIA_CON_CAMPO = "✓ Categoria '%s' creata con campo caratteristico '%s'";
-    public static final String SUCCESS_CATEGORIA_FOGLIA = "✓ Categoria foglia '%s' creata";
-    public static final String SUCCESS_CAMPO_CREATO = "✓ Campo '%s' creato con %d valori di dominio";
-    public static final String SUCCESS_VALORE_AGGIUNTO = "✓ Valore '%s' aggiunto al dominio";
-
-    // Costanti per gerarchie - messaggi di riepilogo
-    public static final String RIEPILOGO_PROFONDITA = "La gerarchia ha una profondità di %d livelli.";
-    public static final String RIEPILOGO_FOGLIE = "Contiene %d categorie foglia.";
-    public static final String RIEPILOGO_DOMINIO = "\nRiepilogo valori del dominio per il campo '%s':";
-    public static final String FORMATO_VALORE_DOMINIO = " %d. %s - %s";
-    public static final String NESSUNA_DESCRIZIONE = "(nessuna descrizione)";
-
-    // 5. ConversioneConstants.java
-    // Costanti per fattori di conversione - titoli e passi
-    public static final String TITLE_FATTORI_CONVERSIONE = "\n=== FATTORI DI CONVERSIONE ===";
-    public static final String TITLE_CONVERSIONI_TRA_GERARCHIE = "\n=== CONVERSIONI TRA GERARCHIE ===";
-    public static final String TITLE_CONVERSIONE_GERARCHIE = "\n=== CREAZIONE FATTORI DI CONVERSIONE TRA GERARCHIE ===";
-
-    // Costanti per fattori di conversione - descrizioni informative
-    public static final String INFO_CONVERSIONE_INTRO = "Per rendere confrontabili attività di gerarchie diverse, è necessario definire fattori di conversione.";
-    public static final String INFO_CONVERSIONE_PONTE = "Il processo utilizza categorie di riferimento (una per ogni gerarchia) come 'ponte' tra le gerarchie.";
-    public static final String INFO_CONVERSIONE_GT1 = "Un fattore > 1 significa che un'ora dell'attività di destinazione vale più di un'ora dell'attività di origine.";
-    public static final String INFO_CONVERSIONE_LT1 = "Un fattore < 1 significa che un'ora dell'attività di destinazione vale meno di un'ora dell'attività di origine.";
-    public static final String INFO_GERARCHIA_NUOVA = "➤ GERARCHIA NUOVA: %s";
-    public static final String INFO_CATEGORIA_RIFERIMENTO = "   Categoria di riferimento: %s (livello %d)";
-    public static final String INFO_CONVERSIONE_CON = "➤ CONVERSIONE CON: %s";
-    public static final String INFO_PERCORSO_NUOVO = "\n   Percorso nella gerarchia nuova:";
-    public static final String INFO_PERCORSO_ESISTENTE = "\n   Percorso nella gerarchia esistente:";
-    public static final String INFO_NESSUNA_GERARCHIA = "\nNessun'altra gerarchia presente nel sistema. Non è necessario creare conversioni.";
-    public static final String INFO_VISUALIZZA_FATTORI = "\nEcco i fattori di conversione relativi alla categoria \"%s\":";
-    public static final String INFO_SELEZIONA_DESTINAZIONE = "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n";
-
-    // Costanti per fattori di conversione - prompts
-    public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ";
-
-    // Costanti per fattori di conversione - messaggi di errore
-    public static final String ERROR_FATTORE_SPECIALIZZATO = "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate.";
-    public static final String ERROR_FATTORE_NON_SPECIALIZZATO = "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.";
-    public static final String ERROR_FATTORE_FORMATO = "Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2.";
-    public static final String ERROR_FATTORE_RANGE = "Il fattore di conversione tra gerarchie deve essere un valore decimale compreso tra 0.5 e 2.";
-
-    // Costanti per fattori di conversione - messaggi di successo
-    public static final String SUCCESS_FATTORE_AGGIUNTO = "✓ Fattore di conversione aggiunto: %s";
-    public static final String SUCCESS_FATTORI_CREATI = "\nSono stati creati %d fattori di conversione tra gerarchie.";
-    public static final String SUCCESS_FATTORE_SEMPLICE = "Fattore di conversione aggiunto";
-    public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato.";
-
-    // Costanti per separatori visivi
-    public static final String SEPARATORE = "\n----------------------------------------------------------";
 
     private Database database;
     private final ConsoleView view;
@@ -312,7 +116,7 @@ public class Controller {
             try {
                 // Mostra il menu principale e ottieni la scelta dell'utente
                 view.showMenu();
-                String choice = view.getInput(PROMPT_CHOICE);
+                String choice = view.getInput(ControllerConstants.PROMPT_CHOICE);
 
                 switch (choice) {
                     case "1": // Login
@@ -323,25 +127,25 @@ public class Controller {
                         if (handleRegistration()) {
                             // Se la registrazione va a buon fine, salva i dati utente
                             salvaUtenti();
-                            view.showSuccessMessage(SAVING_USERS_SUCCESS);
+                            view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
                         }
                         break;
 
                     case "0": // Uscita
                         // Prima di uscire, salva tutti i dati
                         salvaTutti();
-                        view.showMessage(EXIT_MESSAGE);
+                        view.showMessage(ControllerConstants.EXIT_MESSAGE);
                         view.close(); // Chiude la vista (terminali, scanner, ecc.)
                         return; // Termina il ciclo e il metodo
 
                     default:
                         // Gestisce input non validi
-                        view.showMessage(INVALID_OPTION);
+                        view.showMessage(ControllerConstants.INVALID_OPTION);
                 }
 
             } catch (Exception e) {
                 // Gestione errori imprevisti per evitare che l'applicazione si arresti
-                view.showErrorMessage(String.format(ERROR_GENERIC, e.getMessage()));
+                view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
                 e.printStackTrace(); // Stampa lo stack trace per il debug
                 view.pressEnterToContinue(); // Attende input utente prima di continuare
             }
@@ -375,49 +179,49 @@ public class Controller {
      * @see model.Database#deserializeConversioneGerarchie(String)
      */
     private void loadData() {
-        view.showMessage(LOADING_DATA);
+        view.showMessage(ControllerConstants.LOADING_DATA);
 
         try {
             // Carica i dati utenti se il file esiste
-            if (fileEsistente(USERS_FILE_PATH)) {
-                this.database.deserializeUtenti(USERS_FILE_PATH);
-                view.showMessage(String.format(LOADING_ITEM_SUCCESS, "utenti"));
+            if (fileEsistente(ControllerConstants.USERS_FILE_PATH)) {
+                this.database.deserializeUtenti(ControllerConstants.USERS_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "utenti"));
             } else {
                 // Altrimenti, indica che si parte da zero per questa sezione
-                view.showMessage(String.format(LOADING_ITEM_EMPTY, "dato utente"));
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato utente"));
             }
 
             // Carica i dati comprensori se il file esiste
-            if (fileEsistente(COMPRESORI_FILE_PATH)) {
-                this.database.deserializeComprensori(COMPRESORI_FILE_PATH);
-                view.showMessage(String.format(LOADING_ITEM_SUCCESS, "comprensori"));
+            if (fileEsistente(ControllerConstants.COMPRESORI_FILE_PATH)) {
+                this.database.deserializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "comprensori"));
             } else {
-                view.showMessage(String.format(LOADING_ITEM_EMPTY, "comprensorio"));
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "comprensorio"));
             }
 
             // Carica i dati gerarchie se il file esiste
-            if (fileEsistente(GERARCHIE_FILE_PATH)) {
-                this.database.deserializeGerarchie(GERARCHIE_FILE_PATH);
-                view.showMessage(String.format(LOADING_ITEM_SUCCESS, "gerarchie"));
+            if (fileEsistente(ControllerConstants.GERARCHIE_FILE_PATH)) {
+                this.database.deserializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "gerarchie"));
             } else {
-                view.showMessage(String.format(LOADING_ITEM_EMPTY, "gerarchia"));
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "gerarchia"));
             }
 
             // Carica i dati conversione gerarchie se il file esiste
-            if (fileEsistente(CONVERSIONE_FILE_PATH)) {
-                this.database.deserializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
-                view.showMessage(String.format(LOADING_ITEM_SUCCESS, "conversione gerarchie"));
+            if (fileEsistente(ControllerConstants.CONVERSIONE_FILE_PATH)) {
+                this.database.deserializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "conversione gerarchie"));
             } else {
-                view.showMessage(String.format(LOADING_ITEM_EMPTY, "dato di conversione"));
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato di conversione"));
             }
 
             // Indica all'utente che il processo di caricamento è completato con successo
-            view.showSuccessMessage(LOADING_COMPLETE);
+            view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
 
         } catch (Exception e) {
             // Gestione centralizzata degli errori durante il caricamento
-            view.showErrorMessage(String.format(LOADING_ERROR, e.getMessage()));
-            view.showMessage(LOADING_DEFAULT);
+            view.showErrorMessage(String.format(ControllerConstants.LOADING_ERROR, e.getMessage()));
+            view.showMessage(ControllerConstants.LOADING_DEFAULT);
             // Re-inizializza il database per garantire uno stato pulito
             this.database = new Database();
             view.pressEnterToContinue();
@@ -466,10 +270,10 @@ public class Controller {
     private void salvaUtenti() {
         try {
             // Serializza solo i dati utente nel file dedicato
-            this.database.serializeUtenti(USERS_FILE_PATH);
+            this.database.serializeUtenti(ControllerConstants.USERS_FILE_PATH);
         } catch (Exception e) {
             // Gestisce eventuali errori durante il salvataggio
-            view.showErrorMessage(String.format(SAVING_ERROR, e.getMessage()));
+            view.showErrorMessage(String.format(ControllerConstants.SAVING_ERROR, e.getMessage()));
         }
     }
 
@@ -498,20 +302,20 @@ public class Controller {
      */
     private void salvaTutti() {
         // Informa l'utente che il processo di salvataggio è iniziato
-        view.showMessage(SAVING_DATA);
+        view.showMessage(ControllerConstants.SAVING_DATA);
 
         try {
             // Salva tutti i componenti del database in file separati
-            this.database.serializeUtenti(USERS_FILE_PATH);
-            this.database.serializeComprensori(COMPRESORI_FILE_PATH);
-            this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
-            this.database.serializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
+            this.database.serializeUtenti(ControllerConstants.USERS_FILE_PATH);
+            this.database.serializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
+            this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
+            this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
-            view.showSuccessMessage(SAVING_SUCCESS);
+            view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
         } catch (Exception e) {
             // Gestisce eventuali errori durante il salvataggio
-            view.showErrorMessage(String.format(SAVING_ERROR, e.getMessage()));
+            view.showErrorMessage(String.format(ControllerConstants.SAVING_ERROR, e.getMessage()));
         }
     }
 
@@ -542,7 +346,7 @@ public class Controller {
     private void handleLogin() {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
         if (database.getUtenti().isEmpty()) {
-            view.showMessage(NO_USERS_REGISTERED);
+            view.showMessage(ControllerConstants.NO_USERS_REGISTERED);
             return;
         }
 
@@ -551,12 +355,12 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showMessage(LOGIN_FAILED);
+            view.showMessage(ControllerConstants.LOGIN_FAILED);
             return;
         }
 
         // Autenticazione riuscita: mostra un messaggio di benvenuto personalizzato
-        view.showMessage(LOGIN_SUCCESS + utente.getUsername() + ".");
+        view.showMessage(ControllerConstants.LOGIN_SUCCESS + utente.getUsername() + ".");
 
         // Reindirizzamento al menu appropriato in base al ruolo dell'utente
         if (utente.isConfig()) {
@@ -593,7 +397,7 @@ public class Controller {
         boolean checkRegistration = registerUtente();
 
         // Mostra un messaggio di esito (successo o fallimento)
-        view.showMessage(checkRegistration ? REGISTRATION_SUCCESS : REGISTRATION_FAILED);
+        view.showMessage(checkRegistration ? ControllerConstants.REGISTRATION_SUCCESS : ControllerConstants.REGISTRATION_FAILED);
 
         // Ritorna l'esito della registrazione per ulteriori elaborazioni
         return checkRegistration;
@@ -628,7 +432,7 @@ public class Controller {
             try {
                 // Mostra il menu configuratore e ottiene la scelta dell'utente
                 view.showMenuConfiguratore();
-                String choice = view.getInput(PROMPT_CHOICE);
+                String choice = view.getInput(ControllerConstants.PROMPT_CHOICE);
 
                 // Elabora la scelta dell'utente
                 switch (choice) {
@@ -657,12 +461,12 @@ public class Controller {
 
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
-                        view.showMessage(LOGOUT_MESSAGE);
+                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
                         return;
 
                     default:
                         // Gestione di input non validi
-                        view.showMessage(INVALID_OPTION);
+                        view.showMessage(ControllerConstants.INVALID_OPTION);
                 }
 
                 // Pausa per permettere all'utente di leggere i risultati
@@ -670,7 +474,7 @@ public class Controller {
 
             } catch (Exception e) {
                 // Gestione centralizzata delle eccezioni per garantire robustezza
-                view.showErrorMessage(String.format(ERROR_GENERIC, e.getMessage()));
+                view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
                 view.pressEnterToContinue();
             }
         }
@@ -694,10 +498,10 @@ public class Controller {
         // Verifica se ci sono comprensori da visualizzare
         if (this.database.getComprensori().isEmpty()) {
             // Se non ci sono comprensori, mostra un messaggio appropriato
-            view.showErrorMessage(NO_COMPRENSORI);
+            view.showErrorMessage(ControllerConstants.NO_COMPRENSORI);
         } else {
             // Altrimenti, mostra il titolo e la lista dei comprensori
-            view.showMessage(TITLE_COMPRENSORI);
+            view.showMessage(ControllerConstants.TITLE_COMPRENSORI);
             view.showMessage(database.toStringComprensori());
         }
     }
@@ -720,10 +524,10 @@ public class Controller {
         // Verifica se ci sono gerarchie da visualizzare
         if (this.database.getGerarchie().isEmpty()) {
             // Se non ci sono gerarchie, mostra un messaggio appropriato
-            view.showErrorMessage(NO_GERARCHIE);
+            view.showErrorMessage(ControllerConstants.NO_GERARCHIE);
         } else {
             // Altrimenti, mostra il titolo e la lista delle gerarchie
-            view.showMessage(TITLE_GERARCHIE);
+            view.showMessage(ControllerConstants.TITLE_GERARCHIE);
             view.showMessage(this.database.toStringGerarchie());
         }
     }
@@ -750,7 +554,7 @@ public class Controller {
         if (this.database.getGerarchie().isEmpty()) {
             // Se non ci sono gerarchie, mostra un messaggio di errore specifico per la
             // funzione di conversione
-            this.view.showErrorMessage(NO_GERARCHIE_CONV);
+            this.view.showErrorMessage(ControllerConstants.NO_GERARCHIE_CONV);
             return false;
         }
         // Ci sono gerarchie, l'operazione può procedere
@@ -775,18 +579,18 @@ public class Controller {
      */
     private void creaComprensorio() {
         // Mostra informazioni introduttive sul processo di creazione
-        view.showMessage(TITLE_NEW_COMPRENSORIO);
-        view.showMessage(INFO_COMPRENSORIO_DESC);
-        view.showMessage(INFO_COMPRENSORIO_NEXT);
+        view.showMessage(ControllerConstants.TITLE_NEW_COMPRENSORIO);
+        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_DESC);
+        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_NEXT);
 
         // Avvia il processo di creazione del comprensorio
         if (createComprensorio()) {
             // Se la creazione ha successo, salva i dati su file
-            this.database.serializeComprensori(COMPRESORI_FILE_PATH);
-            view.showSuccessMessage(COMPRENSORIO_CREATED);
+            this.database.serializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
+            view.showSuccessMessage(ControllerConstants.COMPRENSORIO_CREATED);
         } else {
             // In caso di annullamento o errore
-            view.showMessage(OPERATION_CANCELLED);
+            view.showMessage(ControllerConstants.OPERATION_CANCELLED);
         }
     }
 
@@ -814,33 +618,33 @@ public class Controller {
      */
     private void creaGerarchia() {
         // Mostra informazioni introduttive sulla creazione della gerarchia
-        view.showMessage(TITLE_NEW_GERARCHIA);
+        view.showMessage(ControllerConstants.TITLE_NEW_GERARCHIA);
 
         // Creazione della struttura principale della gerarchia
         Gerarchia gerarchia = createGerarchia();
-        view.showSuccessMessage(GERARCHIA_CREATED);
+        view.showSuccessMessage(ControllerConstants.GERARCHIA_CREATED);
 
         // Visualizzazione della struttura gerarchica creata
         view.showMessage("\n" + gerarchia);
 
         // Configurazione dei fattori di conversione interni alla gerarchia
-        view.showMessage("\n" + CONVERSIONE_TITLE);
+        view.showMessage("\n" + ControllerConstants.CONVERSIONE_TITLE);
         creaFattoriConversione(gerarchia);
 
         // Configurazione delle conversioni tra la nuova gerarchia e quelle esistenti
         if (!database.getGerarchie().isEmpty()) {
-            view.showMessage(TITLE_CONVERSIONI_TRA_GERARCHIE);
+            view.showMessage(ControllerConstants.TITLE_CONVERSIONI_TRA_GERARCHIE);
             creaConversioneGerarchie(gerarchia);
         }
 
         // Aggiunta della gerarchia al database
         if (this.database.addGerarchia(gerarchia)) {
-            view.showSuccessMessage(GERARCHIA_ADDED);
+            view.showSuccessMessage(ControllerConstants.GERARCHIA_ADDED);
         }
 
         // Salvataggio dei dati su file
-        this.database.serializeGerarchie(GERARCHIE_FILE_PATH);
-        this.database.serializeConversioneGerarchie(CONVERSIONE_FILE_PATH);
+        this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
+        this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
     }
 
     // -----------------------------------------------------------------------------------
@@ -875,10 +679,10 @@ public class Controller {
      */
     public Utente loginUtente() {
         // Richiesta dello username all'utente
-        String username = view.getInput(PROMPT_USERNAME);
+        String username = view.getInput(ControllerConstants.PROMPT_USERNAME);
 
         // Richiesta della password all'utente
-        String password = view.getInput(PROMPT_PASSWORD);
+        String password = view.getInput(ControllerConstants.PROMPT_PASSWORD);
 
         // Verifica delle credenziali attraverso il database
         // Ritorna l'utente se valido, null altrimenti
@@ -933,7 +737,7 @@ public class Controller {
             return false; // Se l'utente non fornisce una password valida, interrompi
 
         // Step 4: Determinazione del tipo di account (Configuratore o Fruitore)
-        boolean isConfig = getUserChoice(PROMPT_CONFIG_ROLE);
+        boolean isConfig = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
 
         // Step 5: Registrazione effettiva dell'utente nel database
         // Il metodo ritorna true se la registrazione ha successo, false altrimenti
@@ -973,15 +777,15 @@ public class Controller {
         String passwordDefault = UserUtil.generateRandomPassword();
 
         // Mostra le credenziali all'utente
-        view.showMessage(DEFAULT_LOGIN_INTRO);
-        view.showMessage(String.format(DEFAULT_USERNAME_DISPLAY, usernameDefault));
-        view.showMessage(String.format(DEFAULT_PASSWORD_DISPLAY, passwordDefault));
+        view.showMessage(ControllerConstants.DEFAULT_LOGIN_INTRO);
+        view.showMessage(String.format(ControllerConstants.DEFAULT_USERNAME_DISPLAY, usernameDefault));
+        view.showMessage(String.format(ControllerConstants.DEFAULT_PASSWORD_DISPLAY, passwordDefault));
 
         // Concede all'utente tre tentativi per inserire le credenziali correttamente
         for (int i = 2; i >= 0; i--) {
             // Richiede l'inserimento delle credenziali
-            String username = view.getInput(PROMPT_USERNAME);
-            String password = view.getInput(PROMPT_PASSWORD);
+            String username = view.getInput(ControllerConstants.PROMPT_USERNAME);
+            String password = view.getInput(ControllerConstants.PROMPT_PASSWORD);
 
             // Verifica se le credenziali inserite corrispondono a quelle generate
             if (usernameDefault.equals(username) && passwordDefault.equals(password))
@@ -989,12 +793,12 @@ public class Controller {
 
             // Se le credenziali non corrispondono, mostra un messaggio di errore
             // con il numero di tentativi rimasti
-            view.showMessage(String.format(DEFAULT_LOGIN_INVALID, i));
+            view.showMessage(String.format(ControllerConstants.DEFAULT_LOGIN_INVALID, i));
         }
 
         // Se sono stati esauriti tutti i tentativi, mostra un messaggio di errore
         // e interrompi il processo di registrazione
-        view.showMessage(DEFAULT_LOGIN_FAILED);
+        view.showMessage(ControllerConstants.DEFAULT_LOGIN_FAILED);
         return false;
     }
 
@@ -1037,7 +841,7 @@ public class Controller {
      */
     public boolean createComprensorio() {
         // Mostra il titolo della prima fase: definizione del nome del comprensorio
-        view.showMessage(STEP_NOME_COMPRENSORIO);
+        view.showMessage(ControllerConstants.STEP_NOME_COMPRENSORIO);
 
         String nome = null;
         boolean nomeValido = false;
@@ -1045,7 +849,7 @@ public class Controller {
         // Ciclo di validazione del nome del comprensorio
         while (!nomeValido) {
             // Richiede il nome all'utente
-            nome = view.getInput(PROMPT_NOME_COMPRENSORIO);
+            nome = view.getInput(ControllerConstants.PROMPT_NOME_COMPRENSORIO);
 
             // Verifica se l'utente vuole annullare l'operazione
             if (nome.equals("0")) {
@@ -1053,15 +857,15 @@ public class Controller {
             }
             // Verifica che il nome non sia vuoto
             else if (nome.isBlank()) {
-                view.showErrorMessage(ERROR_NOME_VUOTO);
+                view.showErrorMessage(ControllerConstants.ERROR_NOME_VUOTO);
             }
             // Verifica che il nome abbia almeno 3 caratteri
             else if (nome.length() < 3) {
-                view.showErrorMessage(ERROR_NOME_CORTO);
+                view.showErrorMessage(ControllerConstants.ERROR_NOME_CORTO);
             }
             // Verifica che non esista già un comprensorio con questo nome
             else if (database.hasComprensorio(nome)) {
-                view.showErrorMessage(ERROR_NOME_DUPLICATO);
+                view.showErrorMessage(ControllerConstants.ERROR_NOME_DUPLICATO);
             } else {
                 // Tutte le verifiche sono passate, il nome è valido
                 nomeValido = true;
@@ -1069,9 +873,9 @@ public class Controller {
         }
 
         // Inizia la seconda fase: aggiunta dei comuni al comprensorio
-        view.showMessage(STEP_COMUNI_COMPRENSORIO);
-        view.showMessage(String.format(INFO_AGGIUNGI_COMUNI, nome));
-        view.showMessage(INFO_MINIMO_UN_COMUNE);
+        view.showMessage(ControllerConstants.STEP_COMUNI_COMPRENSORIO);
+        view.showMessage(String.format(ControllerConstants.INFO_AGGIUNGI_COMUNI, nome));
+        view.showMessage(ControllerConstants.INFO_MINIMO_UN_COMUNE);
 
         // Crea il nuovo oggetto Comprensorio con il nome validato
         Comprensorio comprensorio = new Comprensorio(nome);
@@ -1081,7 +885,7 @@ public class Controller {
 
         // Verifica che il comprensorio abbia almeno un comune
         if (comprensorio.getComuni().isEmpty()) {
-            view.showErrorMessage(ERROR_CREAZIONE_ANNULLATA);
+            view.showErrorMessage(ControllerConstants.ERROR_CREAZIONE_ANNULLATA);
             return false; // Operazione fallita: nessun comune aggiunto
         }
 
@@ -1090,7 +894,7 @@ public class Controller {
 
         // Mostra un messaggio di successo se l'operazione è andata a buon fine
         if (risultato) {
-            view.showSuccessMessage(String.format(SUCCESS_COMPRENSORIO_AGGIUNTO, nome));
+            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_COMPRENSORIO_AGGIUNTO, nome));
         }
 
         return risultato;
@@ -1138,13 +942,13 @@ public class Controller {
         // Ciclo principale per l'aggiunta dei comuni
         while (!finished) {
             // Richiede il nome del comune all'utente
-            String comune = this.view.getInput(PROMPT_NOME_COMUNE);
+            String comune = this.view.getInput(ControllerConstants.PROMPT_NOME_COMUNE);
 
             // Gestisce il caso di uscita (digitando '0')
             if (comune.equals("0")) {
                 // Se non è stato aggiunto ancora nessun comune, non permette l'uscita
                 if (comuniAggiunti == 0) {
-                    this.view.showErrorMessage(ERROR_NESSUN_COMUNE);
+                    this.view.showErrorMessage(ControllerConstants.ERROR_NESSUN_COMUNE);
                 } else {
                     // Termina il ciclo se è stato aggiunto almeno un comune
                     finished = true;
@@ -1154,19 +958,19 @@ public class Controller {
 
             // Verifica che il nome del comune non sia vuoto
             if (comune.isBlank()) {
-                this.view.showErrorMessage(ERROR_COMUNE_VUOTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_COMUNE_VUOTO);
                 continue;
             }
 
             // Verifica che il nome del comune abbia almeno 2 caratteri
             if (comune.length() < 2) {
-                this.view.showErrorMessage(ERROR_COMUNE_CORTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_COMUNE_CORTO);
                 continue;
             }
 
             // Verifica che il comune non sia già presente nel comprensorio
             if (comprensorio.hasComune(comune)) {
-                this.view.showErrorMessage(String.format(ERROR_COMUNE_DUPLICATO, comune));
+                this.view.showErrorMessage(String.format(ControllerConstants.ERROR_COMUNE_DUPLICATO, comune));
                 continue;
             }
 
@@ -1175,15 +979,15 @@ public class Controller {
             comuniAggiunti++;
 
             // Mostra conferma dell'aggiunta
-            this.view.showSuccessMessage(String.format(SUCCESS_COMUNE_AGGIUNTO, comune, comprensorio.getNome()));
+            this.view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_COMUNE_AGGIUNTO, comune, comprensorio.getNome()));
 
             // Dopo aver aggiunto almeno un comune, offre la possibilità di terminare
             if (comuniAggiunti > 0) {
                 // Mostra il numero di comuni aggiunti finora
-                this.view.showMessage(String.format(INFO_COMUNI_AGGIUNTI, comuniAggiunti));
+                this.view.showMessage(String.format(ControllerConstants.INFO_COMUNI_AGGIUNTI, comuniAggiunti));
 
                 // Chiede all'utente se vuole aggiungere un altro comune
-                if (!getUserChoice(PROMPT_ADD_ALTRO_COMUNE)) {
+                if (!getUserChoice(ControllerConstants.PROMPT_ADD_ALTRO_COMUNE)) {
                     finished = true; // Termina il ciclo se l'utente sceglie di non continuare
                 }
             }
@@ -1225,9 +1029,9 @@ public class Controller {
      */
     private Gerarchia createGerarchia() {
         // Intestazione e spiegazione iniziale per l'utente
-        view.showMessage(TITLE_CREATE_GERARCHIA);
-        view.showMessage(INFO_GERARCHIA_DESC);
-        view.showMessage(INFO_GERARCHIA_PROCESS);
+        view.showMessage(ControllerConstants.TITLE_CREATE_GERARCHIA);
+        view.showMessage(ControllerConstants.INFO_GERARCHIA_DESC);
+        view.showMessage(ControllerConstants.INFO_GERARCHIA_PROCESS);
 
         // Lista per tenere traccia delle categorie foglia e il livello massimo
         // raggiunto
@@ -1235,9 +1039,9 @@ public class Controller {
         int maxLevel = 0;
 
         // FASE 1: Creazione della categoria radice
-        view.showMessage(STEP_RADICE_GERARCHIA);
-        view.showMessage(INFO_RADICE_DESC);
-        view.showMessage(INFO_RADICE_CAMPO);
+        view.showMessage(ControllerConstants.STEP_RADICE_GERARCHIA);
+        view.showMessage(ControllerConstants.INFO_RADICE_DESC);
+        view.showMessage(ControllerConstants.INFO_RADICE_CAMPO);
 
         // Crea la categoria radice (il primo parametro null indica che è la radice)
         Gerarchia rootGerarchia = new Gerarchia(createCategoria(null, null));
@@ -1246,14 +1050,14 @@ public class Controller {
 
         // Verifica obbligatoria: la categoria radice deve avere un campo caratteristico
         if (categoria.getCampo() == null) {
-            view.showErrorMessage(ERROR_RADICE_SENZA_CAMPO);
+            view.showErrorMessage(ControllerConstants.ERROR_RADICE_SENZA_CAMPO);
             return createGerarchia(); // Riavvia la procedura se la radice non ha campo
         }
 
         // FASE 2: Creazione della struttura gerarchica basata sui valori di dominio
-        view.showMessage(STEP_STRUTTURA_GERARCHIA);
-        view.showMessage(INFO_STRUTTURA_DESC);
-        view.showMessage(INFO_STRUTTURA_VALORI);
+        view.showMessage(ControllerConstants.STEP_STRUTTURA_GERARCHIA);
+        view.showMessage(ControllerConstants.INFO_STRUTTURA_DESC);
+        view.showMessage(ControllerConstants.INFO_STRUTTURA_VALORI);
 
         // Inizializza lo stack con la radice, una volta per ogni valore del suo dominio
         for (int i = 0; i < categoria.getCampo().getDominio().size(); i++) {
@@ -1281,7 +1085,7 @@ public class Controller {
             int totaleFigli = totalePerPadre.get(theGoodFather);
 
             // Mostra il progresso all'utente per il padre corrente
-            view.showMessage(String.format(INFO_CREAZIONE_SOTTOCATEGORIA,
+            view.showMessage(String.format(ControllerConstants.INFO_CREAZIONE_SOTTOCATEGORIA,
                     contatoreFiglio, totaleFigli, nomeCategoriaPadre));
 
             // Crea una nuova categoria come figlio del padre corrente
@@ -1314,10 +1118,10 @@ public class Controller {
         }
 
         // FASE 3: Riepilogo finale
-        view.showMessage(STEP_COMPLETAMENTO_GERARCHIA);
-        view.showMessage(SUCCESS_GERARCHIA_COMPLETATA);
-        view.showMessage(String.format(RIEPILOGO_PROFONDITA, maxLevel));
-        view.showMessage(String.format(RIEPILOGO_FOGLIE, rootGerarchia.getFoglie().size()));
+        view.showMessage(ControllerConstants.STEP_COMPLETAMENTO_GERARCHIA);
+        view.showMessage(ControllerConstants.SUCCESS_GERARCHIA_COMPLETATA);
+        view.showMessage(String.format(ControllerConstants.RIEPILOGO_PROFONDITA, maxLevel));
+        view.showMessage(String.format(ControllerConstants.RIEPILOGO_FOGLIE, rootGerarchia.getFoglie().size()));
 
         return rootGerarchia;
     }
@@ -1359,14 +1163,14 @@ public class Controller {
         while (true) {
             // Messaggio contestualizzato in base al tipo di categoria (radice o
             // sottocategoria)
-            String prompt = (root == null) ? PROMPT_NOME_CATEGORIA_RADICE
-                    : String.format(PROMPT_NOME_SOTTOCATEGORIA, nomePadre);
+            String prompt = (root == null) ? ControllerConstants.PROMPT_NOME_CATEGORIA_RADICE
+                    : String.format(ControllerConstants.PROMPT_NOME_SOTTOCATEGORIA, nomePadre);
 
             nome = this.view.getInput(prompt);
 
             // Verifica che il nome non sia vuoto
             if (nome.isBlank()) {
-                this.view.showErrorMessage(ERROR_NOME_CATEGORIA_VUOTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_NOME_CATEGORIA_VUOTO);
                 continue;
             }
 
@@ -1375,7 +1179,7 @@ public class Controller {
             // (per la radice) o una categoria con questo nome (per le sottocategorie)
             if ((root == null && database.hasGerarchia(nome)) ||
                     (root != null && root.find(new Categoria(nome)) != null)) {
-                view.showErrorMessage(root == null ? ERROR_NOME_GERARCHIA_DUPLICATO : ERROR_NOME_CATEGORIA_DUPLICATO);
+                view.showErrorMessage(root == null ? ControllerConstants.ERROR_NOME_GERARCHIA_DUPLICATO : ControllerConstants.ERROR_NOME_CATEGORIA_DUPLICATO);
                 continue;
             }
 
@@ -1389,12 +1193,12 @@ public class Controller {
         if (root == null) {
             // Per la categoria radice il campo è obbligatorio
             aggiungiCampo = true;
-            view.showMessage(INFO_RADICE_CAMPO);
+            view.showMessage(ControllerConstants.INFO_RADICE_CAMPO);
         } else {
             // Per le altre categorie è opzionale, in base alla scelta dell'utente
-            view.showMessage("\n" + INFO_CAMPO_PROPRIETA);
-            view.showMessage(INFO_CAMPO_FOGLIE);
-            aggiungiCampo = getUserChoice(PROMPT_CAMPO_CARATTERISTICO);
+            view.showMessage("\n" + ControllerConstants.INFO_CAMPO_PROPRIETA);
+            view.showMessage(ControllerConstants.INFO_CAMPO_FOGLIE);
+            aggiungiCampo = getUserChoice(ControllerConstants.PROMPT_CAMPO_CARATTERISTICO);
         }
 
         // Creazione del campo se necessario
@@ -1402,9 +1206,9 @@ public class Controller {
 
         // Feedback all'utente sul tipo di categoria creata
         if (campo != null) {
-            view.showSuccessMessage(String.format(SUCCESS_CATEGORIA_CON_CAMPO, nome, campo.getNome()));
+            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_CATEGORIA_CON_CAMPO, nome, campo.getNome()));
         } else {
-            view.showSuccessMessage(String.format(SUCCESS_CATEGORIA_FOGLIA, nome));
+            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_CATEGORIA_FOGLIA, nome));
         }
 
         // Crea e restituisce la nuova categoria
@@ -1432,15 +1236,15 @@ public class Controller {
      * @see model.ValoreCampo
      */
     private Campo createCampo() {
-        view.showMessage(TITLE_CAMPO_CARATTERISTICO);
-        view.showMessage(INFO_CAMPO_DESC);
+        view.showMessage(ControllerConstants.TITLE_CAMPO_CARATTERISTICO);
+        view.showMessage(ControllerConstants.INFO_CAMPO_DESC);
 
         // Richiede e valida il nome del campo
         String nome;
         do {
-            nome = this.view.getInput(PROMPT_NOME_CAMPO);
+            nome = this.view.getInput(ControllerConstants.PROMPT_NOME_CAMPO);
             if (nome.isBlank()) {
-                this.view.showErrorMessage(ERROR_CAMPO_VUOTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_CAMPO_VUOTO);
             }
         } while (nome.isBlank());
 
@@ -1448,21 +1252,21 @@ public class Controller {
         Campo campo = new Campo(nome);
 
         // Spiegazione del concetto di dominio all'utente
-        view.showMessage(TITLE_VALORI_DOMINIO);
-        view.showMessage(INFO_DOMINIO_DESC);
-        view.showMessage(INFO_DOMINIO_SOTTOCATEGORIE);
+        view.showMessage(ControllerConstants.TITLE_VALORI_DOMINIO);
+        view.showMessage(ControllerConstants.INFO_DOMINIO_DESC);
+        view.showMessage(ControllerConstants.INFO_DOMINIO_SOTTOCATEGORIE);
 
         // Ciclo di creazione del dominio (si ripete finché il dominio non è vuoto)
         do {
             createDominio(campo);
             if (campo.getDominio().isEmpty()) {
-                this.view.showErrorMessage(ERROR_DOMINIO_VUOTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_DOMINIO_VUOTO);
             }
         } while (campo.getDominio().isEmpty());
 
         // Feedback di successo con riepilogo
         view.showSuccessMessage(
-                String.format(SUCCESS_CAMPO_CREATO, nome, campo.getDominio().size()));
+                String.format(ControllerConstants.SUCCESS_CAMPO_CREATO, nome, campo.getDominio().size()));
         return campo;
     }
 
@@ -1503,11 +1307,11 @@ public class Controller {
         while (!finished) {
             // Richiede il nome del valore
             String nomeValore = this.view.getInput(
-                    String.format(PROMPT_VALORE_DOMINIO, valoreCount + 1));
+                    String.format(ControllerConstants.PROMPT_VALORE_DOMINIO, valoreCount + 1));
 
             // Verifica che il nome non sia vuoto
             if (nomeValore.isBlank()) {
-                this.view.showErrorMessage(ERROR_VALORE_VUOTO);
+                this.view.showErrorMessage(ControllerConstants.ERROR_VALORE_VUOTO);
                 continue;
             }
 
@@ -1515,7 +1319,7 @@ public class Controller {
             if (nomeValore.equals("0")) {
                 // Se non è stato aggiunto ancora nessun valore, non permette l'uscita
                 if (valoreCount == 0) {
-                    this.view.showMessage(ERROR_MINIMO_VALORE);
+                    this.view.showMessage(ControllerConstants.ERROR_MINIMO_VALORE);
                 } else {
                     finished = true; // Termina il ciclo se c'è almeno un valore
                 }
@@ -1524,12 +1328,12 @@ public class Controller {
 
             // Verifica che il valore non sia duplicato
             if (campo.hasValore(nomeValore)) {
-                this.view.showErrorMessage(String.format(ERROR_VALORE_DUPLICATO, nomeValore));
+                this.view.showErrorMessage(String.format(ControllerConstants.ERROR_VALORE_DUPLICATO, nomeValore));
                 continue;
             }
 
             // Richiede una descrizione opzionale per il valore
-            String descrizione = this.view.getInput(String.format(PROMPT_DESCRIZIONE_VALORE, nomeValore));
+            String descrizione = this.view.getInput(String.format(ControllerConstants.PROMPT_DESCRIZIONE_VALORE, nomeValore));
 
             // Crea il valore con o senza descrizione
             ValoreCampo valore = descrizione.isBlank() ? new ValoreCampo(nomeValore)
@@ -1540,11 +1344,11 @@ public class Controller {
             valoreCount++;
 
             // Conferma l'aggiunta all'utente
-            this.view.showSuccessMessage(String.format(SUCCESS_VALORE_AGGIUNTO, nomeValore));
+            this.view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_VALORE_AGGIUNTO, nomeValore));
 
             // Dopo il primo valore, chiede se l'utente vuole aggiungerne altri
             if (valoreCount >= 1) {
-                if (!getUserChoice(PROMPT_ALTRO_VALORE)) {
+                if (!getUserChoice(ControllerConstants.PROMPT_ALTRO_VALORE)) {
                     finished = true; // Termina se l'utente non vuole aggiungere altri valori
                 }
             }
@@ -1552,12 +1356,12 @@ public class Controller {
 
         // Mostra il riepilogo dei valori aggiunti
         if (valoreCount > 0) {
-            view.showMessage(String.format(RIEPILOGO_DOMINIO, campo.getNome()));
+            view.showMessage(String.format(ControllerConstants.RIEPILOGO_DOMINIO, campo.getNome()));
             List<ValoreCampo> valori = new ArrayList<>(campo.getDominio());
             for (int i = 0; i < valori.size(); i++) {
                 ValoreCampo v = valori.get(i);
-                String desc = v.getDescrizione().isEmpty() ? NESSUNA_DESCRIZIONE : v.getDescrizione();
-                view.showMessage(String.format(FORMATO_VALORE_DOMINIO, i + 1, v.getNome(), desc));
+                String desc = v.getDescrizione().isEmpty() ? ControllerConstants.NESSUNA_DESCRIZIONE : v.getDescrizione();
+                view.showMessage(String.format(ControllerConstants.FORMATO_VALORE_DOMINIO, i + 1, v.getNome(), desc));
             }
         }
     }
@@ -1598,14 +1402,14 @@ public class Controller {
      */
     private void visualizzaFattoriConversione() {
         // Mostra il titolo della funzionalità
-        view.showMessage(TITLE_FATTORI_CONVERSIONE);
+        view.showMessage(ControllerConstants.TITLE_FATTORI_CONVERSIONE);
 
         // FASE 1: Selezione della gerarchia di origine
-        this.view.showMessage(MSG_LISTA_GERARCHIE);
+        this.view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
         Gerarchia gerarchiaOrigine = selezionaGerarchia();
 
         // FASE 2: Selezione della foglia (attività concreta) dalla gerarchia origine
-        this.view.showMessage(MSG_LISTA_FOGLIE);
+        this.view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
         // Mostra la gerarchia con le foglie numerate per facilitare la selezione
         this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
 
@@ -1614,7 +1418,7 @@ public class Controller {
 
         // FASE 3: Selezione della gerarchia di destinazione per cui visualizzare i
         // fattori
-        this.view.showMessage(String.format(INFO_SELEZIONA_DESTINAZIONE, fogliaScelta.data().getNome()));
+        this.view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, fogliaScelta.data().getNome()));
         Gerarchia gerarchiaDestinazione = selezionaGerarchia();
 
         // CALCOLO CONVERSIONE: Il processo coinvolge due fattori:
@@ -1640,7 +1444,7 @@ public class Controller {
         // VISUALIZZAZIONE RISULTATI: Mostra i fattori di conversione per tutte le
         // foglie
         // della gerarchia di destinazione, in relazione alla foglia selezionata
-        this.view.showMessage(String.format(INFO_VISUALIZZA_FATTORI, fogliaScelta.data().getNome()));
+        this.view.showMessage(String.format(ControllerConstants.INFO_VISUALIZZA_FATTORI, fogliaScelta.data().getNome()));
         this.view.showMessage(
                 gerarchiaDestinazione.toStringFattoreConversione(fattoreCombinato));
     }
@@ -1684,7 +1488,7 @@ public class Controller {
         int numScelte = this.database.getGerarchie().size();
         // Gli indici visualizzati partono da 1, quindi sottraiamo 1 per ottenere
         // l'indice effettivo (0-based)
-        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_GERARCHIA, numScelte) - 1;
+        int indiceScelta = richiediIndiceDaUtente(ControllerConstants.MSG_SCELTA_GERARCHIA, numScelte) - 1;
 
         // Restituisce la gerarchia selezionata
         return this.database.getGerarchia(indiceScelta);
@@ -1720,7 +1524,7 @@ public class Controller {
         int numScelte = foglie.size();
         // Gli indici visualizzati partono da 1, quindi sottraiamo 1 per ottenere
         // l'indice effettivo (0-based)
-        int indiceScelta = richiediIndiceDaUtente(MSG_SCELTA_FOGLIA, numScelte) - 1;
+        int indiceScelta = richiediIndiceDaUtente(ControllerConstants.MSG_SCELTA_FOGLIA, numScelte) - 1;
 
         // Restituisce la foglia selezionata
         return foglie.get(indiceScelta);
@@ -1766,11 +1570,11 @@ public class Controller {
                     validInput = true; // Input valido, uscita dal ciclo
                 } else {
                     // Indice fuori dal range valido
-                    this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                    this.view.showMessage(String.format(ControllerConstants.MSG_SCELTA_ERRATA, numScelte));
                 }
             } catch (NumberFormatException e) {
                 // Input non convertibile in numero
-                this.view.showMessage(String.format(MSG_SCELTA_ERRATA, numScelte));
+                this.view.showMessage(String.format(ControllerConstants.MSG_SCELTA_ERRATA, numScelte));
             }
         }
 
@@ -1812,11 +1616,11 @@ public class Controller {
     private void creaConversioneGerarchie(Gerarchia gerarchia) {
         // Spiegazione introduttiva sul funzionamento dei fattori di conversione tra
         // gerarchie
-        view.showMessage(TITLE_CONVERSIONE_GERARCHIE);
-        view.showMessage(INFO_CONVERSIONE_INTRO);
-        view.showMessage(INFO_CONVERSIONE_PONTE);
-        view.showMessage(INFO_CONVERSIONE_GT1);
-        view.showMessage(INFO_CONVERSIONE_LT1);
+        view.showMessage(ControllerConstants.TITLE_CONVERSIONE_GERARCHIE);
+        view.showMessage(ControllerConstants.INFO_CONVERSIONE_INTRO);
+        view.showMessage(ControllerConstants.INFO_CONVERSIONE_PONTE);
+        view.showMessage(ControllerConstants.INFO_CONVERSIONE_GT1);
+        view.showMessage(ControllerConstants.INFO_CONVERSIONE_LT1);
 
         // Ottiene la foglia di riferimento della nuova gerarchia
         // Questa foglia servirà come "ponte" per tutte le conversioni con altre
@@ -1826,15 +1630,15 @@ public class Controller {
 
         // Mostra informazioni sulla gerarchia corrente e la sua categoria di
         // riferimento
-        view.showMessage(String.format(INFO_GERARCHIA_NUOVA, categoriaRadice.getNome()));
-        view.showMessage(String.format(INFO_CATEGORIA_RIFERIMENTO,
+        view.showMessage(String.format(ControllerConstants.INFO_GERARCHIA_NUOVA, categoriaRadice.getNome()));
+        view.showMessage(String.format(ControllerConstants.INFO_CATEGORIA_RIFERIMENTO,
                 fogliaRiferimento.data().getNome(), fogliaRiferimento.level()));
 
         // Elenco delle gerarchie esistenti con cui creare conversioni
         List<Gerarchia> gerarchieEsistenti = new ArrayList<>(database.getGerarchie());
         if (gerarchieEsistenti.isEmpty()) {
             // Se non ci sono altre gerarchie nel sistema, non serve creare conversioni
-            view.showMessage(INFO_NESSUNA_GERARCHIA);
+            view.showMessage(ControllerConstants.INFO_NESSUNA_GERARCHIA);
             return;
         }
 
@@ -1856,18 +1660,18 @@ public class Controller {
 
             // Visualizza separatore e informazioni sulla gerarchia con cui si sta creando
             // la conversione
-            view.showMessage(SEPARATORE);
-            view.showMessage(String.format(INFO_CONVERSIONE_CON, categoriaRadiceEsistente.getNome()));
-            view.showMessage(String.format(INFO_CATEGORIA_RIFERIMENTO,
+            view.showMessage(ControllerConstants.SEPARATORE);
+            view.showMessage(String.format(ControllerConstants.INFO_CONVERSIONE_CON, categoriaRadiceEsistente.getNome()));
+            view.showMessage(String.format(ControllerConstants.INFO_CATEGORIA_RIFERIMENTO,
                     fogliaRiferimentoEsistente.data().getNome(), fogliaRiferimentoEsistente.level()));
 
             // Visualizza il percorso dalla radice alle foglie di riferimento per entrambe
             // le gerarchie
             // Questo aiuta l'utente a comprendere meglio la relazione tra le categorie
-            view.showMessage(INFO_PERCORSO_NUOVO);
+            view.showMessage(ControllerConstants.INFO_PERCORSO_NUOVO);
             mostraPercorsoFino(fogliaRiferimento);
 
-            view.showMessage(INFO_PERCORSO_ESISTENTE);
+            view.showMessage(ControllerConstants.INFO_PERCORSO_ESISTENTE);
             mostraPercorsoFino(fogliaRiferimentoEsistente);
 
             // Richiede all'utente il fattore di conversione con validazione
@@ -1875,7 +1679,7 @@ public class Controller {
                     fogliaRiferimento.data().getNome() + " (" + categoriaRadice.getNome() + ")",
                     fogliaRiferimentoEsistente.data().getNome() + " (" + categoriaRadiceEsistente.getNome() + ")",
                     0.5, 2.0, // Limiti min e max del fattore
-                    ERROR_FATTORE_RANGE); // Messaggio di errore in caso di input non valido
+                    ControllerConstants.ERROR_FATTORE_RANGE); // Messaggio di errore in caso di input non valido
 
             // Aggiunge il fattore di conversione al sistema globale di conversione
             this.database.getConversioneGerarchie().addFattoreConversione(
@@ -1884,15 +1688,15 @@ public class Controller {
                     fattore);
 
             // Conferma l'aggiunta del fattore e incrementa il contatore
-            view.showSuccessMessage(String.format(SUCCESS_FATTORE_AGGIUNTO, fattore));
+            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_FATTORE_AGGIUNTO, fattore));
             fattoriCreati++;
         }
 
         // Riepilogo finale dell'operazione
         if (fattoriCreati > 0) {
-            view.showSuccessMessage(String.format(SUCCESS_FATTORI_CREATI, fattoriCreati));
+            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_FATTORI_CREATI, fattoriCreati));
         } else {
-            view.showMessage(INFO_NESSUN_FATTORE);
+            view.showMessage(ControllerConstants.INFO_NESSUN_FATTORE);
         }
     }
 
@@ -2004,7 +1808,7 @@ public class Controller {
             double maxFattore = isSpecializzata ? 2.0 : 1.0; // Massimo: 2.0 per specializzate, 1.0 per altre
 
             // Seleziona il messaggio di errore appropriato
-            String messaggioErrore = isSpecializzata ? ERROR_FATTORE_SPECIALIZZATO : ERROR_FATTORE_NON_SPECIALIZZATO;
+            String messaggioErrore = isSpecializzata ? ControllerConstants.ERROR_FATTORE_SPECIALIZZATO : ControllerConstants.ERROR_FATTORE_NON_SPECIALIZZATO;
 
             // Richiede all'utente di definire il fattore di conversione
             double fattore = richiediEValidaFattore(
@@ -2016,7 +1820,7 @@ public class Controller {
 
             // Aggiunge il fattore di conversione al sistema
             gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
-            view.showMessage(SUCCESS_FATTORE_SEMPLICE);
+            view.showMessage(ControllerConstants.SUCCESS_FATTORE_SEMPLICE);
         }
     }
 
@@ -2052,7 +1856,7 @@ public class Controller {
         while (true) {
             // Richiede all'utente di inserire il fattore di conversione
             String value = view.getInput(
-                    String.format(PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione));
+                    String.format(ControllerConstants.PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione));
 
             try {
                 // Converte l'input in un valore numerico
@@ -2067,7 +1871,7 @@ public class Controller {
                 }
             } catch (NumberFormatException e) {
                 // Input non convertibile in numero decimale
-                view.showMessage(ERROR_FATTORE_FORMATO);
+                view.showMessage(ControllerConstants.ERROR_FATTORE_FORMATO);
             }
         }
     }
@@ -2099,7 +1903,7 @@ public class Controller {
     private String getUsername() {
         while (true) {
             // Richiede uno username all'utente, specificando i requisiti di lunghezza
-            String username = view.getInput(String.format(PROMPT_NEW_USERNAME, UserUtil.USERNAME_LENGTH));
+            String username = view.getInput(String.format(ControllerConstants.PROMPT_NEW_USERNAME, UserUtil.USERNAME_LENGTH));
 
             // Verifica se lo username soddisfa i criteri di sicurezza
             if (UserUtil.checkUsername(username))
@@ -2107,7 +1911,7 @@ public class Controller {
 
             // Se lo username non è valido, mostra un messaggio di errore
             // e richiede un nuovo tentativo
-            view.showMessage(ERROR_INVALID_USERNAME);
+            view.showMessage(ControllerConstants.ERROR_INVALID_USERNAME);
         }
     }
 
@@ -2136,7 +1940,7 @@ public class Controller {
             // Richiede una password all'utente, specificando i requisiti minimi di
             // lunghezza
             // e complessità (maiuscole, minuscole, caratteri speciali)
-            String password = view.getInput(String.format(PROMPT_NEW_PASSWORD, UserUtil.PASSWORD_LENGTH));
+            String password = view.getPasswordInput(String.format(ControllerConstants.PROMPT_NEW_PASSWORD, UserUtil.PASSWORD_LENGTH));
 
             // Verifica se la password soddisfa i criteri di sicurezza
             if (UserUtil.checkPassword(password))
@@ -2144,7 +1948,7 @@ public class Controller {
 
             // Se la password non è valida, mostra un messaggio di errore
             // e richiede un nuovo tentativo
-            view.showMessage(ERROR_INVALID_PASSWORD);
+            view.showMessage(ControllerConstants.ERROR_INVALID_PASSWORD);
         }
     }
 
@@ -2181,7 +1985,7 @@ public class Controller {
 
             // Se l'input non è valido, mostra un messaggio di errore
             // e richiede un nuovo tentativo
-            view.showMessage(ERROR_INVALID_INPUT);
+            view.showMessage(ControllerConstants.ERROR_INVALID_INPUT);
         }
     }
 }

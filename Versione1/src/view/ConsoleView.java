@@ -333,7 +333,6 @@ public class ConsoleView {
                 GREEN + "1. Visualizza Attività" + RESET,
                 GREEN + "2. Registra Nuova Attività" + RESET,
                 CYAN + "3. Visualizza Statistiche" + RESET,
-                YELLOW + "9. Logout" + RESET,
                 RED + "0. Uscita" + RESET);
 
         printMenuBox(USER_MENU_TITLE, menuItems);
