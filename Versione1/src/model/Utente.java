@@ -25,9 +25,13 @@ import java.util.Objects;
 public class Utente implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // Costanti di sicurezza
+    private static final String ALGORITMO_HASH = "SHA-256";
+    private static final int DIMENSIONE_SALT = 20; // In byte
+
     // Costanti per messaggi di errore
-    public static final String USERNAME_NON_NULL = "Username non può essere null";
-    public static final String HASHING_NON_DISPONIBILE = "Algoritmo di hashing non disponibile";
+    private static final String USERNAME_NON_NULL = "Username non può essere null";
+    private static final String HASHING_NON_DISPONIBILE = "Algoritmo di hashing non disponibile";
 
     /** Username univoco che identifica l'utente */
     private String username;
@@ -158,7 +162,7 @@ public class Utente implements Serializable {
     private String hashPassword(String password, byte[] salt) {
         try {
             // Inizializza l'algoritmo di hashing SHA-256
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigest.getInstance(ALGORITMO_HASH);
 
             // Aggiunge il salt ai dati da processare
             md.update(salt);
@@ -185,7 +189,7 @@ public class Utente implements Serializable {
         SecureRandom random = new SecureRandom();
 
         // Crea un array di 20 byte per contenere il salt
-        byte[] salt = new byte[20];
+        byte[] salt = new byte[DIMENSIONE_SALT];
 
         // Riempie l'array con valori casuali
         random.nextBytes(salt);

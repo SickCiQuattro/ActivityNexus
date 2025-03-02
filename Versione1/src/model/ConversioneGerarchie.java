@@ -8,51 +8,42 @@ import java.util.Objects;
 /**
  * Sistema di conversione tra categorie appartenenti a gerarchie diverse.
  * <p>
- * Memorizza fattori di conversione che rappresentano il rapporto di equivalenza
- * tra categorie,
- * consentendo di confrontare attività eterogenee. Ad esempio, un fattore di 1.5
- * tra "Nuoto" e "Corsa"
- * significa che 1 ora di nuoto equivale a 1.5 ore di corsa.
+ * Gestisce fattori di conversione che rappresentano il rapporto di equivalenza
+ * tra categorie, permettendo di confrontare attività eterogenee. Ad esempio, un
+ * fattore di 1.5 tra "Nuoto" e "Corsa" significa che 1 ora di nuoto equivale
+ * a 1.5 ore di corsa.
  * <p>
- * Caratteristiche principali:
+ * Funzionalità principali:
  * <ul>
- * <li>Memorizza fattori diretti tra coppie di categorie</li>
- * <li>Calcola automaticamente i fattori inversi</li>
- * <li>Garantisce consistenza dei dati (fattori positivi, no
- * auto-riferimenti)</li>
+ * <li>Gestione di fattori diretti tra coppie di categorie</li>
+ * <li>Calcolo automatico di fattori inversi</li>
+ * <li>Validazione della consistenza dei dati</li>
  * </ul>
  * 
  * @see Categoria
  * @see Gerarchia
  */
 public class ConversioneGerarchie implements Serializable {
-    // Identificatore di versione per la serializzazione
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Mappa che associa coppie ordinate di categorie ai rispettivi fattori di
-     * conversione.
-     * <p>
-     * Ogni coppia (A,B) è associata a un fattore che indica quante unità di B
-     * equivalgono a una unità di A.
-     */
-    private final Map<CoppiaOrdinata, Double> fattori = new HashMap<>();
+    /** Messaggio di errore per fattori non positivi */
+    private static final String ERRORE_FATTORE_NON_POSITIVO = "Il fattore di conversione deve essere positivo";
+
+    /** Mappa delle conversioni tra categorie */
+    private final Map<CoppiaDiCategorie, Double> fattori = new HashMap<>();
 
     // -----------------------------------------------------------------------------------
     // METODI DI ACCESSO AI FATTORI DI CONVERSIONE
     // -----------------------------------------------------------------------------------
 
     /**
-     * Restituisce il fattore di conversione tra due categorie.
+     * Ottiene il fattore di conversione tra due categorie.
      * <p>
-     * Cerca il fattore diretto o calcola l'inverso se necessario. Il fattore
-     * rappresenta quante unità della seconda categoria equivalgono a una unità
-     * della prima.
+     * Cerca il fattore diretto o calcola l'inverso se necessario.
      *
      * @param prima   la categoria di origine
      * @param seconda la categoria di destinazione
      * @return il fattore arrotondato a due decimali, o null se non esiste relazione
-     * @see #addFattoreConversione(Categoria, Categoria, double)
      */
     public Double getFattoreConversione(Categoria prima, Categoria seconda) {
         // Verifica parametri null: se almeno uno è null, non può esistere conversione
@@ -64,7 +55,7 @@ public class ConversioneGerarchie implements Serializable {
         Double fattore = getFattore(prima, seconda);
         if (fattore != null) {
             // Se trovato, arrotonda a due decimali e restituisce
-            return Math.round(fattore * 100) / 100.0;
+            return fattore;
         }
 
         // Se non trova il fattore diretto, cerca quello inverso
@@ -73,7 +64,7 @@ public class ConversioneGerarchie implements Serializable {
             // Calcola l'inverso (1/fattore) per ottenere la conversione opposta
             fattore = 1.0 / fattore;
             // Arrotonda a due decimali e restituisce
-            return Math.round(fattore * 100) / 100.0;
+            return fattore;
         }
 
         // Se non esiste né il fattore diretto né l'inverso, non c'è relazione
@@ -99,7 +90,7 @@ public class ConversioneGerarchie implements Serializable {
 
         // Verifica che il fattore sia positivo
         if (fattore <= 0) {
-            throw new IllegalArgumentException("Il fattore di conversione deve essere positivo");
+            throw new IllegalArgumentException(ERRORE_FATTORE_NON_POSITIVO);
         }
 
         // Non memorizzare fattori per categorie uguali (auto-riferimento)

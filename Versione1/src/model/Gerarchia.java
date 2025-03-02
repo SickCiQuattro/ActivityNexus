@@ -30,6 +30,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      * Costruisce una Gerarchia con la categoria radice specificata.
      *
      * @param categoriaRadice la categoria radice della gerarchia
+     * @throws NullPointerException se categoriaRadice è null
      */
     public Gerarchia(Categoria categoriaRadice) {
         super(categoriaRadice); // Inizializza il nodo radice con la categoria specificata

@@ -28,13 +28,17 @@ import java.util.Set;
  * @see Gerarchia
  */
 public class Campo implements Serializable {
-    // Identificatore di versione per la serializzazione
-    private static final long serialVersionUID = 1L;
 
-    // Nome del campo (es. "Disciplina", "Area geografica")
+    /** Messaggio per eccezioni di nome nullo */
+    private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
+
+    /** Messaggio per eccezioni di valore nullo */
+    private static final String ERRORE_VALORE_NULLO = "Il valore non può essere null";
+
+    /** Nome del campo (es. "Disciplina", "Area geografica") */
     private String nome;
 
-    // Insieme di valori che costituiscono il dominio del campo
+    /** Insieme di valori che costituiscono il dominio del campo */
     private final Set<ValoreCampo> dominio;
 
     // -----------------------------------------------------------------------------------
@@ -63,7 +67,7 @@ public class Campo implements Serializable {
      */
     public Campo(String nome, Set<ValoreCampo> dominio) {
         // Verifica che il nome non sia null e lancia eccezione in caso contrario
-        this.nome = Objects.requireNonNull(nome, "Il nome del campo non può essere null");
+        this.nome = Objects.requireNonNull(nome, ERRORE_NOME_NULLO);
 
         // Inizializza un nuovo insieme per memorizzare i valori del dominio
         this.dominio = new HashSet<>();
@@ -100,7 +104,7 @@ public class Campo implements Serializable {
      */
     public void setNome(String nome) {
         // Verifica che il nuovo nome non sia null prima di assegnarlo
-        this.nome = Objects.requireNonNull(nome, "Il nome del campo non può essere null");
+        this.nome = Objects.requireNonNull(nome, ERRORE_NOME_NULLO);
     }
 
     /**
@@ -137,7 +141,7 @@ public class Campo implements Serializable {
      */
     public boolean addValore(ValoreCampo valore) {
         // Verifica che il valore non sia null e lancia eccezione in caso contrario
-        Objects.requireNonNull(valore, "Il valore non può essere null");
+        Objects.requireNonNull(valore, ERRORE_VALORE_NULLO);
 
         // Tenta di aggiungere il valore al dominio
         return this.dominio.add(valore);

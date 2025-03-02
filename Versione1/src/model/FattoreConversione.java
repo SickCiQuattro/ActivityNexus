@@ -219,30 +219,30 @@ public class FattoreConversione implements Serializable {
      * fattori</li>
      * </ol>
      *
-     * @param primoLivello   il livello di partenza
-     * @param secondoLivello il livello di arrivo
+     * @param livelloPartenza il livello di partenza
+     * @param livelloArrivo   il livello di arrivo
      * @return il fattore calcolato, null se mancano i fattori necessari
      */
-    public Double getFattoreConversione(int primoLivello, int secondoLivello) {
+    public Double getFattoreConversione(int livelloPartenza, int livelloArrivo) {
         // CASO 0: Se i livelli sono uguali, il fattore è 1 (identità)
-        if (primoLivello == secondoLivello) {
+        if (livelloPartenza == livelloArrivo) {
             return 1.0;
         }
 
         // CASO 1: Dal livello di riferimento a un altro livello
         // Esempio: Da "Nuoto agonistico" (rif) a "Sport acquatici"
-        if (primoLivello == livelloRiferimento) {
+        if (livelloPartenza == livelloRiferimento) {
             // Restituisce direttamente il fattore per il secondo livello
             // Ad es. se fattore=0.8, significa che 1 unità di riferimento = 0.8 unità del
             // secondo livello
-            return getFattoreDiretto(secondoLivello);
+            return getFattoreDiretto(livelloArrivo);
         }
 
         // CASO 2: Da un livello al livello di riferimento
         // Esempio: Da "Sport acquatici" a "Nuoto agonistico" (rif)
-        else if (secondoLivello == livelloRiferimento) {
+        else if (livelloArrivo == livelloRiferimento) {
             // Ottiene il fattore per il primo livello
-            Double fattorePrimo = getFattoreDiretto(primoLivello);
+            Double fattorePrimo = getFattoreDiretto(livelloPartenza);
 
             // Se il fattore esiste, calcola l'inverso
             // Ad es. se fattore=0.8 (1 unità primo = 0.8 unità riferimento)
@@ -254,8 +254,8 @@ public class FattoreConversione implements Serializable {
         // Esempio: Da "Sport acquatici" a "Nuoto"
         else {
             // Ottiene i fattori diretti rispetto al livello di riferimento
-            Double fattorePrimo = getFattoreDiretto(primoLivello);
-            Double fattoreSecondo = getFattoreDiretto(secondoLivello);
+            Double fattorePrimo = getFattoreDiretto(livelloPartenza);
+            Double fattoreSecondo = getFattoreDiretto(livelloArrivo);
 
             // Se entrambi i fattori esistono, calcola il rapporto
             if (fattorePrimo != null && fattoreSecondo != null) {
@@ -290,5 +290,35 @@ public class FattoreConversione implements Serializable {
     public int getNumeroFattori() {
         // Restituisce il numero di fattori memorizzati nella mappa
         return fattoriConversione.size();
+    }
+
+    /**
+     * Restituisce una rappresentazione testuale dei fattori di conversione.
+     * 
+     * @return stringa che descrive i fattori di conversione
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Fattori di conversione:\n");
+
+        sb.append("Livello di riferimento: ").append(livelloRiferimento);
+        if (nodoRiferimento != null) {
+            sb.append(" (").append(nodoRiferimento.data().getNome()).append(")");
+        }
+        sb.append("\n");
+
+        if (fattoriConversione.isEmpty()) {
+            sb.append("Nessun fattore definito");
+        } else {
+            sb.append("Livello -> Fattore:\n");
+            fattoriConversione.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> sb.append(entry.getKey())
+                            .append(" -> ")
+                            .append(entry.getValue())
+                            .append("\n"));
+        }
+
+        return sb.toString();
     }
 }
