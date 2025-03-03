@@ -260,9 +260,7 @@ public class ConsoleView {
         clearScreen();
 
         List<String> menuItems = List.of(
-                GREEN + "1. Visualizza Attività" + RESET,
-                GREEN + "2. Registra Nuova Attività" + RESET,
-                CYAN + "3. Visualizza Statistiche" + RESET,
+                GREEN + "1. Visualizza categorie radice" + RESET,
                 RED + "0. Uscita" + RESET);
 
         printMenuBox(USER_MENU_TITLE, menuItems);
