@@ -28,7 +28,9 @@ import java.util.Set;
  * @see Gerarchia
  */
 public class Campo implements Serializable {
-
+    // Identificatore di versione per la serializzazione
+    private static final long serialVersionUID = 1L;
+    
     /** Messaggio per eccezioni di nome nullo */
     private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
 
