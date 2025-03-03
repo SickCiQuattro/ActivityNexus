@@ -7,6 +7,9 @@ import model.*;
 import util.UserUtil;
 import view.ConsoleView;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,22 +95,7 @@ public class Controller {
                         break;
 
                     case "2": // Registrazione
-                        // Determinazione del tipo di account (Configuratore o Fruitore)
-                        boolean isConfig = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
-                        boolean registrazioneAvvenuta = false;
-                        if (isConfig)
-                            registrazioneAvvenuta = registraConfiguratore();
-                        else
-                            registrazioneAvvenuta = registraFruitore();
-
-                        //TODO: messaggi di errore differenziati
-                        this.view.showMessage(registrazioneAvvenuta ? ControllerConstants.REGISTRATION_SUCCESS : ControllerConstants.REGISTRATION_FAILED);
-
-                        if (registrazioneAvvenuta) {
-                            // Se la registrazione va a buon fine, salva i dati utente
-                            salvaUtenti();
-                            view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
-                        }
+                        handleRegistration();
                         break;
 
                     case "0": // Uscita
@@ -125,7 +113,10 @@ public class Controller {
             } catch (Exception e) {
                 // Gestione errori imprevisti per evitare che l'applicazione si arresti
                 view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
-                e.printStackTrace(); // Stampa lo stack trace per il debug
+
+                // Logging dell'errore invece di una semplice stack trace
+                logErrore(e);
+
                 view.pressEnterToContinue(); // Attende input utente prima di continuare
             }
         }
@@ -263,7 +254,8 @@ public class Controller {
     private void handleLogin() {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
         if (database.getUtenti().isEmpty()) {
-            view.showMessage(ControllerConstants.NO_USERS_REGISTERED);
+            view.showErrorMessage(ControllerConstants.NO_USERS_REGISTERED);
+            view.pressEnterToContinue();
             return;
         }
 
@@ -286,6 +278,49 @@ public class Controller {
         } else {
             // Altrimenti è un fruitore (funzionalità future)
             manageFruitore();
+        }
+    }
+
+    /**
+     * Gestisce il processo di registrazione di un nuovo utente.
+     * <p>
+     * Mostra le opzioni di registrazione e guida l'utente nella scelta
+     * del tipo di account (configuratore o fruitore) e nell'inserimento
+     * delle informazioni necessarie.
+     */
+    private void handleRegistration() {
+        // Presentazione delle opzioni di registrazione
+        view.showMessage(ControllerConstants.TITLE_REGISTRATION);
+
+        // Determinazione del tipo di account (Configuratore o Fruitore)
+        boolean isConfiguratore = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
+        boolean registrazioneCompletata;
+
+        try {
+            if (isConfiguratore) {
+                registrazioneCompletata = registraConfiguratore();
+            } else {
+                // Verifica preliminare: per i fruitori serve almeno un comprensorio
+                if (database.getComprensori().isEmpty()) {
+                    view.showErrorMessage(ControllerConstants.ERROR_NO_COMPRENSORI_REGISTRATION);
+                    return;
+                }
+                registrazioneCompletata = registraFruitore();
+            }
+
+            // Mostra il messaggio appropriato in base all'esito
+            if (registrazioneCompletata) {
+                view.showSuccessMessage(ControllerConstants.REGISTRATION_SUCCESS);
+                // Salva i dati utente dopo registrazione riuscita
+                salvaUtenti();
+                view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
+            } else {
+                view.showErrorMessage(ControllerConstants.REGISTRATION_CANCELLED);
+            }
+            this.view.pressEnterToContinue();
+        } catch (Exception e) {
+            view.showErrorMessage(String.format(
+                    ControllerConstants.ERROR_REGISTRATION, e.getMessage()));
         }
     }
 
@@ -479,7 +514,8 @@ public class Controller {
                 // Elabora la scelta dell'utente
                 switch (choice) {
                     case "1": // Visualizza gerarchie
-                        //TODO: visualizzazione categorie radice, per poi scegliere la gerarchia da visualizzare
+                        // TODO: visualizzazione categorie radice, per poi scegliere la gerarchia da
+                        // visualizzare
                         visualizzaGerarchie();
                         break;
 
@@ -529,53 +565,157 @@ public class Controller {
     }
 
     /**
-     * TODO
-     * @return
+     * Registra un nuovo utente configuratore nel sistema.
+     * <p>
+     * Il processo include:
+     * <ul>
+     * <li>Verifica di sicurezza preliminare</li>
+     * <li>Acquisizione di username valido e univoco</li>
+     * <li>Acquisizione di password sicura</li>
+     * <li>Creazione dell'account nel database</li>
+     * </ul>
+     *
+     * @return true se la registrazione è completata con successo, false altrimenti
      */
     private boolean registraConfiguratore() {
-        if (!defaultUtente())
-            return false; // Se l'autenticazione fallisce, interrompi la registrazione
+        // Mostra intestazione per la registrazione configuratore
+        view.showMessage(ControllerConstants.TITLE_REGISTRA_CONFIGURATORE);
 
-        // Raccolta di uno username valido
+        // Verifica di sicurezza preliminare per prevenire registrazioni automatizzate
+        if (!defaultUtente()) {
+            view.showErrorMessage(ControllerConstants.SECURITY_CHECK_FAILED);
+            return false;
+        }
+
+        // Acquisizione username valido e verifica unicità
         String username = getUsername();
-        if (username == null)
-            return false; // Se l'utente non fornisce uno username valido, interrompi
+        if (username == null) {
+            view.showErrorMessage(ControllerConstants.USERNAME_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Step 3: Raccolta di una password valida
+        // Verifica che lo username non sia già utilizzato
+        if (!database.esisteUtente(username)) {
+            view.showErrorMessage(ControllerConstants.ERROR_USERNAME_ALREADY_EXISTS);
+            return false;
+        }
+
+        // Acquisizione password valida
         String password = getPassword();
-        if (password == null)
-            return false; // Se l'utente non fornisce una password valida, interrompi
+        if (password == null) {
+            view.showErrorMessage(ControllerConstants.PASSWORD_ACQUISITION_FAILED);
+            return false;
+        }
 
-
-        // Step 5: Registrazione effettiva dell'utente nel database
-        // Il metodo ritorna true se la registrazione ha successo, false altrimenti
-        return this.database.registraConfiguratore(username, password, true);
+        // Registrazione effettiva nel database
+        return database.registraConfiguratore(username, password);
     }
 
+    /**
+     * Registra un nuovo utente fruitore nel sistema.
+     * <p>
+     * Il processo include:
+     * <ul>
+     * <li>Selezione del comprensorio di appartenenza</li>
+     * <li>Acquisizione di username valido e univoco</li>
+     * <li>Acquisizione di password sicura</li>
+     * <li>Acquisizione e validazione dell'indirizzo email</li>
+     * <li>Creazione dell'account nel database</li>
+     * </ul>
+     *
+     * @return true se la registrazione è completata con successo, false altrimenti
+     */
+    private boolean registraFruitore() {
+        // Mostra intestazione per la registrazione fruitore
+        view.showMessage(ControllerConstants.TITLE_REGISTRA_FRUITORE);
 
-    private boolean registraFruitore () {
         // Selezione del comprensorio di appartenenza
         Comprensorio comprensorio = selezionaComprensorio();
-        if (comprensorio == null)
-            return false; // Se l'utente annulla la selezione del comprensorio, interrompi
+        if (comprensorio == null) {
+            return false;
+        }
 
-        // Raccolta di uno username valido
+        // Acquisizione username valido e verifica unicità
         String username = getUsername();
-        if (username == null)
-            return false; // Se l'utente non fornisce uno username valido, interrompi
+        if (username == null) {
+            view.showErrorMessage(ControllerConstants.USERNAME_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Step 3: Raccolta di una password valida
+        // Verifica che lo username non sia già utilizzato
+        if (!database.esisteUtente(username)) {
+            view.showErrorMessage(ControllerConstants.ERROR_USERNAME_ALREADY_EXISTS);
+            return false;
+        }
+
+        // Acquisizione password valida
         String password = getPassword();
-        if (password == null)
-            return false; // Se l'utente non fornisce una password valida, interrompi
+        if (password == null) {
+            view.showErrorMessage(ControllerConstants.PASSWORD_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Raccolta dell'indirizzo email
-        String mail = getMail();
-        if (mail == null)
-            return false; // Se l'utente non fornisce una mail valida, interrompi
+        // Acquisizione e validazione email
+        String email = getEmailValida();
+        if (email == null) {
+            view.showErrorMessage(ControllerConstants.EMAIL_ACQUISITION_FAILED);
+            return false;
+        }
 
+        // Registrazione effettiva nel database
+        return database.registraFruitore(username, password, email, comprensorio);
+    }
 
-        return this.database.registraFruitore(username, password, mail, comprensorio);
+    /**
+     * Richiede e valida un indirizzo email dall'utente.
+     *
+     * @return l'indirizzo email validato, o null se il processo è annullato
+     */
+    private String getEmailValida() {
+        final int MAX_TENTATIVI = 3;
+
+        for (int tentativo = 0; tentativo < MAX_TENTATIVI; tentativo++) {
+            String email = view.getInput(ControllerConstants.PROMPT_MAIL);
+
+            // Annullamento inserimento
+            if (email.equals("0")) {
+                return null;
+            }
+
+            // Validazione di base: controllo formato email
+            if (validaFormatoEmail(email)) {
+                return email;
+            }
+
+            // Messaggio di errore con tentativi rimanenti
+            int tentativi_rimanenti = MAX_TENTATIVI - tentativo - 1;
+            view.showErrorMessage(String.format(
+                    ControllerConstants.ERROR_INVALID_EMAIL,
+                    tentativi_rimanenti > 0 ? tentativi_rimanenti : "nessun"));
+        }
+
+        return null;
+    }
+
+    /**
+     * Valida il formato di un indirizzo email.
+     * 
+     * @param email l'indirizzo email da validare
+     * @return true se il formato è valido, false altrimenti
+     */
+    private boolean validaFormatoEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        // Validazione di base: deve contenere @ e almeno un punto dopo @
+        int chiocciola = email.indexOf('@');
+        if (chiocciola < 1 || chiocciola == email.length() - 1) {
+            return false;
+        }
+
+        String dominio = email.substring(chiocciola + 1);
+        return dominio.contains(".") && !dominio.startsWith(".");
     }
 
     /**
@@ -760,30 +900,60 @@ public class Controller {
     }
 
     /**
-     * TODO
-     * @return
+     * Permette all'utente di selezionare un comprensorio geografico.
+     * <p>
+     * Mostra un elenco numerato di tutti i comprensori disponibili nel sistema
+     * e acquisisce la scelta dell'utente. Consente anche di annullare l'operazione.
+     *
+     * @return il comprensorio selezionato, o null se l'operazione è annullata o non
+     *         ci sono comprensori
      */
     public Comprensorio selezionaComprensorio() {
-        //TODO: stampa carina simile a quello delle foglie
-        // TODO: aggiungere indicazione per uscire
+        // Recupera la lista dei comprensori disponibili
+        List<Comprensorio> comprensori = new ArrayList<>(this.database.getComprensori());
 
-        ArrayList<Comprensorio> comprensori = new ArrayList<>(this.database.getComprensori());
-
+        // Verifica se ci sono comprensori disponibili
         if (comprensori.isEmpty()) {
-            //TODO: non puoi registrarti come fruitore se non ci sono comprensori
-            this.view.showErrorMessage("Non ci sono comprensori registrati.");
+            this.view.showErrorMessage(ControllerConstants.ERROR_NO_COMPRENSORI);
             return null;
         }
 
-        this.view.showMessage(this.database.toStringComprensori());
+        // Mostra il titolo della selezione
+        this.view.showMessage(ControllerConstants.TITLE_SELEZIONA_COMPRENSORIO);
+        this.view.showMessage(ControllerConstants.INFO_SELEZIONE_COMPRENSORIO);
 
-        int index = this.view.getIntInput(ControllerConstants.PROMPT_COMPRENSORIO_INDEX, 0, comprensori.size());
+        // Visualizza l'elenco dei comprensori in formato numerato
+        for (int i = 0; i < comprensori.size(); i++) {
+            Comprensorio comprensorio = comprensori.get(i);
 
+            // Formato: [1] Nome Comprensorio (3 comuni)
+            this.view.showMessage(String.format(ControllerConstants.FORMATO_COMPRENSORIO_LISTA,
+                    i + 1,
+                    comprensorio.getNome(),
+                    comprensorio.getComuni().size()));
+        }
+
+        // Mostra le istruzioni per annullare
+        this.view.showMessage(ControllerConstants.INFO_ANNULLA_SELEZIONE);
+
+        // Richiedi la selezione dell'utente (0 per annullare, 1-N per selezionare)
+        int index = this.view.getIntInput(
+                ControllerConstants.PROMPT_COMPRENSORIO_INDEX,
+                0,
+                comprensori.size());
+
+        // Gestione dell'annullamento dell'operazione
         if (index == 0) {
             return null;
         }
 
-        return comprensori.get(index - 1);
+        // Recupera e mostra il comprensorio selezionato
+        Comprensorio selezionato = comprensori.get(index - 1);
+        this.view.showSuccessMessage(String.format(
+                ControllerConstants.SUCCESS_COMPRENSORIO_SELEZIONATO,
+                selezionato.getNome()));
+
+        return selezionato;
     }
 
     // -----------------------------------------------------------------------------------
@@ -1363,7 +1533,7 @@ public class Controller {
         // categorie
         while (corrente != null) {
             // addFirst per avere l'ordine corretto (dalla radice alla foglia)
-            percorso.add(0, corrente.data());
+            percorso.addFirst(corrente.data());
             corrente = corrente.parent(); // Risale al nodo genitore
         }
 
@@ -1521,12 +1691,12 @@ public class Controller {
     }
 
     /**
-     * TODO
+     * TODO ma perchè esiste questo metodo
+     * 
      * @return
      */
     private String getMail() {
-        String mail = view.getInput(ControllerConstants.PROMPT_MAIL);
-        return mail;
+        return view.getInput(ControllerConstants.PROMPT_MAIL);
     }
 
     /**
@@ -1554,7 +1724,58 @@ public class Controller {
 
             // Se l'input non è valido, mostra un messaggio di errore
             // e richiede un nuovo tentativo
-            view.showMessage(ControllerConstants.ERROR_INVALID_INPUT);
+            view.showErrorMessage(ControllerConstants.ERROR_INVALID_INPUT);
+        }
+    }
+
+    /**
+     * Registra un errore nel sistema di logging dell'applicazione.
+     * <p>
+     * Gestisce un'eccezione in modo centralizzato, registrando informazioni
+     * dettagliate per il debug e notificando appropriatamente l'utente.
+     *
+     * @param e l'eccezione da registrare
+     */
+    private void logErrore(Exception e) {
+        // Inizializza un builder per il messaggio di log
+        StringBuilder logMessage = new StringBuilder();
+        logMessage.append("\n=== ERRORE APPLICAZIONE ===\n");
+        logMessage.append("Contesto: ").append("Errore imprevisto nel menu principale").append("\n");
+        logMessage.append("Timestamp: ").append(new java.util.Date()).append("\n");
+        logMessage.append("Tipo errore: ").append(e.getClass().getName()).append("\n");
+        logMessage.append("Messaggio: ").append(e.getMessage()).append("\n");
+
+        // Aggiungi informazioni sulla causa originale dell'errore, se presente
+        Throwable causa = e.getCause();
+        if (causa != null) {
+            logMessage.append("Causa: ").append(causa.getMessage()).append("\n");
+        }
+
+        // Aggiungi stack trace formattata
+        logMessage.append("Stack trace:\n");
+        for (StackTraceElement element : e.getStackTrace()) {
+            // Includi solo elementi relativi al nostro package per ridurre il rumore
+            if (element.getClassName().startsWith("model") ||
+                    element.getClassName().startsWith("controller") ||
+                    element.getClassName().startsWith("view")) {
+                logMessage.append("  at ").append(element).append("\n");
+            }
+        }
+
+        // Registra l'errore nel file di log (in modalità sviluppo stampa su console)
+        System.err.println(logMessage);
+
+        try {
+            // Scrivi l'errore su un file di log per riferimento futuro
+            String logFilePath = "error_log.txt";
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter(logFilePath, true)); // true = append mode
+            writer.write(logMessage.toString());
+            writer.newLine();
+            writer.close();
+        } catch (IOException loggingError) {
+            // In caso di errore durante il logging, stampa almeno un avviso
+            System.err.println("Impossibile scrivere nel file di log: " + loggingError.getMessage());
         }
     }
 }

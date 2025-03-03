@@ -24,6 +24,7 @@ import java.util.Objects;
  */
 public class Categoria implements Serializable {
     // Identificatore di versione per la serializzazione
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Costante per i messaggi di errore, riutilizzata in più punti

@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.Set;
  */
 public class Campo implements Serializable {
     // Identificatore di versione per la serializzazione
+    @Serial
     private static final long serialVersionUID = 1L;
     
     /** Messaggio per eccezioni di nome nullo */

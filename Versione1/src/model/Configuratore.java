@@ -1,6 +1,6 @@
 package model;
 
-import java.io.Serializable;
+import java.io.Serial;
 
 /**
  * Utente con privilegi amministrativi nel sistema.
@@ -16,6 +16,7 @@ import java.io.Serializable;
  * @see Fruitore
  */
 public class Configuratore extends Utente {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
