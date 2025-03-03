@@ -291,34 +291,4 @@ public class FattoreConversione implements Serializable {
         // Restituisce il numero di fattori memorizzati nella mappa
         return fattoriConversione.size();
     }
-
-    /**
-     * Restituisce una rappresentazione testuale dei fattori di conversione.
-     * 
-     * @return stringa che descrive i fattori di conversione
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("Fattori di conversione:\n");
-
-        sb.append("Livello di riferimento: ").append(livelloRiferimento);
-        if (nodoRiferimento != null) {
-            sb.append(" (").append(nodoRiferimento.data().getNome()).append(")");
-        }
-        sb.append("\n");
-
-        if (fattoriConversione.isEmpty()) {
-            sb.append("Nessun fattore definito");
-        } else {
-            sb.append("Livello -> Fattore:\n");
-            fattoriConversione.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .forEach(entry -> sb.append(entry.getKey())
-                            .append(" -> ")
-                            .append(entry.getValue())
-                            .append("\n"));
-        }
-
-        return sb.toString();
-    }
 }

@@ -30,7 +30,7 @@ public class ConversioneGerarchie implements Serializable {
     private static final String ERRORE_FATTORE_NON_POSITIVO = "Il fattore di conversione deve essere positivo";
 
     /** Mappa delle conversioni tra categorie */
-    private final Map<CoppiaDiCategorie, Double> fattori = new HashMap<>();
+    private final Map<CoppiaOrdinata, Double> fattori = new HashMap<>();
 
     // -----------------------------------------------------------------------------------
     // METODI DI ACCESSO AI FATTORI DI CONVERSIONE
