@@ -60,24 +60,31 @@ public class Database {
     }
 
     /**
-     * Registra un nuovo utente nel database.
-     *
-     * @param username lo username dell'utente (deve essere univoco)
-     * @param password la password dell'utente
-     * @param isConfig true per creare un Configuratore, false per un Utente
-     *                 standard
+     * TODO
      * @return true se registrato con successo, false altrimenti
      */
-    public boolean registerUtente(String username, String password, boolean isConfig) {
+    public boolean registraConfiguratore(String username, String password, boolean isConfig) {
         // Verifica dei parametri e unicità dello username
-        if (username == null || password == null || hasUtente(username)) {
+        if (hasUtente(username))
             return false;
-        }
 
         // Crea il tipo appropriato di utente in base al flag isConfig
-        Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
+        Utente utente = new Configuratore(username, password);
 
         // Tenta di aggiungere l'utente al database
+        return this.addUtente(utente);
+    }
+
+    /**
+     * TODO
+     * @return true se registrato con successo, false altrimenti
+     */
+    public boolean registraFruitore(String username, String password, String mail, Comprensorio comprensorio) {
+        if (hasUtente(username))
+            return false;
+
+        Utente utente = new Fruitore(username, password, mail, comprensorio);
+
         return this.addUtente(utente);
     }
 
@@ -226,10 +233,13 @@ public class Database {
             return "Nessun comprensorio presente.";
         }
 
+        int count = 1;
+
         // Costruisce la rappresentazione in stringa di tutti i comprensori
         StringBuilder sb = new StringBuilder();
         for (Comprensorio c : this.comprensori) {
-            sb.append(c.toString()).append("\n");
+            sb.append(String.format("[%d] %s", count, c.toString())).append("\n");
+            count++;
         }
         return sb.toString();
     }
