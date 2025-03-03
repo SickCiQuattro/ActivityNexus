@@ -119,6 +119,9 @@ public class ControllerConstants {
     public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore #%d. Premi 0 per terminare: ";
     public static final String PROMPT_DESCRIZIONE_VALORE = "Inserisci una descrizione per '%s' (facoltativa, premi INVIO per saltare): ";
     public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio? (s/n): ";
+    public static final String PROMPT_MAIL = "Inserisci la tua mail: ";
+    public static final String PROMPT_COMPRENSORIO_INDEX = "Inserisci il numero corrispondente al comprensorio scelto: ";
+
     // Costanti per gerarchie - messaggi di errore
     public static final String ERROR_NOME_CATEGORIA_VUOTO = "✗ Nome non valido. Il nome non può essere vuoto.";
     public static final String ERROR_NOME_GERARCHIA_DUPLICATO = "✗ Esiste già una gerarchia con questo nome";
@@ -173,4 +176,6 @@ public class ControllerConstants {
     public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato.";
     // Costanti per separatori visivi
     public static final String SEPARATORE = "\n----------------------------------------------------------";
+
 }
+
