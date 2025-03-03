@@ -92,7 +92,18 @@ public class Controller {
                         break;
 
                     case "2": // Registrazione
-                        if (handleRegistration()) {
+                        // Determinazione del tipo di account (Configuratore o Fruitore)
+                        boolean isConfig = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
+                        boolean registrazioneAvvenuta = false;
+                        if (isConfig)
+                            registrazioneAvvenuta = registraConfiguratore();
+                        else
+                            registrazioneAvvenuta = registraFruitore();
+
+                        //TODO: messaggi di errore differenziati
+                        this.view.showMessage(registrazioneAvvenuta ? ControllerConstants.REGISTRATION_SUCCESS : ControllerConstants.REGISTRATION_FAILED);
+
+                        if (registrazioneAvvenuta) {
                             // Se la registrazione va a buon fine, salva i dati utente
                             salvaUtenti();
                             view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
@@ -274,28 +285,8 @@ public class Controller {
             manageConfiguratore();
         } else {
             // Altrimenti è un fruitore (funzionalità future)
-            view.showMessage("TODO menu Fruitore");
+            manageFruitore();
         }
-    }
-
-    /**
-     * Gestisce il processo di registrazione di un nuovo utente.
-     * <p>
-     * Coordina le fasi di verifica preliminare, acquisizione credenziali
-     * e creazione dell'account nel database.
-     *
-     * @return true se la registrazione è completata con successo, false altrimenti
-     */
-    private boolean handleRegistration() {
-        // Tenta la registrazione dell'utente
-        boolean checkRegistration = registerUtente();
-
-        // Mostra un messaggio di esito (successo o fallimento)
-        view.showMessage(
-                checkRegistration ? ControllerConstants.REGISTRATION_SUCCESS : ControllerConstants.REGISTRATION_FAILED);
-
-        // Ritorna l'esito della registrazione per ulteriori elaborazioni
-        return checkRegistration;
     }
 
     /**
@@ -477,6 +468,42 @@ public class Controller {
         this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
     }
 
+    private void manageFruitore() {
+        // Ciclo principale del menu fruitore
+        while (true) {
+            try {
+                // Mostra il menu fruitore e ottiene la scelta dell'utente
+                view.showMenuFruitore();
+                String choice = view.getInput(ControllerConstants.PROMPT_CHOICE);
+
+                // Elabora la scelta dell'utente
+                switch (choice) {
+                    case "1": // Visualizza gerarchie
+                        //TODO: visualizzazione categorie radice, per poi scegliere la gerarchia da visualizzare
+                        visualizzaGerarchie();
+                        break;
+
+                    case "0": // Logout
+                        // Termina il ciclo e ritorna al menu principale
+                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        return;
+
+                    default:
+                        // Gestione di input non validi
+                        view.showMessage(ControllerConstants.INVALID_OPTION);
+                }
+
+                // Pausa per permettere all'utente di leggere i risultati
+                view.pressEnterToContinue();
+
+            } catch (Exception e) {
+                // Gestione centralizzata delle eccezioni per garantire robustezza
+                view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
+                view.pressEnterToContinue();
+            }
+        }
+    }
+
     // -----------------------------------------------------------------------------------
     // METODI DI AUTENTICAZIONE E REGISTRAZIONE
     // -----------------------------------------------------------------------------------
@@ -502,20 +529,14 @@ public class Controller {
     }
 
     /**
-     * Registra un nuovo utente nel sistema.
-     * <p>
-     * Guida l'utente attraverso il processo di definizione delle credenziali
-     * e del tipo di account, con validazione secondo i requisiti di sicurezza.
-     *
-     * @return true se la registrazione è completata con successo, false altrimenti
+     * TODO
+     * @return
      */
-    public boolean registerUtente() {
-        // Step 1: Autenticazione di sicurezza con credenziali temporanee
-        // Questo passaggio previene registrazioni automatizzate o non autorizzate
+    private boolean registraConfiguratore() {
         if (!defaultUtente())
             return false; // Se l'autenticazione fallisce, interrompi la registrazione
 
-        // Step 2: Raccolta di uno username valido
+        // Raccolta di uno username valido
         String username = getUsername();
         if (username == null)
             return false; // Se l'utente non fornisce uno username valido, interrompi
@@ -525,12 +546,36 @@ public class Controller {
         if (password == null)
             return false; // Se l'utente non fornisce una password valida, interrompi
 
-        // Step 4: Determinazione del tipo di account (Configuratore o Fruitore)
-        boolean isConfig = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
 
         // Step 5: Registrazione effettiva dell'utente nel database
         // Il metodo ritorna true se la registrazione ha successo, false altrimenti
-        return database.registerUtente(username, password, isConfig);
+        return this.database.registraConfiguratore(username, password, true);
+    }
+
+
+    private boolean registraFruitore () {
+        // Selezione del comprensorio di appartenenza
+        Comprensorio comprensorio = selezionaComprensorio();
+        if (comprensorio == null)
+            return false; // Se l'utente annulla la selezione del comprensorio, interrompi
+
+        // Raccolta di uno username valido
+        String username = getUsername();
+        if (username == null)
+            return false; // Se l'utente non fornisce uno username valido, interrompi
+
+        // Step 3: Raccolta di una password valida
+        String password = getPassword();
+        if (password == null)
+            return false; // Se l'utente non fornisce una password valida, interrompi
+
+        // Raccolta dell'indirizzo email
+        String mail = getMail();
+        if (mail == null)
+            return false; // Se l'utente non fornisce una mail valida, interrompi
+
+
+        return this.database.registraFruitore(username, password, mail, comprensorio);
     }
 
     /**
@@ -712,6 +757,33 @@ public class Controller {
                 }
             }
         }
+    }
+
+    /**
+     * TODO
+     * @return
+     */
+    public Comprensorio selezionaComprensorio() {
+        //TODO: stampa carina simile a quello delle foglie
+        // TODO: aggiungere indicazione per uscire
+
+        ArrayList<Comprensorio> comprensori = new ArrayList<>(this.database.getComprensori());
+
+        if (comprensori.isEmpty()) {
+            //TODO: non puoi registrarti come fruitore se non ci sono comprensori
+            this.view.showErrorMessage("Non ci sono comprensori registrati.");
+            return null;
+        }
+
+        this.view.showMessage(this.database.toStringComprensori());
+
+        int index = this.view.getIntInput(ControllerConstants.PROMPT_COMPRENSORIO_INDEX, 0, comprensori.size());
+
+        if (index == 0) {
+            return null;
+        }
+
+        return comprensori.get(index - 1);
     }
 
     // -----------------------------------------------------------------------------------
@@ -1446,6 +1518,15 @@ public class Controller {
             // e richiede un nuovo tentativo
             view.showMessage(ControllerConstants.ERROR_INVALID_PASSWORD);
         }
+    }
+
+    /**
+     * TODO
+     * @return
+     */
+    private String getMail() {
+        String mail = view.getInput(ControllerConstants.PROMPT_MAIL);
+        return mail;
     }
 
     /**
