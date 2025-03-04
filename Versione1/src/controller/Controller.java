@@ -38,8 +38,9 @@ import java.util.Stack;
  * @see view.ConsoleView
  */
 public class Controller {
-    // TODO: Dividere il Controller in classi più piccole per gestire le
-    // funzionalità specifiche
+    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le
+    // funzionalità
+    // da monilitico a moduli più piccoli e coesi
 
     private Database database;
     private final ConsoleView view;
