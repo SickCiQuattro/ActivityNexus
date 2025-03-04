@@ -245,7 +245,6 @@ public class ConsoleView {
                 MENU_VIEW_CONVERSION_FACTORS,
                 MENU_CREATE_COMPRENSORIO,
                 MENU_CREATE_GERARCHIA,
-                MENU_DEFINE_CONVERSIONS,
                 MENU_EXIT);
 
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
