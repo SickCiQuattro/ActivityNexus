@@ -294,7 +294,7 @@ public class Controller {
         view.showMessage(ControllerConstants.TITLE_REGISTRATION);
 
         // Determinazione del tipo di account (Configuratore o Fruitore)
-        boolean isConfiguratore = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
+        boolean isConfiguratore = this.view.getConfirmation(ControllerConstants.PROMPT_CONFIG_ROLE);
         boolean registrazioneCompletata;
 
         try {
@@ -893,7 +893,7 @@ public class Controller {
                 this.view.showMessage(String.format(ControllerConstants.INFO_COMUNI_AGGIUNTI, comuniAggiunti));
 
                 // Chiede all'utente se vuole aggiungere un altro comune
-                if (!getUserChoice(ControllerConstants.PROMPT_ADD_ALTRO_COMUNE)) {
+                if (!this.view.getConfirmation(ControllerConstants.PROMPT_ADD_ALTRO_COMUNE)) {
                     finished = true; // Termina il ciclo se l'utente sceglie di non continuare
                 }
             }
@@ -1121,7 +1121,7 @@ public class Controller {
             // Per le altre categorie è opzionale, in base alla scelta dell'utente
             view.showMessage("\n" + ControllerConstants.INFO_CAMPO_PROPRIETA);
             view.showMessage(ControllerConstants.INFO_CAMPO_FOGLIE);
-            aggiungiCampo = getUserChoice(ControllerConstants.PROMPT_CAMPO_CARATTERISTICO);
+            aggiungiCampo = this.view.getConfirmation(ControllerConstants.PROMPT_CAMPO_CARATTERISTICO);
         }
 
         // Creazione del campo se necessario
@@ -1243,7 +1243,7 @@ public class Controller {
 
             // Dopo il primo valore, chiede se l'utente vuole aggiungerne altri
             if (valoreCount >= 1) {
-                if (!getUserChoice(ControllerConstants.PROMPT_ALTRO_VALORE)) {
+                if (!this.view.getConfirmation(ControllerConstants.PROMPT_ALTRO_VALORE)) {
                     finished = true; // Termina se l'utente non vuole aggiungere altri valori
                 }
             }
@@ -1692,35 +1692,6 @@ public class Controller {
     }
 
     /**
-     * Acquisisce una scelta binaria (sì/no) dall'utente.
-     * <p>
-     * Richiede all'utente di inserire 's' per sì o 'n' per no,
-     * validando l'input fino a ottenere una risposta valida.
-     *
-     * @param messaggio il messaggio da mostrare per la richiesta
-     * @return true se l'utente risponde affermativamente, false altrimenti
-     */
-    // TODO: sostituire con view.getConfirmation
-    private boolean getUserChoice(String messaggio) {
-        while (true) {
-            // Richiede una risposta all'utente, mostrando il messaggio specificato
-            String role = view.getInput(messaggio);
-
-            // Verifica se la risposta è affermativa
-            if (role.equalsIgnoreCase("s"))
-                return true;
-
-            // Verifica se la risposta è negativa
-            if (role.equalsIgnoreCase("n"))
-                return false;
-
-            // Se l'input non è valido, mostra un messaggio di errore
-            // e richiede un nuovo tentativo
-            view.showErrorMessage(ControllerConstants.ERROR_INVALID_INPUT);
-        }
-    }
-
-    /**
      * Registra un errore nel sistema di logging dell'applicazione.
      * <p>
      * Gestisce un'eccezione in modo centralizzato, registrando informazioni
@@ -1755,7 +1726,7 @@ public class Controller {
         }
 
         // Registra l'errore nel file di log (in modalità sviluppo stampa su console)
-        System.err.println(logMessage);
+        this.view.showErrorMessage(logMessage.toString());
 
         try {
             // Scrivi l'errore su un file di log per riferimento futuro
@@ -1767,7 +1738,7 @@ public class Controller {
             writer.close();
         } catch (IOException loggingError) {
             // In caso di errore durante il logging, stampa almeno un avviso
-            System.err.println("Impossibile scrivere nel file di log: " + loggingError.getMessage());
+            this.view.showErrorMessage("Impossibile scrivere nel file di log: " + loggingError.getMessage());
         }
     }
 }

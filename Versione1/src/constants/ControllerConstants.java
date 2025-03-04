@@ -38,7 +38,7 @@ public class ControllerConstants {
     public static final String PROMPT_PASSWORD = "Inserisci password: ";
     public static final String PROMPT_NEW_USERNAME = "Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ";
     public static final String PROMPT_NEW_PASSWORD = "Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ";
-    public static final String PROMPT_CONFIG_ROLE = "Sei un configuratore? (s/n): ";
+    public static final String PROMPT_CONFIG_ROLE = "Sei un configuratore?";
     public static final String DEFAULT_LOGIN_INTRO = "Effettua il login con le seguenti credenziali: ";
     public static final String DEFAULT_USERNAME_DISPLAY = "Username: %s";
     public static final String DEFAULT_PASSWORD_DISPLAY = "Password: %s";
@@ -73,7 +73,7 @@ public class ControllerConstants {
     // Costanti per comprensori - prompts
     public static final String PROMPT_NOME_COMPRENSORIO = "Inserisci il nome del comprensorio: ";
     public static final String PROMPT_NOME_COMUNE = "Inserisci il nome del comune: ";
-    public static final String PROMPT_ADD_ALTRO_COMUNE = "Vuoi aggiungere un altro comune? (s/n): ";
+    public static final String PROMPT_ADD_ALTRO_COMUNE = "Vuoi aggiungere un altro comune?";
     // Costanti per comprensori - messaggi informativi
     public static final String INFO_AGGIUNGI_COMUNI = "Ora puoi aggiungere i comuni che fanno parte del comprensorio '%s'";
     public static final String INFO_MINIMO_UN_COMUNE = "Ogni comprensorio deve contenere almeno un comune";
@@ -134,11 +134,11 @@ public class ControllerConstants {
     public static final String MSG_SCELTA_FOGLIA = "Inserisci il numero corrispondente alla categoria foglia scelta: ";
     public static final String PROMPT_NOME_CATEGORIA_RADICE = "Inserisci il nome della categoria radice: ";
     public static final String PROMPT_NOME_SOTTOCATEGORIA = "Inserisci il nome della sottocategoria di '%s': ";
-    public static final String PROMPT_CAMPO_CARATTERISTICO = "Vuoi aggiungere un campo caratteristico a questa categoria? (s/n): ";
+    public static final String PROMPT_CAMPO_CARATTERISTICO = "Vuoi aggiungere un campo caratteristico a questa categoria?";
     public static final String PROMPT_NOME_CAMPO = "Inserisci il nome del campo: ";
     public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore numero %d: ";
     public static final String PROMPT_DESCRIZIONE_VALORE = "Inserisci una descrizione per '%s' (facoltativa, premi INVIO per saltare): ";
-    public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio? (s/n): ";
+    public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio?";
     public static final String PROMPT_MAIL = "Inserisci la tua mail: ";
     public static final String PROMPT_COMPRENSORIO_INDEX = "Inserisci il numero corrispondente al comprensorio scelto: ";
 

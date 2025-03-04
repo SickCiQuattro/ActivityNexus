@@ -178,13 +178,13 @@ public class ConsoleView {
      */
     public boolean getConfirmation(String prompt) {
         while (true) {
-            String input = getInput(prompt + " (s/n):").toLowerCase();
+            String input = getInput(prompt + " (s/n): ").toLowerCase();
             if (input.equals("s") || input.equals("si") || input.equals("y") || input.equals("yes")) {
                 return true;
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                showErrorMessage("Risposta non valida. Utilizzare 's' per confermare o 'n' per annullare.");
+                showErrorMessage("Risposta non valida. Utilizzare 's' per confermare o 'n' per annullare");
             }
         }
     }
