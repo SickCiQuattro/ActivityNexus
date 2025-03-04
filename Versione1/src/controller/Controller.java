@@ -514,9 +514,9 @@ public class Controller {
                 // Elabora la scelta dell'utente
                 switch (choice) {
                     case "1": // Visualizza gerarchie
-                        // TODO: visualizzazione categorie radice, per poi scegliere la gerarchia da
+                        Gerarchia gerarchiaScelta = selezionaGerarchia();
                         // visualizzare
-                        visualizzaGerarchie();
+                        this.view.showMessage(gerarchiaScelta.toString());
                         break;
 
                     case "0": // Logout
@@ -1688,15 +1688,6 @@ public class Controller {
             // e richiede un nuovo tentativo
             view.showMessage(ControllerConstants.ERROR_INVALID_PASSWORD);
         }
-    }
-
-    /**
-     * TODO ma perchè esiste questo metodo
-     * 
-     * @return
-     */
-    private String getMail() {
-        return view.getInput(ControllerConstants.PROMPT_MAIL);
     }
 
     /**
