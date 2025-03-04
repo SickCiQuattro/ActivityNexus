@@ -31,9 +31,9 @@ public class ControllerConstants {
     public static final String LOGIN_SUCCESS = "Login effettuato con successo! Bentornato, ";
     public static final String LOGIN_FAILED = "Credenziali non valide. Riprova.";
     public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo!";
-    public static final String REGISTRATION_FAILED = "Registrazione fallita. Utente già esistente. Riprova.";
     public static final String SAVING_USERS_SUCCESS = "Dati utente salvati con successo";
     // Costanti per autenticazione e registrazione
+    public static final String TITLE_REGISTRATION = "\n===== REGISTRAZIONE NUOVO ACCOUNT =====";
     public static final String PROMPT_USERNAME = "Inserisci username: ";
     public static final String PROMPT_PASSWORD = "Inserisci password: ";
     public static final String PROMPT_NEW_USERNAME = "Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ";
@@ -46,6 +46,19 @@ public class ControllerConstants {
     public static final String DEFAULT_LOGIN_FAILED = "Login non riuscito. Riprova più tardi.";
     public static final String ERROR_INVALID_USERNAME = "Username non valido. Riprova.";
     public static final String ERROR_INVALID_PASSWORD = "Password non valido. Riprova.";
+    public static final String ERROR_INVALID_EMAIL = "Email non valida. %s tentativo/i rimanente/i.";
+    public static final String USERNAME_ACQUISITION_FAILED = "Impossibile acquisire un username valido.";
+    public static final String PASSWORD_ACQUISITION_FAILED = "Impossibile acquisire una password valida.";
+    public static final String ERROR_NO_COMPRENSORI_REGISTRATION = "Non è possibile registrarsi come fruitore senza comprensori presenti.";
+    public static final String SECURITY_CHECK_FAILED = "Credenziali di default errate.";
+    public static final String ERROR_COMPRENSORIO_REQUIRED = "Comprensorio richiesto non presente.";
+    public static final String EMAIL_ACQUISITION_FAILED = "Impossibile acquisire un'email valida.";
+    // Registrazione
+    public static final String TITLE_REGISTRA_CONFIGURATORE = "\n=== Registrazione Nuovo Configuratore ===";
+    public static final String TITLE_REGISTRA_FRUITORE = "\n=== Registrazione Nuovo Fruitore ===";
+    public static final String REGISTRATION_CANCELLED = "Registrazione annullata.";
+    public static final String ERROR_REGISTRATION = "Errore durante la registrazione: %s";
+    public static final String ERROR_USERNAME_ALREADY_EXISTS = "Username già in uso. Scegline un altro.";
     // 3. ComprensoriConstants.java
     // Costanti per titoli e sezioni
     public static final String TITLE_COMPRENSORI = "\n=== COMPRENSORI DISPONIBILI ===";
@@ -78,6 +91,15 @@ public class ControllerConstants {
     // Costanti per comprensori - messaggi di successo
     public static final String SUCCESS_COMPRENSORIO_AGGIUNTO = "✓ Comprensorio '%s' aggiunto con successo!";
     public static final String SUCCESS_COMUNE_AGGIUNTO = "✓ Comune '%s' aggiunto al comprensorio '%s'";
+
+    // Costanti per la selezione dei comprensori
+    public static final String ERROR_NO_COMPRENSORI = "Non ci sono comprensori registrati nel sistema.";
+    public static final String TITLE_SELEZIONA_COMPRENSORIO = "\n=== Selezione Comprensorio ===";
+    public static final String INFO_SELEZIONE_COMPRENSORIO = "Seleziona il tuo comprensorio di appartenenza:";
+    public static final String FORMATO_COMPRENSORIO_LISTA = "[%d] %s (%d comuni)";
+    public static final String INFO_ANNULLA_SELEZIONE = "\nInserisci 0 per annullare la selezione.";
+    public static final String INFO_SELEZIONE_ANNULLATA = "Selezione comprensorio annullata.";
+    public static final String SUCCESS_COMPRENSORIO_SELEZIONATO = "Hai selezionato il comprensorio: %s";
     // 4. GerarchieConstants.java
     // Costanti per titoli e sezioni
     public static final String TITLE_GERARCHIE = "\n=== GERARCHIE DISPONIBILI ===";

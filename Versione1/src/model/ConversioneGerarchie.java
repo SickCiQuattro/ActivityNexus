@@ -24,6 +24,7 @@ import java.util.Objects;
  * @see Gerarchia
  */
 public class ConversioneGerarchie implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Messaggio di errore per fattori non positivi */
@@ -204,6 +205,7 @@ public class ConversioneGerarchie implements Serializable {
      */
     private static class CoppiaOrdinata implements Serializable {
         // Identificatore di versione per la serializzazione
+        @Serial
         private static final long serialVersionUID = 1L;
 
         // Le due categorie che formano la coppia ordinata

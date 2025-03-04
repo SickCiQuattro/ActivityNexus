@@ -1,7 +1,6 @@
 package view;
 
 import java.util.*;
-import java.io.IOException;
 
 /**
  * Interfaccia utente a console con funzionalità avanzate di visualizzazione.
@@ -16,9 +15,6 @@ public class ConsoleView {
 
     /** Scanner per input utente */
     private final Scanner scanner = new Scanner(System.in);
-
-    /** Flag per supporto codici ANSI */
-    private final boolean supportsAnsi = true;
 
     // -----------------------------------------------------------------------------------
     // COSTANTI PER LA FORMATTAZIONE
@@ -205,6 +201,8 @@ public class ConsoleView {
      * Pulisce lo schermo del terminale.
      */
     public void clearScreen() {
+        // Flag per supporto codici ANSI
+        boolean supportsAnsi = true;
         if (supportsAnsi) {
             System.out.print("\033[H\033[2J");
             System.out.flush();
@@ -247,7 +245,6 @@ public class ConsoleView {
                 MENU_VIEW_CONVERSION_FACTORS,
                 MENU_CREATE_COMPRENSORIO,
                 MENU_CREATE_GERARCHIA,
-                MENU_DEFINE_CONVERSIONS,
                 MENU_EXIT);
 
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
