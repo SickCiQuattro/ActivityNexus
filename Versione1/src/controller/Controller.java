@@ -264,7 +264,8 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showMessage(ControllerConstants.LOGIN_FAILED);
+            view.showErrorMessage(ControllerConstants.LOGIN_FAILED);
+            view.pressEnterToContinue();
             return;
         }
 
