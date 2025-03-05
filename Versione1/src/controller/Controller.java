@@ -278,8 +278,9 @@ public class Controller {
             // Se è un configuratore, mostra il menu corrispondente
             manageConfiguratore();
         } else {
+            Fruitore fruitore = (Fruitore) utente;
             // Altrimenti è un fruitore (funzionalità future)
-            manageFruitore();
+            manageFruitore(fruitore);
         }
     }
 
@@ -505,7 +506,7 @@ public class Controller {
         this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
     }
 
-    private void manageFruitore() {
+    private void manageFruitore(Fruitore fruitore) {
         // Ciclo principale del menu fruitore
         while (true) {
             try {
@@ -519,6 +520,10 @@ public class Controller {
                         Gerarchia gerarchiaScelta = selezionaGerarchia();
                         // visualizzare
                         this.view.showMessage(gerarchiaScelta.toString());
+                        break;
+
+                    case "2": // Proposta scambio d'opera
+                        propostaScambioOpera(fruitore);
                         break;
 
                     case "0": // Logout
@@ -1636,6 +1641,87 @@ public class Controller {
                 view.showMessage(ControllerConstants.ERROR_FATTORE_FORMATO);
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI GESTIONE DI SCAMBI D'OPERA
+    // -----------------------------------------------------------------------------------
+
+    private void propostaScambioOpera(Fruitore fruitore) {
+        // FASE 1: Selezione della gerarchia di origine
+        this.view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
+        Gerarchia gerarchiaOrigine = selezionaGerarchia();
+
+        // FASE 2: Selezione della foglia (attività concreta) dalla gerarchia origine
+        this.view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        // Mostra la gerarchia con le foglie numerate per facilitare la selezione
+        this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
+
+        // Ottiene la foglia selezionata dall'utente
+        TreeNode<Categoria> fogliaRichiesta = selezionaFoglia(gerarchiaOrigine);
+
+        // TODO: dimmi le ore bastardo
+        int oreRichieste = this.view.getIntInput("Quante ore richiedi? ", 1, 100);
+
+        // FASE 3: Selezione della gerarchia di destinazione per cui visualizzare i
+        // fattori
+        this.view.showMessage(
+                String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, fogliaRichiesta.data().getNome()));
+        Gerarchia gerarchiaDestinazione = selezionaGerarchia();
+        // FASE 2: Selezione della foglia (attività concreta) dalla gerarchia origine
+        this.view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        // Mostra la gerarchia con le foglie numerate per facilitare la selezione
+        this.view.showMessage(gerarchiaDestinazione.toStringSelezioneFoglia());
+
+        // Ottiene la foglia selezionata dall'utente
+        TreeNode<Categoria> fogliaOfferta = selezionaFoglia(gerarchiaDestinazione);
+
+        // TODO: controllare che le due foglie siano diverse
+
+        // CALCOLO CONVERSIONE: Il processo coinvolge due fattori:
+        // 1. Fattore di conversione interno alla gerarchia di origine (dalla foglia al
+        // nodo di riferimento)
+        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
+                fogliaRichiesta.level(),
+                gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
+
+        double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
+        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
+            // Se le gerarchie sono diverse, ottiene il fattore di conversione tra i loro
+            // nodi di riferimento
+            fattoreInterGerarchia = this.database.getConversioneGerarchie().getFattoreConversione(
+                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
+                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
+        }
+
+        double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
+                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),fogliaOfferta.level());
+
+
+        // Calcolo del fattore di conversione
+        double fattoreConversione = fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
+
+        double oreOfferteOriginali = oreRichieste * fattoreConversione;
+
+        int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
+
+        this.view.showMessage("Richiedendo " + oreRichieste + " ore per " + "\"" + fogliaRichiesta.data().getNome() + "\"" +
+                " offriresti " + oreOfferte + " ore per " + "\"" + fogliaOfferta.data().getNome() + "\"" + ".");
+
+        boolean accetta = this.view.getConfirmation("Accetti la proposta? ");
+
+        Proposta proposta = new Proposta(new Prestazione(fogliaRichiesta.data(), oreRichieste),
+                                         new Prestazione(fogliaOfferta.data(), oreOfferte),
+                                         accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA);
+
+        // TODO: mettere il toString della proposta?
+        if (accetta)
+            this.view.showMessage("La proposta è stata accettata");
+        else
+            this.view.showMessage("La proposta è stata rifiutata");
+
+        fruitore.aggiungiProposta(proposta);
+
     }
 
     // -----------------------------------------------------------------------------------
