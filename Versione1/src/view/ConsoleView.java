@@ -171,6 +171,30 @@ public class ConsoleView {
     }
 
     /**
+     * Ottiene un input numerico con validazione del range.
+     *
+     * @param prompt il messaggio di richiesta
+     * @param min    valore minimo accettabile
+     * @param max    valore massimo accettabile
+     * @return il numero inserito entro il range specificato
+     */
+    public float getFloatInput(String prompt, float min, float max) {
+        while (true) {
+            try {
+                String input = getInput(prompt + " [" + min + "-" + max + "]:");
+                float value = Float.parseFloat(input);
+                if (value >= min && value <= max) {
+                    return value;
+                } else {
+                    showErrorMessage("Inserire un valore compreso tra " + min + " e " + max);
+                }
+            } catch (NumberFormatException e) {
+                showErrorMessage("Inserire un numero valido");
+            }
+        }
+    }
+
+    /**
      * Richiede conferma (sì/no) all'utente.
      *
      * @param prompt il messaggio di richiesta
@@ -257,7 +281,8 @@ public class ConsoleView {
         clearScreen();
 
         List<String> menuItems = List.of(
-                GREEN + "1. Visualizza categorie radice" + RESET,
+                GREEN + "1. Visualizza categorie" + RESET,
+                GREEN + "2. Formula proposta di scambio d'opera" + RESET,
                 RED + "0. Uscita" + RESET);
 
         printMenuBox(USER_MENU_TITLE, menuItems);
