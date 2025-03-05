@@ -1647,81 +1647,163 @@ public class Controller {
     // METODI DI GESTIONE DI SCAMBI D'OPERA
     // -----------------------------------------------------------------------------------
 
+    /**
+     * Gestisce il processo di creazione di una proposta di scambio d'opera.
+     * <p>
+     * Il processo si articola in diverse fasi:
+     * <ol>
+     *   <li>Selezione della categoria richiesta (ciò che il fruitore desidera ricevere)</li>
+     *   <li>Indicazione del numero di ore richieste</li>
+     *   <li>Selezione della categoria offerta (ciò che il fruitore è disposto a offrire)</li>
+     *   <li>Calcolo automatico delle ore da offrire in base ai fattori di conversione</li>
+     *   <li>Conferma e registrazione della proposta</li>
+     * </ol>
+     *
+     * @param fruitore il fruitore che sta creando la proposta di scambio
+     */
     private void propostaScambioOpera(Fruitore fruitore) {
-        // FASE 1: Selezione della gerarchia di origine
-        this.view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
+        // Intestazione e spiegazione del processo
+        view.showMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
+        view.showMessage(ControllerConstants.INFO_PROPOSTA_DESCRIZIONE);
+        
+        // FASE 1: Selezione della prestazione richiesta
+        view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_RICHIESTA);
+        
+        // Selezione della gerarchia di origine
+        view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
         Gerarchia gerarchiaOrigine = selezionaGerarchia();
+        if (gerarchiaOrigine == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
 
-        // FASE 2: Selezione della foglia (attività concreta) dalla gerarchia origine
-        this.view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
-        // Mostra la gerarchia con le foglie numerate per facilitare la selezione
-        this.view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
-
-        // Ottiene la foglia selezionata dall'utente
+        // Selezione della foglia (attività concreta) dalla gerarchia origine
+        view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
         TreeNode<Categoria> fogliaRichiesta = selezionaFoglia(gerarchiaOrigine);
+        if (fogliaRichiesta == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // FASE 2: Acquisizione delle ore richieste
+        view.showMessage("\n" + ControllerConstants.STEP_ORE_RICHIESTE);
+        int oreRichieste = view.getIntInput(
+            String.format(ControllerConstants.PROMPT_ORE_RICHIESTE, 
+                        fogliaRichiesta.data().getNome()),
+            1, 100); // Limitiamo a 100 ore per praticità
 
-        // TODO: dimmi le ore bastardo
-        int oreRichieste = this.view.getIntInput("Quante ore richiedi? ", 1, 100);
-
-        // FASE 3: Selezione della gerarchia di destinazione per cui visualizzare i
-        // fattori
-        this.view.showMessage(
-                String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, fogliaRichiesta.data().getNome()));
+        // FASE 3: Selezione della prestazione offerta
+        view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_OFFERTA);
+        
+        // Selezione della gerarchia di destinazione
+        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, 
+                                    fogliaRichiesta.data().getNome()));
         Gerarchia gerarchiaDestinazione = selezionaGerarchia();
-        // FASE 2: Selezione della foglia (attività concreta) dalla gerarchia origine
-        this.view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
-        // Mostra la gerarchia con le foglie numerate per facilitare la selezione
-        this.view.showMessage(gerarchiaDestinazione.toStringSelezioneFoglia());
-
-        // Ottiene la foglia selezionata dall'utente
+        if (gerarchiaDestinazione == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // Selezione della categoria foglia per l'offerta
+        view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        view.showMessage(gerarchiaDestinazione.toStringSelezioneFoglia());
         TreeNode<Categoria> fogliaOfferta = selezionaFoglia(gerarchiaDestinazione);
+        if (fogliaOfferta == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // Verifica che non si stia offrendo la stessa categoria richiesta
+        if (fogliaRichiesta.data().equals(fogliaOfferta.data())) {
+            view.showErrorMessage(ControllerConstants.ERROR_STESSA_CATEGORIA);
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // FASE 4: Calcolo delle ore offerte in base ai fattori di conversione
+        view.showMessage("\n" + ControllerConstants.STEP_CALCOLO_CONVERSIONE);
+        
+        // Calcolo del fattore di conversione complessivo
+        double fattoreConversione = calcolaFattoreConversione(
+            gerarchiaOrigine, fogliaRichiesta,
+            gerarchiaDestinazione, fogliaOfferta);
+            
+        // Calcolo delle ore offerte basate sul fattore di conversione
+        double oreOfferteOriginali = oreRichieste * fattoreConversione;
+        int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
+        
+        // FASE 5: Presentazione del risultato e conferma
+        view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
+        view.showMessage(String.format(ControllerConstants.INFO_RIEPILOGO_PROPOSTA,
+                oreRichieste, fogliaRichiesta.data().getNome(),
+                oreOfferte, fogliaOfferta.data().getNome()));
+        
+        // Chiede la conferma dell'utente
+        boolean accetta = view.getConfirmation(ControllerConstants.PROMPT_CONFERMA_PROPOSTA);
+        
+        // FASE 6: Creazione e registrazione della proposta
+        Prestazione prestazioneRichiesta = new Prestazione(fogliaRichiesta.data(), oreRichieste);
+        Prestazione prestazioneOfferta = new Prestazione(fogliaOfferta.data(), oreOfferte);
+        
+        StatoProposta stato = accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA;
+        Proposta proposta = new Proposta(prestazioneRichiesta, prestazioneOfferta, stato);
+        
+        // Aggiunge la proposta al fruitore e mostra il messaggio appropriato
+        fruitore.aggiungiProposta(proposta);
+        
+        if (accetta) {
+            view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
+            view.showMessage("\n" + proposta.toString());
+            
+            // Salva gli utenti per persistere le proposte
+            salvaUtenti();
+        } else {
+            view.showMessage(ControllerConstants.INFO_PROPOSTA_RITIRATA);
+        }
+    }
 
-        // TODO: controllare che le due foglie siano diverse
-
-        // CALCOLO CONVERSIONE: Il processo coinvolge due fattori:
-        // 1. Fattore di conversione interno alla gerarchia di origine (dalla foglia al
-        // nodo di riferimento)
+    /**
+     * Calcola il fattore di conversione tra due categorie foglia in diverse gerarchie.
+     * <p>
+     * Il calcolo coinvolge tre componenti:
+     * <ol>
+     *   <li>Fattore interno alla prima gerarchia (dalla foglia al nodo di riferimento)</li>
+     *   <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
+     *   <li>Fattore interno alla seconda gerarchia (dal nodo di riferimento alla foglia)</li>
+     * </ol>
+     * 
+     * @param gerarchiaOrigine gerarchia della categoria richiesta
+     * @param fogliaRichiesta categoria foglia richiesta
+     * @param gerarchiaDestinazione gerarchia della categoria offerta
+     * @param fogliaOfferta categoria foglia offerta
+     * @return il fattore di conversione complessivo
+     */
+    private double calcolaFattoreConversione(
+            Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
+            Gerarchia gerarchiaDestinazione, TreeNode<Categoria> fogliaOfferta) {
+        
+        // 1. Fattore interno alla gerarchia di origine (dalla foglia al nodo di riferimento)
         double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
                 fogliaRichiesta.level(),
                 gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
-
+        
+        // 2. Fattore tra gerarchie diverse (tra i nodi di riferimento)
         double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
         if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
-            // Se le gerarchie sono diverse, ottiene il fattore di conversione tra i loro
-            // nodi di riferimento
-            fattoreInterGerarchia = this.database.getConversioneGerarchie().getFattoreConversione(
+            // Se le gerarchie sono diverse, ottiene il fattore tra i loro nodi di riferimento
+            fattoreInterGerarchia = database.getConversioneGerarchie().getFattoreConversione(
                     gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
                     gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
         }
-
+        
+        // 3. Fattore interno alla gerarchia di destinazione (dal nodo di riferimento alla foglia)
         double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
-                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),fogliaOfferta.level());
-
-
-        // Calcolo del fattore di conversione
-        double fattoreConversione = fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
-
-        double oreOfferteOriginali = oreRichieste * fattoreConversione;
-
-        int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
-
-        this.view.showMessage("Richiedendo " + oreRichieste + " ore per " + "\"" + fogliaRichiesta.data().getNome() + "\"" +
-                " offriresti " + oreOfferte + " ore per " + "\"" + fogliaOfferta.data().getNome() + "\"" + ".");
-
-        boolean accetta = this.view.getConfirmation("Accetti la proposta? ");
-
-        Proposta proposta = new Proposta(new Prestazione(fogliaRichiesta.data(), oreRichieste),
-                                         new Prestazione(fogliaOfferta.data(), oreOfferte),
-                                         accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA);
-
-        // TODO: mettere il toString della proposta?
-        if (accetta)
-            this.view.showMessage("La proposta è stata accettata");
-        else
-            this.view.showMessage("La proposta è stata rifiutata");
-
-        fruitore.aggiungiProposta(proposta);
-
+                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),
+                fogliaOfferta.level());
+        
+        // Calcolo del fattore combinato
+        return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
     }
 
     // -----------------------------------------------------------------------------------

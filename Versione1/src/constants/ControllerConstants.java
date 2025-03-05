@@ -194,8 +194,23 @@ public class ControllerConstants {
     public static final String SUCCESS_FATTORI_CREATI = "\nSono stati creati %d fattori di conversione tra gerarchie";
     public static final String SUCCESS_FATTORE_SEMPLICE = "Fattore di conversione aggiunto";
     public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato";
+
+    // Proposta di scambio
+    public static final String TITLE_PROPOSTA_SCAMBIO = "=== PROPOSTA DI SCAMBIO D'OPERA ===";
+    public static final String INFO_PROPOSTA_DESCRIZIONE = "Questo processo ti guiderà nella creazione di una proposta di scambio di prestazioni d'opera";
+    public static final String STEP_SELEZIONE_RICHIESTA = "FASE 1: Seleziona la prestazione che desideri ricevere";
+    public static final String STEP_ORE_RICHIESTE = "FASE 2: Specifica la durata della prestazione richiesta";
+    public static final String STEP_SELEZIONE_OFFERTA = "FASE 3: Seleziona la prestazione che sei disposto a offrire";
+    public static final String STEP_CALCOLO_CONVERSIONE = "FASE 4: Calcolo delle ore equivalenti";
+    public static final String STEP_RIEPILOGO_PROPOSTA = "FASE 5: Riepilogo e conferma della proposta";
+    public static final String PROMPT_ORE_RICHIESTE = "Quante ore di %s desideri ricevere?";
+    public static final String ERROR_STESSA_CATEGORIA = "Non puoi offrire la stessa categoria che stai richiedendo";
+    public static final String INFO_OPERAZIONE_ANNULLATA = "Operazione annullata";
+    public static final String INFO_RIEPILOGO_PROPOSTA = "Richiedendo %d ore per \"%s\", dovrai offrire %d ore per \"%s\"";
+    public static final String PROMPT_CONFERMA_PROPOSTA = "Confermi questa proposta di scambio?";
+    public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
+    public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata";
     // Costanti per separatori visivi
     public static final String SEPARATORE = "\n----------------------------------------------------------";
 
 }
-
