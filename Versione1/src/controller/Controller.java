@@ -1728,7 +1728,9 @@ public class Controller {
         double fattoreConversione = calcolaFattoreConversione(
             gerarchiaOrigine, fogliaRichiesta,
             gerarchiaDestinazione, fogliaOfferta);
-            
+
+        view.showMessage(String.format(ControllerConstants.STEP_FATTORE_CONV, fattoreConversione));
+
         // Calcolo delle ore offerte basate sul fattore di conversione
         double oreOfferteOriginali = oreRichieste * fattoreConversione;
         int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));

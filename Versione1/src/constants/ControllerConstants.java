@@ -181,7 +181,7 @@ public class ControllerConstants {
     public static final String INFO_PERCORSO_ESISTENTE = "\n   Percorso nella gerarchia esistente: ";
     public static final String INFO_NESSUNA_GERARCHIA = "\nNessun'altra gerarchia presente nel sistema. Non è necessario creare conversioni";
     public static final String INFO_VISUALIZZA_FATTORI = "\nEcco i fattori di conversione relativi alla categoria \"%s\": ";
-    public static final String INFO_SELEZIONA_DESTINAZIONE = "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n";
+    public static final String INFO_SELEZIONA_DESTINAZIONE = "\nOra seleziona la gerarchia di cui vuoi visualizzare le prestazioni che vuoi offrire rispetto alla categoria \"%s\":\n";
     // Costanti per fattori di conversione - prompts
     public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ";
     // Costanti per fattori di conversione - messaggi di errore
@@ -201,7 +201,8 @@ public class ControllerConstants {
     public static final String STEP_SELEZIONE_RICHIESTA = "FASE 1: Seleziona la prestazione che desideri ricevere";
     public static final String STEP_ORE_RICHIESTE = "FASE 2: Specifica la durata della prestazione richiesta";
     public static final String STEP_SELEZIONE_OFFERTA = "FASE 3: Seleziona la prestazione che sei disposto a offrire";
-    public static final String STEP_CALCOLO_CONVERSIONE = "FASE 4: Calcolo delle ore equivalenti";
+    public static final String STEP_CALCOLO_CONVERSIONE = "FASE 4: Calcolo del fattore di conversione";
+    public static final String STEP_FATTORE_CONV = "\nFattore di conversione: %.2f";
     public static final String STEP_RIEPILOGO_PROPOSTA = "FASE 5: Riepilogo e conferma della proposta";
     public static final String PROMPT_ORE_RICHIESTE = "Quante ore di %s desideri ricevere?";
     public static final String ERROR_STESSA_CATEGORIA = "Non puoi offrire la stessa categoria che stai richiedendo";
