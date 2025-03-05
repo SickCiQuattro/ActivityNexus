@@ -2,6 +2,7 @@ package model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -32,6 +33,9 @@ public class Fruitore extends Utente implements Serializable {
     /** Comprensorio geografico di appartenenza del fruitore */
     private Comprensorio comprensorio;
 
+    /** Proposte di attività inviate dal fruitore */
+    private ArrayList<Proposta> proposte;
+
     /**
      * Costruisce un nuovo fruitore con credenziali e dati personali specificati.
      *
@@ -46,6 +50,7 @@ public class Fruitore extends Utente implements Serializable {
         super(username, password, false);
         this.mail = Objects.requireNonNull(mail, MAIL_NON_NULL);
         this.comprensorio = comprensorio; // può essere null se non specificato
+        this.proposte = new ArrayList<>();
     }
 
     /**
@@ -104,6 +109,24 @@ public class Fruitore extends Utente implements Serializable {
      */
     public boolean haComprensorio() {
         return this.comprensorio != null;
+    }
+
+    /**
+     * Restituisce la lista delle proposte di attività inviate dal fruitore.
+     *
+     * @return lista delle proposte inviate
+     */
+    public ArrayList<Proposta> getProposte() {
+        return proposte;
+    }
+
+    /**
+     * Aggiunge una proposta di attività alla lista del fruitore.
+     *
+     * @param proposta la proposta da aggiungere
+     */
+    public void aggiungiProposta (Proposta proposta) {
+        proposte.add(proposta);
     }
 
     /**
