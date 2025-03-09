@@ -34,6 +34,7 @@ import java.util.Objects;
  */
 public class FattoreConversione implements Serializable {
     // Identificatore di versione per la serializzazione
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Costanti per i messaggi di errore, migliora la manutenibilità del codice

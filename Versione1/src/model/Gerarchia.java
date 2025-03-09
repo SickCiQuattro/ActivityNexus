@@ -4,6 +4,7 @@ import com.scalified.tree.TraversalAction;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.LinkedMultiTreeNode;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -33,6 +34,7 @@ import java.util.*;
  * @see FattoreConversione
  */
 public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L; // Identificatore per la serializzazione
 
     /** Fattore di conversione associato alla gerarchia */
@@ -252,6 +254,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
                     // Aggiunge numerazione progressiva se richiesto e se è foglia
                     if (parametri.numeraFoglie && nodo.isLeaf()) {
+                        assert contatoreFoglie != null;
                         builder.append(" [").append(contatoreFoglie[0]++).append("] ");
                     }
                     builder.append("Nome: ").append(nodo.data().getNome());

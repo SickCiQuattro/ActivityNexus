@@ -26,6 +26,7 @@ import java.util.Objects;
  * @see Categoria
  */
 public class ValoreCampo implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Messaggio di errore costante
