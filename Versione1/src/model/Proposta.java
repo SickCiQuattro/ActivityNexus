@@ -18,6 +18,13 @@ import java.util.Objects;
  * La proposta può attraversare diversi stati (aperta, chiusa, ritirata) con
  * specifiche regole di transizione.
  *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ * <li>richiesta != null</li>
+ * <li>offerta != null</li>
+ * <li>stato != null</li>
+ * </ul>
+ *
  * @see Prestazione
  * @see StatoProposta
  */
@@ -41,6 +48,13 @@ public class Proposta implements Serializable {
      * @param offerta   la prestazione offerta in cambio (non può essere null)
      * @param stato     lo stato iniziale della proposta (non può essere null)
      * @throws NullPointerException se uno dei parametri è null
+     *
+     * @pre richiesta != null
+     * @pre offerta != null
+     * @pre stato != null
+     * @post getRichiesta() == richiesta
+     * @post getOfferta() == offerta
+     * @post getStato() == stato
      */
     public Proposta(Prestazione richiesta, Prestazione offerta, StatoProposta stato) {
         this.richiesta = Objects.requireNonNull(richiesta, "La prestazione richiesta non può essere null");
@@ -48,16 +62,6 @@ public class Proposta implements Serializable {
         this.stato = Objects.requireNonNull(stato, "Lo stato della proposta non può essere null");
     }
 
-    /**
-     * Crea una nuova proposta di scambio con stato iniziale APERTA.
-     *
-     * @param richiesta la prestazione richiesta
-     * @param offerta   la prestazione offerta in cambio
-     * @throws NullPointerException se uno dei parametri è null
-     */
-    public Proposta(Prestazione richiesta, Prestazione offerta) {
-        this(richiesta, offerta, StatoProposta.APERTA);
-    }
 
     /**
      * Tenta di chiudere questa proposta.
@@ -66,6 +70,10 @@ public class Proposta implements Serializable {
      *
      * @return true se la proposta è stata chiusa, false se era in uno stato
      *         che non permette la chiusura
+     *
+     * @pre true (può essere invocato in qualsiasi stato)
+     * @post risultato == true ⟹ this.stato == StatoProposta.CHIUSA && old(this.stato) == StatoProposta.APERTA
+     * @post risultato == false ⟹ this.stato == old(this.stato) && old(this.stato) != StatoProposta.APERTA
      */
     public boolean chiudiProposta() {
         if (stato == StatoProposta.APERTA) {
@@ -82,6 +90,10 @@ public class Proposta implements Serializable {
      *
      * @return true se la proposta è stata ritirata, false se era in uno stato
      *         che non permette il ritiro
+     *
+     * @pre true (può essere invocato in qualsiasi stato)
+     * @post risultato == true ⟹ this.stato == StatoProposta.RITIRATA && old(this.stato) == StatoProposta.APERTA
+     * @post risultato == false ⟹ this.stato == old(this.stato) && old(this.stato) != StatoProposta.APERTA
      */
     public boolean ritiraProposta() {
         if (stato == StatoProposta.APERTA) {
@@ -95,6 +107,10 @@ public class Proposta implements Serializable {
      * Verifica se questa proposta è ancora aperta per possibili accettazioni.
      *
      * @return true se la proposta è nello stato APERTA, false altrimenti
+     *
+     * @pre true
+     * @post risultato == (this.stato == StatoProposta.APERTA)
+     * @post this.stato == old(this.stato) (non modifica lo stato)
      */
     public boolean isAperta() {
         return stato == StatoProposta.APERTA;
@@ -104,6 +120,10 @@ public class Proposta implements Serializable {
      * Restituisce la prestazione richiesta.
      *
      * @return la prestazione richiesta (mai null)
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato == this.richiesta
      */
     public Prestazione getRichiesta() {
         return richiesta;
@@ -113,6 +133,10 @@ public class Proposta implements Serializable {
      * Restituisce la prestazione offerta.
      *
      * @return la prestazione offerta (mai null)
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato == this.offerta
      */
     public Prestazione getOfferta() {
         return offerta;
@@ -122,6 +146,10 @@ public class Proposta implements Serializable {
      * Restituisce lo stato corrente della proposta.
      *
      * @return lo stato della proposta (mai null)
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato == this.stato
      */
     public StatoProposta getStato() {
         return stato;
@@ -132,6 +160,10 @@ public class Proposta implements Serializable {
      * Genera una rappresentazione testuale della proposta.
      *
      * @return una stringa contenente i dettagli della proposta
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato contiene informazioni su richiesta, offerta e stato
      */
     @Override
     public String toString() {
@@ -149,6 +181,12 @@ public class Proposta implements Serializable {
      *
      * @param obj l'oggetto da confrontare con questa proposta
      * @return true se l'oggetto rappresenta una proposta uguale a questa
+     *
+     * @pre true
+     * @post risultato == true se e solo se obj instanceof Proposta &&
+     *       Objects.equals(richiesta, ((Proposta)obj).richiesta) &&
+     *       Objects.equals(offerta, ((Proposta)obj).offerta) &&
+     *       stato == ((Proposta)obj).stato
      */
     @Override
     public boolean equals(Object obj) {
@@ -167,6 +205,10 @@ public class Proposta implements Serializable {
      * Calcola il codice hash per questa proposta.
      *
      * @return il codice hash calcolato
+     *
+     * @pre true
+     * @post se x.equals(y) == true, allora x.hashCode() == y.hashCode()
+     * @post risultato == Objects.hash(richiesta, offerta, stato)
      */
     @Override
     public int hashCode() {

@@ -127,6 +127,11 @@ public class Fruitore extends Utente implements Serializable {
      * Restituisce la lista delle proposte di attività inviate dal fruitore.
      *
      * @return lista delle proposte inviate
+     *
+     * @pre true (non ci sono precondizioni particolari per questo getter)
+     * @post risultato != null
+     * @post risultato contiene esattamente le stesse proposte presenti in this.proposte
+     * @post lo stato dell'oggetto Fruitore non viene modificato
      */
     public ArrayList<Proposta> getProposte() {
         return proposte;
@@ -136,6 +141,11 @@ public class Fruitore extends Utente implements Serializable {
      * Aggiunge una proposta di attività alla lista del fruitore.
      *
      * @param proposta la proposta da aggiungere
+     *
+     * @pre proposta != null
+     * @post getProposte().contains(proposta) == true
+     * @post getProposte().size() == old(getProposte().size()) + 1
+     * @post la proposta è stata aggiunta alla fine della lista
      */
     public void aggiungiProposta (Proposta proposta) {
         proposte.add(proposta);

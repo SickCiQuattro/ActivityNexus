@@ -15,7 +15,13 @@ import java.util.Objects;
  * </ul>
  * <p>
  * Questa classe è immutabile e quindi thread-safe.
- * 
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ * <li>categoria != null</li>
+ * <li>ore > 0</li>
+ * </ul>
+ *
  * @see Categoria
  * @see Proposta
  */
@@ -36,6 +42,11 @@ public class Prestazione implements Serializable {
      * @param ore       la durata in ore della prestazione (deve essere positiva)
      * @throws IllegalArgumentException se ore è un valore non positivo (≤ 0)
      * @throws NullPointerException     se categoria è null
+     *
+     * @pre categoria != null
+     * @pre ore > 0
+     * @post getCategoria() == categoria
+     * @post getOre() == ore
      */
     public Prestazione(Categoria categoria, int ore) {
         this.categoria = Objects.requireNonNull(categoria, "La categoria non può essere null");
@@ -49,6 +60,10 @@ public class Prestazione implements Serializable {
      * Restituisce la categoria foglia associata a questa prestazione.
      *
      * @return la categoria della prestazione (mai null)
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato == this.categoria
      */
     public Categoria getCategoria() {
         return categoria;
@@ -58,6 +73,10 @@ public class Prestazione implements Serializable {
      * Restituisce la durata in ore della prestazione.
      *
      * @return il numero intero di ore (sempre positivo)
+     *
+     * @pre true
+     * @post risultato > 0
+     * @post risultato == this.ore
      */
     public int getOre() {
         return ore;
@@ -71,6 +90,10 @@ public class Prestazione implements Serializable {
      *
      * @param o l'oggetto da confrontare
      * @return true se l'oggetto è una Prestazione con stessa categoria e ore
+     *
+     * @pre true
+     * @post risultato == true se e solo se o instanceof Prestazione &&
+     *       this.ore == ((Prestazione)o).ore && this.categoria.equals(((Prestazione)o).categoria)
      */
     @Override
     public boolean equals(Object o) {
@@ -88,6 +111,10 @@ public class Prestazione implements Serializable {
      * Calcola l'hash code di questa prestazione.
      *
      * @return hash code basato su categoria e ore
+     *
+     * @pre true
+     * @post se x.equals(y) == true, allora x.hashCode() == y.hashCode()
+     * @post risultato == Objects.hash(categoria, ore)
      */
     @Override
     public int hashCode() {
@@ -100,6 +127,10 @@ public class Prestazione implements Serializable {
      * Formato: "Nome categoria, X ore"
      *
      * @return una stringa che rappresenta questa prestazione
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato contiene categoria.getNome() e ore
      */
     @Override
     public String toString() {
