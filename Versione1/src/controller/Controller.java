@@ -18,8 +18,7 @@ import java.util.Stack;
 
 /**
  * Controller principale dell'applicazione che gestisce la logica di business e
- * coordina
- * le interazioni tra vista (ConsoleView) e modello (Database).
+ * coordina le interazioni tra vista (ConsoleView) e modello (Database).
  * <p>
  * Implementa il pattern MVC (Model-View-Controller) gestendo:
  * <ul>
@@ -33,7 +32,16 @@ import java.util.Stack;
  * Supporta due tipi di utenti: Configuratore (amministratore) e Fruitore
  * (utente standard).
  *
- * @version 2.0
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>Il database non è mai null dopo l'inizializzazione del controller</li>
+ *   <li>La view non è mai null durante l'intero ciclo di vita del controller</li>
+ *   <li>Le operazioni di modifica dei dati sono sempre seguite da un tentativo di persistenza</li>
+ *   <li>Le operazioni riservate ai Configuratori non sono mai eseguibili da un Fruitore</li>
+ *   <li>Gli indici usati nelle selezioni sono sempre validati prima dell'utilizzo</li>
+ * </ul>
+ *
+ * @version 1.0
  * @see model.Database
  * @see view.ConsoleView
  */
@@ -56,6 +64,12 @@ public class Controller {
      * per l'interazione con l'utente.
      *
      * @param view la vista console per l'interazione con l'utente
+     * @throws NullPointerException se view è null
+     *
+     * @pre view != null
+     * @post this.database != null (inizializzato con un nuovo database vuoto)
+     * @post this.view == view
+     * @post il controller è pronto per gestire le interazioni utente
      */
     public Controller(ConsoleView view) {
         // Inizializza un nuovo database vuoto
@@ -77,6 +91,13 @@ public class Controller {
      * <p>
      * Il ciclo continua finché l'utente non sceglie esplicitamente di terminare
      * l'applicazione.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Tutti i dati persistenti sono caricati all'avvio (tramite loadData())
+     * @post Tutte le modifiche ai dati sono salvate prima della terminazione (tramite salvaTutti())
+     * @post Se si verificano eccezioni durante l'esecuzione, vengono catturate e gestite senza terminare bruscamente
+     * @post L'applicazione termina solo quando l'utente seleziona esplicitamente l'opzione di uscita
      */
     public void start() {
         // Carica i dati prima di avviare l'applicazione
@@ -126,12 +147,28 @@ public class Controller {
     /**
      * Carica tutti i dati dal disco all'avvio dell'applicazione.
      * <p>
-     * Tenta di caricare utenti, comprensori, gerarchie e conversioni dai rispettivi
-     * file.
-     * Se i file non esistono o si verificano errori, inizializza strutture vuote
-     * garantendo che l'applicazione possa comunque funzionare.
+     * Tenta di caricare in sequenza:
+     * <ol>
+     * <li>Utenti registrati e loro credenziali</li>
+     * <li>Comprensori geografici e loro comuni</li>
+     * <li>Gerarchie di categorie con struttura completa</li>
+     * <li>Fattori di conversione tra gerarchie diverse</li>
+     * </ol>
      * <p>
-     * Fornisce feedback all'utente durante il processo di caricamento.
+     * Se i file non esistono o si verificano errori durante la lettura,
+     * inizializza strutture vuote corrispondenti, garantendo che l'applicazione
+     * possa comunque funzionare senza interruzioni.
+     * <p>
+     * Fornisce feedback all'utente durante l'intero processo di caricamento.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post I dati degli utenti sono caricati se il file corrispondente esiste e contiene dati validi
+     * @post I comprensori sono caricati se il file corrispondente esiste e contiene dati validi
+     * @post Le gerarchie sono caricate se il file corrispondente esiste e contiene dati validi
+     * @post I fattori di conversione sono caricati se il file corrispondente esiste e contiene dati validi
+     * @post In caso di errore durante il caricamento di un file, il corrispondente componente del database viene inizializzato vuoto
+     * @post L'applicazione può procedere anche se alcuni o tutti i dati non sono stati caricati
      */
     private void loadData() {
         view.showMessage(ControllerConstants.LOADING_DATA);
@@ -191,6 +228,10 @@ public class Controller {
      *
      * @param path percorso del file da verificare
      * @return true se il file esiste ed ha dimensione maggiore di zero
+     *
+     * @pre path != null
+     * @post restituisce true se e solo se il file esiste fisicamente e ha dimensione > 0
+     * @post restituisce false se il file non esiste, non è accessibile o ha dimensione zero
      */
     private boolean fileEsistente(String path) {
         java.io.File file = new java.io.File(path);
@@ -203,6 +244,12 @@ public class Controller {
      * <p>
      * Serializza solo la componente utenti del database, utilizzato dopo operazioni
      * che modificano i dati utente come registrazione o modifiche al profilo.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post I dati utenti sono serializzati nel file specificato da USERS_FILE_PATH
+     * @post In caso di errore durante il salvataggio, viene mostrato un messaggio appropriato all'utente
+     * @post La struttura dati degli utenti nel database rimane invariata indipendentemente dal risultato dell'operazione
      */
     private void salvaUtenti() {
         try {
@@ -218,9 +265,19 @@ public class Controller {
      * Salva tutti i dati dell'applicazione prima dell'uscita.
      * <p>
      * Serializza utenti, comprensori, gerarchie e fattori di conversione nei
-     * rispettivi file,
-     * garantendo che nessuna informazione venga persa quando l'applicazione
-     * termina.
+     * rispettivi file, garantendo che nessuna informazione venga persa quando
+     * l'applicazione termina.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Tutti i dati dell'applicazione sono serializzati nei rispettivi file:
+     *       - Utenti in USERS_FILE_PATH
+     *       - Comprensori in COMPRESORI_FILE_PATH
+     *       - Gerarchie in GERARCHIE_FILE_PATH
+     *       - Fattori di conversione in CONVERSIONE_FILE_PATH
+     * @post L'utente riceve un messaggio di conferma al completamento del salvataggio
+     * @post In caso di errore durante il salvataggio di qualsiasi componente, viene mostrato un messaggio appropriato
+     * @post Il sistema tenta di salvare tutti i componenti anche se si verificano errori con componenti precedenti
      */
     private void salvaTutti() {
         // Informa l'utente che il processo di salvataggio è iniziato
@@ -248,9 +305,21 @@ public class Controller {
     /**
      * Gestisce il processo di autenticazione dell'utente.
      * <p>
-     * Verifica le credenziali fornite dall'utente e, se valide,
-     * indirizza al menu appropriato in base al tipo di account (configuratore o
-     * fruitore).
+     * Esegue la sequenza completa di autenticazione:
+     * <ol>
+     * <li>Verifica che esistano utenti registrati nel sistema</li>
+     * <li>Richiede le credenziali di accesso (username e password)</li>
+     * <li>Valida le credenziali contro il database</li>
+     * <li>Reindirizza l'utente al menu appropriato in base al suo ruolo</li>
+     * </ol>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non ci sono utenti registrati, viene mostrato un messaggio informativo
+     * @post Se l'autenticazione fallisce, viene mostrato un messaggio di errore
+     * @post Se l'autenticazione ha successo per un Configuratore, viene mostrato il menu Configuratore
+     * @post Se l'autenticazione ha successo per un Fruitore, viene mostrato il menu Fruitore
+     * @post L'applicazione rimane nello stato autenticato finché l'utente non effettua il logout
      */
     private void handleLogin() {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
@@ -287,9 +356,21 @@ public class Controller {
     /**
      * Gestisce il processo di registrazione di un nuovo utente.
      * <p>
-     * Mostra le opzioni di registrazione e guida l'utente nella scelta
-     * del tipo di account (configuratore o fruitore) e nell'inserimento
-     * delle informazioni necessarie.
+     * Coordina l'intero flusso di registrazione che include:
+     * <ol>
+     * <li>Validazione preliminare tramite l'autenticazione temporanea</li>
+     * <li>Raccolta e convalida delle credenziali (username e password)</li>
+     * <li>Selezione del tipo di account (Configuratore o Fruitore)</li>
+     * <li>Creazione dell'account nel database</li>
+     * </ol>
+     *
+     * @return true se la registrazione è completata con successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se la registrazione ha successo, l'utente viene aggiunto al database
+     * @post Se la registrazione ha successo, i dati utente vengono salvati su file (tramite salvaUtenti())
+     * @post Viene mostrato un messaggio appropriato all'utente in base all'esito della registrazione
      */
     private void handleRegistration() {
         // Presentazione delle opzioni di registrazione
@@ -330,8 +411,23 @@ public class Controller {
     /**
      * Gestisce l'interfaccia e le funzionalità dell'utente configuratore.
      * <p>
-     * Presenta il menu dedicato al configuratore e coordina l'esecuzione
-     * delle operazioni di amministrazione selezionate dall'utente.
+     * Implementa un sottomenu dedicato alle operazioni amministrative, permettendo di:
+     * <ul>
+     * <li>Visualizzare e gestire i comprensori geografici</li>
+     * <li>Creare e modificare gerarchie di categorie</li>
+     * <li>Configurare fattori di conversione tra categorie</li>
+     * <li>Tornare al menu principale (logout)</li>
+     * </ul>
+     * <p>
+     * Il ciclo continua finché l'utente non sceglie di effettuare il logout.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @pre È stato effettuato l'accesso come utente Configuratore
+     * @post L'utente può eseguire solo operazioni di amministrazione
+     * @post Ogni operazione completata è seguita da una pausa per consentire la lettura dei risultati
+     * @post Il controllo ritorna al menu principale solo quando l'utente seleziona l'opzione di logout
+     * @post Eventuali eccezioni durante le operazioni sono gestite senza interrompere il flusso di esecuzione
      */
     private void manageConfiguratore() {
         // Ciclo principale del menu configuratore
@@ -390,9 +486,17 @@ public class Controller {
     /**
      * Visualizza i comprensori geografici registrati nel sistema.
      * <p>
-     * Mostra un elenco formattato di tutti i comprensori disponibili,
-     * con i relativi comuni. Se non ci sono comprensori, visualizza
-     * un messaggio informativo.
+     * Mostra un elenco formattato di tutti i comprensori disponibili con le seguenti informazioni:
+     * <ul>
+     * <li>Nome del comprensorio</li>
+     * <li>Elenco dei comuni appartenenti</li>
+     * </ul>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono comprensori, viene mostrato un messaggio informativo
+     * @post Se esistono comprensori, viene visualizzato l'elenco completo in formato leggibile
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
      */
     private void visualizzaComprensori() {
         // Verifica se ci sono comprensori da visualizzare
@@ -409,9 +513,18 @@ public class Controller {
     /**
      * Visualizza le gerarchie di categorie registrate nel sistema.
      * <p>
-     * Mostra la struttura completa delle gerarchie di categorie,
-     * incluse relazioni padre-figlio, campi caratteristici e valori di dominio.
-     * Se non ci sono gerarchie, visualizza un messaggio informativo.
+     * Presenta una rappresentazione strutturata delle gerarchie, mostrando:
+     * <ul>
+     * <li>Relazioni gerarchiche tra categorie (struttura ad albero)</li>
+     * <li>Campi caratteristici di ciascuna categoria</li>
+     * <li>Valori di dominio per i campi caratteristici</li>
+     * </ul>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono gerarchie, viene mostrato un messaggio informativo
+     * @post Se esistono gerarchie, viene visualizzata la struttura completa in formato leggibile
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
      */
     private void visualizzaGerarchie() {
         // Verifica se ci sono gerarchie da visualizzare
@@ -429,9 +542,16 @@ public class Controller {
      * Verifica la presenza di gerarchie nel sistema.
      * <p>
      * Controlla se esistono gerarchie configurate e mostra un messaggio
-     * appropriato in caso negativo.
+     * appropriato in caso negativo. Utilizzato come precondizione per operazioni
+     * che necessitano di almeno una gerarchia esistente.
      *
      * @return true se esistono gerarchie nel database, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono gerarchie, viene mostrato un messaggio specifico di errore
+     * @post Il valore restituito è true se e solo se esiste almeno una gerarchia nel database
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
      */
     private boolean verificaPresenzaGerarchie() {
         // Verifica se ci sono gerarchie nel database
@@ -448,8 +568,22 @@ public class Controller {
     /**
      * Avvia il processo di creazione di un nuovo comprensorio.
      * <p>
-     * Guida l'utente attraverso la definizione di nome e comuni appartenenti
-     * al comprensorio, salvandolo nel database se la creazione ha successo.
+     * Guida l'utente attraverso un flusso interattivo che include:
+     * <ol>
+     * <li>Presentazione delle informazioni introduttive sul processo</li>
+     * <li>Raccolta del nome e dei comuni appartenenti al comprensorio</li>
+     * <li>Validazione dei dati inseriti</li>
+     * <li>Salvataggio del nuovo comprensorio nel database</li>
+     * <li>Persistenza dei dati su file</li>
+     * </ol>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se la creazione ha successo, un nuovo comprensorio viene aggiunto al database
+     * @post Se la creazione ha successo, i dati vengono salvati su file (tramite serializeComprensori())
+     * @post Se la creazione ha successo, viene mostrato un messaggio di conferma
+     * @post Se la creazione è annullata o fallisce, viene mostrato un messaggio appropriato
+     * @post L'operazione non modifica i comprensori esistenti
      */
     private void creaComprensorio() {
         // Mostra informazioni introduttive sul processo di creazione
@@ -471,9 +605,23 @@ public class Controller {
     /**
      * Avvia il processo di creazione di una nuova gerarchia di categorie.
      * <p>
-     * Guida l'utente attraverso la definizione dell'intera struttura gerarchica,
-     * includendo categorie, campi caratteristici e fattori di conversione,
-     * salvando il risultato nel database.
+     * Orchestrazione completa del flusso di creazione che include:
+     * <ol>
+     * <li>Strutturazione della gerarchia con categorie e relazioni padre-figlio</li>
+     * <li>Definizione di campi caratteristici e domini di valori</li>
+     * <li>Configurazione dei fattori di conversione interni alla gerarchia</li>
+     * <li>Configurazione dei fattori di conversione con altre gerarchie esistenti</li>
+     * <li>Salvataggio della gerarchia completa nel database</li>
+     * <li>Persistenza dei dati su file</li>
+     * </ol>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Una nuova gerarchia completa viene aggiunta al database
+     * @post I dati delle gerarchie vengono salvati su file (tramite serializeGerarchie())
+     * @post I fattori di conversione vengono salvati su file (tramite serializeConversioneGerarchie())
+     * @post Se esistono altre gerarchie, vengono configurati fattori di conversione tra la nuova e le esistenti
+     * @post Viene mostrato un messaggio di conferma al completamento dell'operazione
      */
     private void creaGerarchia() {
         // Mostra informazioni introduttive sulla creazione della gerarchia
@@ -554,10 +702,18 @@ public class Controller {
     /**
      * Autentica un utente nel sistema.
      * <p>
-     * Raccoglie username e password dall'utente
-     * e verifica le credenziali contro il database.
+     * Raccoglie le credenziali (username e password) dall'utente e le verifica
+     * confrontandole con i dati memorizzati nel database. Gestisce l'intera
+     * procedura di autenticazione, dall'acquisizione dei dati alla verifica.
      *
-     * @return l'utente autenticato se le credenziali sono valide, null altrimenti
+     * @return l'oggetto Utente se l'autenticazione ha successo, null altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se le credenziali sono valide, restituisce l'oggetto Utente corrispondente
+     * @post Se le credenziali sono invalide o l'utente non esiste, restituisce null
+     * @post Lo stato dell'applicazione non viene modificato (operazione di sola lettura)
+     * @post Il risultato può essere utilizzato per determinare se concedere l'accesso alle funzionalità protette
      */
     public Utente loginUtente() {
         // Richiesta dello username all'utente
@@ -621,16 +777,24 @@ public class Controller {
     /**
      * Registra un nuovo utente fruitore nel sistema.
      * <p>
-     * Il processo include:
+     * Coordina l'intero processo di registrazione utente che include:
      * <ul>
-     * <li>Selezione del comprensorio di appartenenza</li>
-     * <li>Acquisizione di username valido e univoco</li>
-     * <li>Acquisizione di password sicura</li>
-     * <li>Acquisizione e validazione dell'indirizzo email</li>
-     * <li>Creazione dell'account nel database</li>
+     * <li>Raccolta e validazione dello username</li>
+     * <li>Raccolta e validazione della password</li>
+     * <li>Determinazione del tipo di account (Configuratore o Fruitore)</li>
+     * <li>Creazione dell'utente nel database</li>
+     * <li>Persistenza dei dati utente su file</li>
      * </ul>
      *
      * @return true se la registrazione è completata con successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se la registrazione ha successo, un nuovo utente è aggiunto al database
+     * @post Se la registrazione ha successo, i dati utente sono salvati su file (tramite salvaUtenti())
+     * @post Se la registrazione fallisce, il database rimane invariato
+     * @post Se lo username scelto è già in uso, la registrazione fallisce
+     * @post Se l'utente annulla il processo, la registrazione fallisce senza modificare il database
      */
     private boolean registraFruitore() {
         // Mostra intestazione per la registrazione fruitore
@@ -726,12 +890,20 @@ public class Controller {
     }
 
     /**
-     * Esegue una verifica preliminare durante la registrazione.
+     * Crea un utente predefinito nel sistema quando non esistono utenti registrati.
      * <p>
-     * Implementa un meccanismo di sicurezza basato su credenziali temporanee
-     * per prevenire registrazioni automatizzate.
+     * Utilizzato per garantire l'accesso iniziale al sistema con credenziali standard.
+     * Questo metodo viene tipicamente invocato durante il primo avvio dell'applicazione
+     * o quando il database utenti è vuoto.
      *
-     * @return true se la verifica è superata, false altrimenti
+     * @return true se la creazione dell'utente predefinito ha successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se la creazione ha successo, un nuovo utente Configuratore con credenziali predefinite è aggiunto al database
+     * @post Se la creazione ha successo, i dati utente sono salvati su file (tramite salvaUtenti())
+     * @post Se la creazione fallisce, il database rimane vuoto
+     * @post Il metodo mostrerà all'utente le credenziali predefinite create
      */
     private boolean defaultUtente() {
         // Genera credenziali casuali temporanee
@@ -771,11 +943,23 @@ public class Controller {
     /**
      * Crea un nuovo comprensorio con nome e comuni definiti dall'utente.
      * <p>
-     * Acquisisce il nome del comprensorio, verificandone la validità,
-     * e raccoglie i comuni appartenenti attraverso un processo interattivo.
+     * Gestisce l'intero processo di creazione interattiva che include:
+     * <ol>
+     * <li>Acquisizione e validazione del nome del comprensorio</li>
+     * <li>Verifica dell'unicità del nome tra i comprensori esistenti</li>
+     * <li>Raccolta dei comuni appartenenti tramite processo guidato</li>
+     * <li>Aggiunta del comprensorio completo al database</li>
+     * </ol>
      *
-     * @return true se il comprensorio è stato creato e aggiunto con successo, false
-     *         altrimenti
+     * @return true se il comprensorio è stato creato e aggiunto con successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se restituisce true, un nuovo comprensorio è stato aggiunto al database
+     * @post Se l'utente annulla l'operazione (inserendo "0"), restituisce false
+     * @post Se il nome scelto è già in uso, l'utente viene guidato a scegliere un altro nome
+     * @post Se il comprensorio non contiene almeno un comune, la creazione fallisce
+     * @post I comprensori esistenti non vengono modificati durante il processo
      */
     public boolean createComprensorio() {
         // Mostra il titolo della prima fase: definizione del nome del comprensorio
@@ -839,12 +1023,25 @@ public class Controller {
     }
 
     /**
-     * Aggiunge comuni a un comprensorio esistente.
+     * Aggiunge comuni a un comprensorio esistente attraverso un'interfaccia interattiva.
      * <p>
-     * Permette all'utente di inserire più comuni in sequenza,
-     * verificando che siano unici all'interno del comprensorio.
+     * Guida l'utente nel processo di aggiunta comuni che include:
+     * <ol>
+     * <li>Richiesta iterativa del nome di ciascun comune</li>
+     * <li>Validazione del nome del comune (non vuoto, lunghezza minima)</li>
+     * <li>Verifica dell'unicità del comune all'interno del comprensorio</li>
+     * <li>Possibilità di terminare l'inserimento in qualsiasi momento</li>
+     * </ol>
      *
      * @param comprensorio il comprensorio a cui aggiungere i comuni
+     *
+     * @pre comprensorio != null
+     * @pre this.view != null
+     * @post Il comprensorio contiene tutti i comuni validi inseriti dall'utente
+     * @post Ogni comune aggiunto rispetta i criteri di validità (non vuoto, lunghezza minima)
+     * @post L'utente può terminare l'inserimento in qualsiasi momento inserendo "0"
+     * @post Se un comune esiste già nel comprensorio, viene mostrato un messaggio di errore senza duplicazione
+     * @post Il processo continua fino a quando l'utente non sceglie di terminare l'inserimento
      */
     private void addComuniToComprensorio(Comprensorio comprensorio) {
         boolean finished = false;
@@ -970,10 +1167,27 @@ public class Controller {
     /**
      * Crea una nuova gerarchia di categorie completa.
      * <p>
-     * Implementa un algoritmo di costruzione della gerarchia basato sui valori
-     * dei campi caratteristici, generando automaticamente la struttura ad albero.
+     * Implementa un processo interattivo di costruzione di una gerarchia che include:
+     * <ol>
+     * <li>Definizione del nome e descrizione della gerarchia</li>
+     * <li>Creazione delle categorie con le relative relazioni gerarchiche</li>
+     * <li>Configurazione dei campi caratteristici per ogni categoria</li>
+     * <li>Generazione dei valori di dominio per ciascun campo</li>
+     * </ol>
+     * <p>
+     * Utilizza un approccio guidato per supportare l'utente nella creazione
+     * della struttura completa della gerarchia.
      *
      * @return la gerarchia completa creata
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post La gerarchia creata ha un nome valido e univoco
+     * @post La gerarchia contiene almeno una categoria
+     * @post Ogni categoria ha almeno un campo caratteristico
+     * @post Ogni campo caratteristico ha almeno un valore di dominio valido
+     * @post Le relazioni gerarchiche tra le categorie formano una struttura ad albero coerente
+     * @post La gerarchia è pronta per essere aggiunta al database dell'applicazione
      */
     private Gerarchia createGerarchia() {
         // Intestazione e spiegazione iniziale per l'utente
@@ -1075,14 +1289,30 @@ public class Controller {
     }
 
     /**
-     * Crea una categoria per una gerarchia.
+     * Crea una nuova categoria e la aggiunge alla gerarchia specificata.
      * <p>
-     * Definisce nome e campo caratteristico della categoria,
-     * verificando l'unicità del nome all'interno della gerarchia.
+     * Guida l'utente nel processo di creazione di una categoria che include:
+     * <ol>
+     * <li>Acquisizione e validazione del nome della categoria</li>
+     * <li>Definizione di una descrizione opzionale</li>
+     * <li>Posizionamento corretto nella gerarchia (sotto il padre specificato)</li>
+     * <li>Aggiunta di campi caratteristici e relativi valori di dominio</li>
+     * </ol>
+     * <p>
+     * Il metodo crea e configura completamente la categoria prima di restituirla.
      *
-     * @param nomePadre nome della categoria padre (null se è la radice)
-     * @param root      gerarchia radice (null se è la categoria radice)
-     * @return la categoria creata
+     * @param nomePadre nome della categoria padre sotto cui posizionare la nuova categoria
+     * @param root gerarchia a cui aggiungere la categoria
+     * @return il nodo dell'albero contenente la categoria creata
+     *
+     * @pre nomePadre != null
+     * @pre root != null
+     * @pre this.view != null
+     * @post Il nodo restituito contiene una categoria valida e completamente configurata
+     * @post La categoria creata è correttamente posizionata nella struttura gerarchica
+     * @post La categoria ha un nome univoco all'interno del suo livello nella gerarchia
+     * @post La categoria ha almeno un campo caratteristico con valori di dominio definiti
+     * @post Se l'utente annulla l'operazione, restituisce null
      */
     private Categoria createCategoria(String nomePadre, Gerarchia root) {
         String nome;
@@ -1146,12 +1376,28 @@ public class Controller {
     }
 
     /**
-     * Crea un campo caratteristico per una categoria.
+     * Crea un nuovo campo caratteristico per una categoria.
      * <p>
-     * Definisce il nome del campo e il suo dominio di valori possibili,
-     * che determineranno le possibili sottocategorie.
+     * Implementa un'interfaccia interattiva per la definizione completa di un campo, includendo:
+     * <ol>
+     * <li>Acquisizione e validazione del nome del campo</li>
+     * <li>Definizione dei valori di dominio ammissibili</li>
+     * <li>Validazione di ciascun valore inserito</li>
+     * <li>Verifica che il dominio contenga almeno un valore</li>
+     * </ol>
+     * <p>
+     * Ogni campo creato include un insieme non vuoto di valori possibili che rappresentano
+     * il dominio del campo stesso.
      *
-     * @return il campo caratteristico creato
+     * @return il campo caratteristico creato e configurato, o null se l'utente annulla l'operazione
+     *
+     * @pre this.view != null
+     * @post Il campo creato ha un nome valido e non vuoto
+     * @post Il campo ha almeno un valore di dominio definito
+     * @post Ogni valore nel dominio ha un nome valido (non vuoto, lunghezza minima)
+     * @post Se l'utente annulla l'operazione, viene restituito null
+     * @post I valori nel dominio sono univoci (non ci sono duplicati)
+     * @post L'utente riceve feedback appropriati durante il processo di creazione
      */
     private Campo createCampo() {
         view.showMessage(ControllerConstants.TITLE_CAMPO_CARATTERISTICO);
@@ -1191,10 +1437,27 @@ public class Controller {
     /**
      * Crea il dominio di valori per un campo caratteristico.
      * <p>
-     * Raccoglie una serie di valori (con eventuali descrizioni)
-     * che definiscono l'insieme delle possibili sottocategorie.
+     * Guida l'utente attraverso un processo interattivo per definire l'insieme di valori
+     * validi (dominio) che un campo può assumere. Il processo include:
+     * <ol>
+     * <li>Acquisizione e validazione di ogni valore inserito</li>
+     * <li>Verifica dell'unicità all'interno del dominio</li>
+     * <li>Possibilità di aggiungere descrizioni opzionali ai valori</li>
+     * <li>Garanzia che il campo abbia almeno un valore nel dominio</li>
+     * </ol>
+     * <p>
+     * Il metodo utilizza un approccio iterativo, permettendo all'utente di aggiungere
+     * valori finché non decide di terminare l'inserimento.
      *
-     * @param campo il campo a cui assegnare il dominio
+     * @param campo il campo caratteristico per cui definire il dominio di valori
+     *
+     * @pre campo != null
+     * @pre this.view != null
+     * @post Il campo ha almeno un valore definito nel suo dominio
+     * @post Ogni valore nel dominio è valido (non vuoto, rispetta la lunghezza minima)
+     * @post Non ci sono valori duplicati nel dominio (ogni valore ha un nome univoco)
+     * @post L'utente riceve feedback appropriati durante il processo di inserimento
+     * @post Se l'utente tenta di terminare senza inserire valori, riceve un avviso
      */
     private void createDominio(Campo campo) {
         boolean finished = false;
@@ -1331,12 +1594,20 @@ public class Controller {
     }
 
     /**
-     * Permette all'utente di selezionare una gerarchia tra quelle disponibili.
+     * Permette all'utente di selezionare una gerarchia tra quelle disponibili nel sistema.
      * <p>
-     * Mostra un elenco numerato delle gerarchie nel sistema
-     * e acquisisce la scelta dell'utente.
+     * Visualizza un elenco numerato delle gerarchie esistenti e acquisisce la scelta
+     * dell'utente tramite input numerico. La numerazione presentata all'utente è 1-based
+     * per una migliore comprensione da parte dell'utente finale.
      *
      * @return la gerarchia selezionata dall'utente
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @pre this.database.getGerarchie() non è vuoto
+     * @post La gerarchia restituita è una delle gerarchie esistenti nel database
+     * @post L'utente ha potuto visualizzare l'elenco completo delle gerarchie disponibili
+     * @post L'indice selezionato dall'utente è stato validato prima di accedere alla gerarchia corrispondente
      */
     private Gerarchia selezionaGerarchia() {
         // Estrae la lista delle gerarchie dal database per numerazione e
@@ -1363,13 +1634,21 @@ public class Controller {
     }
 
     /**
-     * Permette all'utente di selezionare una categoria foglia da una gerarchia.
+     * Permette all'utente di selezionare una categoria foglia da una gerarchia specificata.
      * <p>
-     * Mostra le foglie disponibili nella gerarchia e acquisisce la scelta
-     * dell'utente.
+     * Utilizza la visualizzazione numerata delle foglie generata dalla gerarchia e
+     * acquisisce la scelta dell'utente. Le foglie rappresentano categorie terminali
+     * che non hanno ulteriori sottocategorie.
      *
      * @param gerarchia la gerarchia da cui selezionare una foglia
-     * @return la categoria foglia selezionata
+     * @return il nodo dell'albero contenente la categoria foglia selezionata
+     *
+     * @pre gerarchia != null
+     * @pre gerarchia.getFoglie() non è vuoto
+     * @pre this.view != null
+     * @post Il nodo restituito appartiene all'insieme delle foglie della gerarchia specificata
+     * @post L'indice selezionato dall'utente è stato validato prima di accedere alla foglia corrispondente
+     * @post L'utente ha potuto visualizzare la struttura gerarchica con le foglie evidenziate
      */
     private TreeNode<Categoria> selezionaFoglia(Gerarchia gerarchia) {
         // Ottiene tutte le foglie della gerarchia (le categorie che rappresentano
@@ -1387,14 +1666,27 @@ public class Controller {
     }
 
     /**
-     * Richiede all'utente di selezionare un'opzione numerica da un intervallo.
+     * Richiede all'utente di selezionare un'opzione numerica da un intervallo definito.
      * <p>
-     * Valida l'input assicurandosi che sia un numero intero
-     * compreso nell'intervallo specificato.
+     * Implementa un ciclo di validazione che garantisce che l'input fornito sia:
+     * <ul>
+     * <li>Un numero intero valido</li>
+     * <li>Compreso tra 1 e il numero massimo di opzioni disponibili</li>
+     * </ul>
+     * <p>
+     * Il metodo mostra un messaggio personalizzato e continua a richiedere input
+     * finché non viene fornito un valore valido.
      *
-     * @param messaggio il messaggio da mostrare per la richiesta
-     * @param numScelte il numero massimo di scelte disponibili
+     * @param messaggio il messaggio da mostrare all'utente durante la richiesta
+     * @param numScelte il numero massimo di scelte disponibili (limite superiore dell'intervallo)
      * @return l'indice numerico selezionato dall'utente (1-based)
+     *
+     * @pre messaggio != null
+     * @pre numScelte > 0
+     * @pre this.view != null
+     * @post Il valore restituito è un intero compreso tra 1 e numScelte (inclusi)
+     * @post L'utente ha ricevuto feedback appropriati in caso di input non valido
+     * @post Il metodo ha gestito correttamente eventuali errori di formato nell'input
      */
     private int richiediIndiceDaUtente(String messaggio, int numScelte) {
         boolean validInput = false;
@@ -1427,13 +1719,27 @@ public class Controller {
     }
 
     /**
-     * Crea i fattori di conversione tra una nuova gerarchia e quelle esistenti.
+     * Crea i fattori di conversione tra una nuova gerarchia e tutte quelle esistenti.
      * <p>
-     * Stabilisce relazioni quantitative tra categorie di riferimento di gerarchie
-     * diverse,
-     * permettendo la conversione di valori tra domini eterogenei.
+     * Guida l'utente attraverso il processo di definizione delle relazioni quantitative
+     * tra la nuova gerarchia e ciascuna di quelle già presenti nel sistema. Questi
+     * fattori permettono la conversione di valori tra domini concettuali diversi ma
+     * correlati.
+     * <p>
+     * Il processo richiede l'inserimento di un valore numerico positivo che definisce
+     * il rapporto di conversione tra i nodi di riferimento delle due gerarchie.
      *
-     * @param gerarchia la nuova gerarchia da collegare alle esistenti
+     * @param gerarchia la nuova gerarchia da collegare alle gerarchie esistenti
+     *
+     * @pre gerarchia != null
+     * @pre this.database != null
+     * @pre this.view != null
+     * @pre Il database contiene almeno una gerarchia oltre a quella specificata
+     * @post Per ogni gerarchia esistente, viene definito un fattore di conversione con la nuova gerarchia
+     * @post Ogni fattore di conversione è un numero positivo maggiore di zero
+     * @post La consistenza matematica delle conversioni inter-gerarchiche è garantita
+     * @post Le relazioni di conversione sono bidirezionali (da A a B e da B ad A)
+     * @post L'utente riceve feedback appropriati durante il processo di inserimento
      */
     private void creaConversioneGerarchie(Gerarchia gerarchia) {
         // Spiegazione introduttiva sul funzionamento dei fattori di conversione tra
@@ -1524,12 +1830,27 @@ public class Controller {
     }
 
     /**
-     * Visualizza il percorso completo dalla radice a un nodo specifico.
+     * Visualizza il percorso completo dalla radice a un nodo specifico nella gerarchia.
      * <p>
-     * Mostra la catena gerarchica che collega la categoria radice
-     * alla categoria specificata, con formattazione grafica.
+     * Costruisce e mostra la catena gerarchica di categorie che collega la categoria radice
+     * alla categoria specificata, con formattazione grafica che include:
+     * <ul>
+     * <li>Indentazione progressiva che rappresenta la profondità del nodo</li>
+     * <li>Indicatori visuali della relazione genitore-figlio</li>
+     * <li>Evidenziazione dei dettagli di ogni categoria nel percorso</li>
+     * </ul>
+     * <p>
+     * Il percorso viene costruito risalendo l'albero dalla foglia alla radice e poi
+     * visualizzato in ordine dall'alto verso il basso.
      *
-     * @param nodo il nodo di cui visualizzare il percorso
+     * @param nodo il nodo di cui visualizzare il percorso completo nella gerarchia
+     *
+     * @pre nodo != null
+     * @pre this.view != null
+     * @post L'utente visualizza il percorso completo dalla radice al nodo specificato
+     * @post La visualizzazione include tutte le categorie nel percorso, correttamente ordinate
+     * @post La formattazione grafica riflette accuratamente la struttura gerarchica
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
      */
     private void mostraPercorsoFino(TreeNode<Categoria> nodo) {
         // Crea una lista per memorizzare il percorso dalla radice alla foglia
@@ -1560,10 +1881,27 @@ public class Controller {
     /**
      * Crea i fattori di conversione tra categorie foglia di una stessa gerarchia.
      * <p>
-     * Definisce relazioni quantitative tra attività della stessa gerarchia,
-     * basate sul loro livello di specializzazione relativa.
+     * Implementa un processo interattivo per definire relazioni quantitative tra le varie
+     * attività (categorie foglia) di una stessa gerarchia, permettendo:
+     * <ol>
+     * <li>Selezione automatica di una foglia di riferimento (base di conversione)</li>
+     * <li>Definizione guidata dei fattori relativi per tutte le altre foglie</li>
+     * <li>Costruzione di un sistema coerente di conversioni intra-gerarchiche</li>
+     * </ol>
+     * <p>
+     * I fattori definiti rappresentano la relazione quantitativa tra attività dello stesso
+     * dominio concettuale ma con diversi livelli di specializzazione.
      *
-     * @param gerarchia la gerarchia su cui definire i fattori di conversione
+     * @param gerarchia la gerarchia su cui definire i fattori di conversione interni
+     *
+     * @pre gerarchia != null
+     * @pre gerarchia.getFogliePerLivello() non è vuoto
+     * @pre this.view != null
+     * @post La gerarchia contiene un nodo di riferimento definito come base di conversione
+     * @post Ogni foglia della gerarchia ha un fattore di conversione definito rispetto al riferimento
+     * @post I fattori di conversione sono maggiori di zero
+     * @post L'utente riceve feedback appropriato durante il processo di definizione
+     * @post Il sistema di conversioni interno alla gerarchia è matematicamente coerente
      */
     private void creaFattoriConversione(Gerarchia gerarchia) {
         // Ottiene tutte le foglie della gerarchia, ordinate per livello
@@ -1607,15 +1945,33 @@ public class Controller {
     /**
      * Richiede e valida un fattore di conversione numerico dall'utente.
      * <p>
-     * Acquisisce e verifica che il valore sia un numero decimale
-     * compreso nell'intervallo specificato.
+     * Implementa un ciclo di validazione che garantisce che il valore inserito:
+     * <ul>
+     * <li>Sia un numero decimale valido</li>
+     * <li>Rientri nell'intervallo specificato dai parametri</li>
+     * <li>Rappresenti correttamente la relazione tra le categorie</li>
+     * </ul>
+     * <p>
+     * Il metodo guida l'utente fornendo contesto sulle categorie coinvolte e
+     * continua a richiedere input finché non viene fornito un valore accettabile.
      *
-     * @param categoriaOrigine      nome della categoria di origine
-     * @param categoriaDestinazione nome della categoria di destinazione
-     * @param minFattore            valore minimo accettabile
-     * @param maxFattore            valore massimo accettabile
-     * @param messaggioErrore       messaggio da mostrare in caso di errore
-     * @return il fattore di conversione validato
+     * @param categoriaOrigine      nome della categoria di origine per la conversione
+     * @param categoriaDestinazione nome della categoria di destinazione per la conversione
+     * @param minFattore            valore minimo accettabile per il fattore (incluso)
+     * @param maxFattore            valore massimo accettabile per il fattore (incluso)
+     * @param messaggioErrore       messaggio da mostrare in caso di input non valido
+     * @return il fattore di conversione validato come numero decimale
+     *
+     * @pre categoriaOrigine != null
+     * @pre categoriaDestinazione != null
+     * @pre minFattore > 0
+     * @pre maxFattore >= minFattore
+     * @pre messaggioErrore != null
+     * @pre this.view != null
+     * @post Il valore restituito è un numero decimale > 0
+     * @post Il valore restituito è compreso tra minFattore e maxFattore (inclusi)
+     * @post L'utente ha ricevuto feedback appropriato in caso di input non valido
+     * @post Il metodo ha gestito correttamente eventuali errori di formato nell'input
      */
     private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
             double minFattore, double maxFattore, String messaggioErrore) {
@@ -1815,10 +2171,18 @@ public class Controller {
     /**
      * Richiede e valida uno username per la registrazione.
      * <p>
-     * Acquisisce uno username dall'utente e verifica che rispetti
-     * i requisiti di sicurezza e formattazione.
+     * Guida l'utente attraverso il processo di selezione di uno username valido,
+     * verificando che rispetti i requisiti del sistema (lunghezza minima, caratteri ammessi)
+     * e che non sia già in uso da un altro utente registrato.
      *
-     * @return lo username validato, o null se il processo è annullato
+     * @return lo username validato, o null se l'utente annulla l'operazione
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se restituisce un valore non null, questo rappresenta uno username valido e disponibile
+     * @post Se restituisce null, l'utente ha scelto di annullare l'operazione
+     * @post Lo username restituito non è già associato a un utente esistente
+     * @post Lo username restituito soddisfa tutti i requisiti di formattazione definiti nel sistema
      */
     private String getUsername() {
         while (true) {
@@ -1839,10 +2203,17 @@ public class Controller {
     /**
      * Richiede e valida una password per la registrazione.
      * <p>
-     * Acquisisce una password dall'utente e verifica che rispetti
-     * i requisiti minimi di sicurezza (lunghezza, complessità).
+     * Guida l'utente nella creazione di una password sicura, verificando che soddisfi
+     * i requisiti minimi di sicurezza definiti dal sistema (lunghezza, complessità, ecc.).
+     * Fornisce feedback appropriati in caso di password non conforme.
      *
-     * @return la password validata, o null se il processo è annullato
+     * @return la password validata, o null se l'utente annulla l'operazione
+     *
+     * @pre this.view != null
+     * @post Se restituisce un valore non null, questo rappresenta una password che soddisfa i requisiti di sicurezza
+     * @post Se restituisce null, l'utente ha scelto di annullare l'operazione
+     * @post La password restituita soddisfa tutti i requisiti di sicurezza definiti nel sistema
+     * @post La password non viene memorizzata in chiaro ma processata attraverso funzioni di hash appropriate
      */
     private String getPassword() {
         while (true) {
@@ -1865,10 +2236,18 @@ public class Controller {
     /**
      * Registra un errore nel sistema di logging dell'applicazione.
      * <p>
-     * Gestisce un'eccezione in modo centralizzato, registrando informazioni
-     * dettagliate per il debug e notificando appropriatamente l'utente.
+     * Richiede all'utente di inserire 's' per sì o 'n' per no,
+     * validando l'input fino a ottenere una risposta valida.
+     * Utilizzato per decisioni semplici durante i processi interattivi.
      *
-     * @param e l'eccezione da registrare
+     * @param messaggio il messaggio da mostrare all'utente per la richiesta
+     * @return true se l'utente risponde affermativamente ('s'), false altrimenti ('n')
+     *
+     * @pre this.view != null
+     * @pre messaggio != null
+     * @post Il valore restituito corrisponde esattamente alla scelta dell'utente: true per 's', false per 'n'
+     * @post Il metodo termina solo quando l'utente ha fornito una risposta valida ('s' o 'n')
+     * @post Durante il processo vengono mostrati messaggi appropriati per guidare l'utente verso un input valido
      */
     private void logErrore(Exception e) {
         // Inizializza un builder per il messaggio di log
