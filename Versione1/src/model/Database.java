@@ -86,14 +86,27 @@ public class Database {
     /**
      * Registra un nuovo utente configuratore nel sistema.
      * <p>
-     * Verifica che lo username non sia già in uso nel sistema, quindi crea e
-     * aggiunge
-     * un nuovo utente Configuratore con le credenziali specificate.
+     * Crea un nuovo utente con ruolo Configuratore, verificando prima che lo username
+     * richiesto non sia già utilizzato. Il processo include:
+     * <ol>
+     * <li>Validazione dei parametri obbligatori</li>
+     * <li>Verifica dell'unicità dello username nel sistema</li>
+     * <li>Creazione di una nuova istanza Configuratore con le credenziali specificate</li>
+     * <li>Aggiunta dell'utente alla collezione del database</li>
+     * </ol>
+     * <p>
+     * La password sarà sottoposta ad hashing per garantire la sicurezza.
      *
      * @param username lo username univoco per il nuovo configuratore
      * @param password la password in chiaro (sarà oggetto di hashing)
-     * @return true se la registrazione è avvenuta con successo, false se lo
-     *         username esiste già
+     * @return true se la registrazione è avvenuta con successo, false se lo username esiste già
+     *
+     * @pre username != null
+     * @pre password != null
+     * @pre this.utenti != null
+     * @post se restituisce true, hasUtente(username) == true
+     * @post se restituisce true, un nuovo Configuratore è stato aggiunto alla collezione utenti
+     * @post se hasUtente(username) == true prima dell'invocazione, restituisce false e lo stato non cambia
      * @throws NullPointerException se username o password sono null
      */
     public boolean registraConfiguratore(String username, String password) {
@@ -114,17 +127,30 @@ public class Database {
     /**
      * Registra un nuovo utente fruitore nel sistema.
      * <p>
-     * Verifica che lo username non sia già in uso, quindi crea e aggiunge un nuovo
-     * utente Fruitore
-     * con le credenziali e informazioni personali specificate.
+     * Crea un nuovo utente con ruolo Fruitore, verificando prima che lo username
+     * richiesto non sia già utilizzato. Il processo include:
+     * <ol>
+     * <li>Validazione dei parametri obbligatori (username, password, email)</li>
+     * <li>Verifica dell'unicità dello username nel sistema</li>
+     * <li>Creazione di una nuova istanza Fruitore con le credenziali e informazioni specificate</li>
+     * <li>Aggiunta dell'utente alla collezione del database</li>
+     * </ol>
+     * <p>
+     * Il comprensorio di appartenenza è opzionale e può essere specificato null.
      *
      * @param username     lo username univoco per il nuovo fruitore
      * @param password     la password in chiaro (sarà oggetto di hashing)
      * @param email        l'indirizzo email del fruitore
-     * @param comprensorio il comprensorio geografico di appartenenza (può essere
-     *                     null)
-     * @return true se la registrazione è avvenuta con successo, false se lo
-     *         username esiste già
+     * @param comprensorio il comprensorio geografico di appartenenza (può essere null)
+     * @return true se la registrazione è avvenuta con successo, false se lo username esiste già
+     *
+     * @pre username != null
+     * @pre password != null
+     * @pre email != null
+     * @pre this.utenti != null
+     * @post se restituisce true, hasUtente(username) == true
+     * @post se restituisce true, un nuovo Fruitore è stato aggiunto alla collezione utenti
+     * @post se hasUtente(username) == true prima dell'invocazione, restituisce false e lo stato non cambia
      * @throws NullPointerException se username, password o email sono null
      */
     public boolean registraFruitore(String username, String password, String email, Comprensorio comprensorio) {
@@ -144,10 +170,22 @@ public class Database {
     }
 
     /**
-     * Verifica se esiste un utente con lo username specificato.
+     * Verifica se uno username è disponibile per la registrazione.
+     * <p>
+     * Controlla se non esiste già un utente con lo username specificato nel sistema.
+     * Il confronto è case-sensitive (distingue tra maiuscole e minuscole).
+     * <p>
+     * Nota: Il nome del metodo può essere fuorviante - restituisce true se lo username
+     * è DISPONIBILE (non esiste), false se è già utilizzato.
      *
-     * @param username lo username da verificare (case-sensitive)
-     * @return true se non esiste, false altrimenti
+     * @param username lo username da verificare
+     * @return true se lo username è disponibile (non esiste), false se è già utilizzato
+     *
+     * @pre this.utenti != null
+     * @post se username == null, restituisce true
+     * @post se esiste un utente u tale che u.getUsername().equals(username), restituisce false
+     * @post se non esiste un utente u tale che u.getUsername().equals(username), restituisce true
+     * @post lo stato del database non viene modificato
      */
     public boolean esisteUtente(String username) {
         // Verifica che lo username non sia null
