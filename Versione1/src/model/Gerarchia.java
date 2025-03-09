@@ -12,6 +12,22 @@ import java.util.*;
  * <p>
  * Gestisce categorie in relazione gerarchica, con supporto per conversioni
  * tra diversi livelli e visualizzazione formattata della struttura.
+ * <p>
+ * Funzionalità principali:
+ * <ul>
+ * <li>Gestione della struttura ad albero di categorie</li>
+ * <li>Conversioni tra livelli gerarchici diversi</li>
+ * <li>Visualizzazione formattata con diverse modalità</li>
+ * <li>Recupero di foglie e nodi a diversi livelli</li>
+ * </ul>
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>La radice dell'albero non è mai null</li>
+ *   <li>Il fattore di conversione non è mai null</li>
+ *   <li>I nodi dell'albero contengono sempre oggetti di tipo Categoria non null</li>
+ *   <li>Due gerarchie sono considerate uguali se hanno la stessa categoria radice</li>
+ * </ul>
  *
  * @see Categoria
  * @see FattoreConversione
@@ -31,6 +47,10 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      *
      * @param categoriaRadice la categoria radice della gerarchia
      * @throws NullPointerException se categoriaRadice è null
+     *
+     * @pre categoriaRadice != null
+     * @post root().data() restituisce categoriaRadice
+     * @post getFattoreConversione() != null
      */
     public Gerarchia(Categoria categoriaRadice) {
         super(categoriaRadice); // Inizializza il nodo radice con la categoria specificata
@@ -41,25 +61,14 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
     // -----------------------------------------------------------------------------------
 
     /**
-     * Aggiunge una categoria come figlio di una categoria padre specificata.
-     *
-     * @param categoriaGenitore la categoria padre
-     * @param categoriaFiglio   la categoria figlio da aggiungere
-     * @return true se la categoria figlio è stata aggiunta correttamente, false
-     *         altrimenti
-     */
-    public boolean addCategoria(Categoria categoriaGenitore, Categoria categoriaFiglio) {
-        // Trova il nodo corrispondente alla categoria genitore
-        TreeNode<Categoria> nodoGenitore = this.find(categoriaGenitore);
-
-        // Aggiunge il figlio solo se il genitore esiste
-        return nodoGenitore != null && nodoGenitore.add(new LinkedMultiTreeNode<>(categoriaFiglio));
-    }
-
-    /**
      * Ottiene il gestore dei fattori di conversione per questa gerarchia.
+     * <p>
+     * Permette di accedere all'oggetto che gestisce le conversioni tra
+     * diversi livelli della gerarchia.
      *
      * @return il gestore dei fattori di conversione
+     *
+     * @post il valore restituito non è null
      */
     public FattoreConversione getFattoreConversione() {
         return fattoreConversione;
@@ -71,8 +80,14 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Restituisce tutte le foglie della gerarchia.
+     * <p>
+     * Una foglia è un nodo che non ha figli. La lista restituita include tutte
+     * le foglie trovate durante l'attraversamento in pre-ordine.
      *
      * @return lista di nodi foglia
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene tutti e soli i nodi foglia della gerarchia
      */
     public ArrayList<TreeNode<Categoria>> getFoglie() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
@@ -101,8 +116,15 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Restituisce una foglia per ogni livello distinto presente nella gerarchia.
+     * <p>
+     * Per ogni livello trovato nell'albero, viene aggiunta alla lista la prima
+     * foglia incontrata a quel livello durante l'attraversamento in pre-ordine.
      *
      * @return lista di nodi foglia, uno per ogni livello presente
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene al massimo un nodo foglia per ogni livello distinto
+     * @post tutti gli elementi nella lista restituita sono nodi foglia (isLeaf() == true)
      */
     public ArrayList<TreeNode<Categoria>> getFogliePerLivello() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
@@ -461,17 +483,4 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
         return Objects.equals(this.root().data(), other.root().data());
     }
 
-    /**
-     * Calcola l'hash code per questa gerarchia.
-     * Questa implementazione si basa sull'identità dell'oggetto anziché sui suoi
-     * contenuti per evitare interferenze con i metodi di visualizzazione.
-     *
-     * @return l'hash code basato sull'identità dell'oggetto
-     */
-    // @Override // Commentato perché può causare problemi con i metodi di
-    // visualizzazione
-    // public int hashCode() {
-    // // Usa l'identità dell'oggetto invece del contenuto per l'hash code
-    // return System.identityHashCode(this);
-    // }
 }
