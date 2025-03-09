@@ -19,7 +19,15 @@ import java.util.Objects;
  * <li>Calcolo automatico di fattori inversi</li>
  * <li>Validazione della consistenza dei dati</li>
  * </ul>
- * 
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>La mappa dei fattori non è mai null</li>
+ *   <li>Tutti i fattori di conversione memorizzati sono positivi (> 0)</li>
+ *   <li>Non esistono fattori di conversione per categorie identiche (auto-riferimenti)</li>
+ *   <li>Le chiavi della mappa sono sempre istanze di CoppiaOrdinata non null</li>
+ * </ul>
+ *
  * @see Categoria
  * @see Gerarchia
  */
@@ -45,6 +53,12 @@ public class ConversioneGerarchie implements Serializable {
      * @param prima   la categoria di origine
      * @param seconda la categoria di destinazione
      * @return il fattore arrotondato a due decimali, o null se non esiste relazione
+     *
+     * @post se prima == null o seconda == null, restituisce null
+     * @post se prima.equals(seconda), restituisce 1.0 (fattore identità)
+     * @post se esiste un fattore diretto, restituisce tale valore
+     * @post se esiste un fattore inverso, restituisce 1/fattore_inverso
+     * @post se non esiste né un fattore diretto né uno inverso, restituisce null
      */
     public Double getFattoreConversione(Categoria prima, Categoria seconda) {
         // Verifica parametri null: se almeno uno è null, non può esistere conversione
@@ -82,6 +96,12 @@ public class ConversioneGerarchie implements Serializable {
      * @param seconda la categoria di destinazione
      * @param fattore il fattore (deve essere positivo)
      * @throws IllegalArgumentException se il fattore è minore o uguale a zero
+     *
+     * @pre fattore > 0
+     * @post se prima == null o seconda == null, non viene memorizzato alcun fattore
+     * @post se prima.equals(seconda), non viene memorizzato alcun fattore
+     * @post se prima != null e seconda != null e prima non equals seconda,
+     *       getFattoreConversione(prima, seconda) restituisce il fattore specificato
      */
     public void addFattoreConversione(Categoria prima, Categoria seconda, double fattore) {
         // Verifica parametri null: se uno dei parametri è null, termina senza effetti
@@ -105,68 +125,6 @@ public class ConversioneGerarchie implements Serializable {
         fattori.put(coppia, fattore);
     }
 
-    /**
-     * Verifica se esiste un fattore di conversione tra due categorie.
-     * <p>
-     * Controlla l'esistenza di un fattore diretto o inverso.
-     *
-     * @param prima   la prima categoria
-     * @param seconda la seconda categoria
-     * @return true se esiste un fattore, false altrimenti
-     */
-    public boolean hasFattoreConversione(Categoria prima, Categoria seconda) {
-        // Verifica parametri null: se almeno uno è null, non può esistere conversione
-        if (prima == null || seconda == null) {
-            return false;
-        }
-
-        // Verifica se esiste un fattore diretto o inverso
-        return getFattore(prima, seconda) != null || getFattore(seconda, prima) != null;
-    }
-
-    /**
-     * Rimuove il fattore di conversione tra due categorie.
-     * <p>
-     * Elimina solo la conversione diretta, non quella inversa.
-     *
-     * @param prima   la prima categoria
-     * @param seconda la seconda categoria
-     * @return true se il fattore è stato rimosso, false altrimenti
-     */
-    public boolean removeFattoreConversione(Categoria prima, Categoria seconda) {
-        // Verifica parametri null: se almeno uno è null, non ci sono fattori da
-        // rimuovere
-        if (prima == null || seconda == null) {
-            return false;
-        }
-
-        // Crea la coppia ordinata e tenta di rimuoverla dalla mappa
-        // Il metodo remove() restituisce il valore associato alla chiave rimossa, o
-        // null
-        CoppiaOrdinata coppia = new CoppiaOrdinata(prima, seconda);
-        return fattori.remove(coppia) != null;
-    }
-
-    /**
-     * Rimuove tutti i fattori di conversione memorizzati.
-     */
-    public void clearFattori() {
-        // Rimuove tutti gli elementi dalla mappa
-        fattori.clear();
-    }
-
-    /**
-     * Restituisce il numero di fattori di conversione diretti memorizzati.
-     * <p>
-     * Conta solo i fattori esplicitamente memorizzati, non quelli calcolabili
-     * tramite inversione.
-     *
-     * @return il numero di coppie di conversione esplicitamente memorizzate
-     */
-    public int getNumeroFattori() {
-        // Restituisce la dimensione della mappa (numero di coppie memorizzate)
-        return fattori.size();
-    }
 
     // -----------------------------------------------------------------------------------
     // METODI DI SUPPORTO
@@ -180,6 +138,10 @@ public class ConversioneGerarchie implements Serializable {
      * @param prima   la prima categoria
      * @param seconda la seconda categoria
      * @return il fattore diretto, o null se non esiste
+     *
+     * @post se prima == null o seconda == null, restituisce null
+     * @post se esiste un fattore diretto per la coppia (prima, seconda), restituisce tale valore
+     * @post se non esiste un fattore diretto, restituisce null
      */
     private Double getFattore(Categoria prima, Categoria seconda) {
         // Verifica parametri null
@@ -200,8 +162,13 @@ public class ConversioneGerarchie implements Serializable {
      * Coppia ordinata di categorie usata come chiave nella mappa dei fattori.
      * <p>
      * Rappresenta una relazione direzionale tra categorie, dove l'ordine è
-     * rilevante:
-     * (A,B) è diverso da (B,A).
+     * rilevante: (A,B) è diverso da (B,A).
+     *
+     * <p><b>Invarianti:</b>
+     * <ul>
+     *   <li>Le categorie prima e seconda possono essere null</li>
+     *   <li>Due coppie sono uguali se e solo se prima e seconda sono uguali nell'ordine</li>
+     * </ul>
      */
     private static class CoppiaOrdinata implements Serializable {
         // Identificatore di versione per la serializzazione
@@ -217,6 +184,9 @@ public class ConversioneGerarchie implements Serializable {
          *
          * @param prima   la prima categoria
          * @param seconda la seconda categoria
+         *
+         * @post this.prima è uguale alla categoria prima fornita
+         * @post this.seconda è uguale alla categoria seconda fornita
          */
         public CoppiaOrdinata(Categoria prima, Categoria seconda) {
             // Memorizza i riferimenti alle categorie nell'ordine specificato
@@ -226,11 +196,14 @@ public class ConversioneGerarchie implements Serializable {
 
         /**
          * Confronta questa coppia ordinata con un altro oggetto.
-         * <p>
-         * 
+         *
          * @param obj l'oggetto da confrontare con questa coppia
          * @return true se obj è una CoppiaOrdinata con le stesse categorie nello stesso
          *         ordine
+         *
+         * @post se obj == this, restituisce true
+         * @post se obj == null o obj è di classe diversa, restituisce false
+         * @post restituisce true se e solo se obj è una CoppiaOrdinata con prima e seconda uguali
          */
         @Override
         public boolean equals(Object obj) {
@@ -254,6 +227,8 @@ public class ConversioneGerarchie implements Serializable {
          * Il codice hash è calcolato combinando gli hash code delle due categorie.
          *
          * @return il codice hash della coppia ordinata
+         *
+         * @post se due coppie sono uguali secondo equals(), hanno lo stesso hashCode()
          */
         @Override
         public int hashCode() {
@@ -264,9 +239,11 @@ public class ConversioneGerarchie implements Serializable {
 
         /**
          * Restituisce una rappresentazione in stringa della coppia ordinata.
-         * <p>
-         * 
+         *
          * @return una rappresentazione testuale della coppia ordinata
+         *
+         * @post il valore restituito non è null
+         * @post il valore restituito contiene una rappresentazione di entrambe le categorie
          */
         @Override
         public String toString() {

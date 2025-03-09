@@ -5,15 +5,23 @@ import java.io.Serial;
 /**
  * Utente con privilegi amministrativi nel sistema.
  * <p>
+ * Estende la classe {@link Utente} e rappresenta un amministratore con diritti
+ * speciali per la configurazione e la gestione del sistema.
+ * <p>
  * Responsabilità principali:
  * <ul>
  * <li>Gestione comprensori geografici</li>
  * <li>Definizione gerarchie di categorie</li>
  * <li>Configurazione fattori di conversione</li>
  * </ul>
- * 
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>isConfig() restituisce sempre true</li>
+ *   <li>Tutte le invarianti ereditate da {@link Utente}</li>
+ * </ul>
+ *
  * @see Utente
- * @see Fruitore
  */
 public class Configuratore extends Utente {
     @Serial
@@ -22,9 +30,15 @@ public class Configuratore extends Utente {
     /**
      * Costruisce un nuovo Configuratore con username e password specificati.
      *
-     * @param username lo username del Configuratore (non null)
-     * @param password la password del Configuratore (non null)
+     * @param username lo username del Configuratore
+     * @param password la password del Configuratore
      * @throws NullPointerException se username o password sono null
+     *
+     * @pre username != null
+     * @pre password != null
+     * @post getUsername() restituisce lo username fornito
+     * @post password viene impostata come specificato (verificabile con authenticate())
+     * @post isConfig() restituisce true
      */
     public Configuratore(String username, String password) {
         // Tutti i Configuratori hanno sempre isConfig=true
@@ -38,6 +52,8 @@ public class Configuratore extends Utente {
      *
      * @return true (sempre, per definizione di Configuratore)
      * @see Utente#isConfig()
+     *
+     * @post il valore restituito è true
      */
     @Override
     public boolean isConfig() {
@@ -48,22 +64,12 @@ public class Configuratore extends Utente {
      * Restituisce una rappresentazione testuale del Configuratore.
      *
      * @return stringa che rappresenta il Configuratore
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene "Configuratore" e la rappresentazione base dell'utente
      */
     @Override
     public String toString() {
         return "Configuratore: " + super.toString();
-    }
-
-    /**
-     * Verifica se questo Configuratore può gestire la risorsa specificata.
-     * <p>
-     * I Configuratori hanno accesso a tutte le risorse amministrative.
-     *
-     * @param risorsa identificatore della risorsa da verificare
-     * @return true se il Configuratore ha accesso alla risorsa
-     */
-    public boolean puoGestireRisorsa(String risorsa) {
-        // I configuratori hanno accesso a tutte le risorse
-        return true;
     }
 }

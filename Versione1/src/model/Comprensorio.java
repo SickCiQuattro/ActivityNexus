@@ -16,7 +16,14 @@ import java.util.*;
  * <p>
  * Due comprensori sono considerati uguali se hanno lo stesso nome,
  * indipendentemente dai comuni contenuti.
- * 
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>La lista dei comuni non è mai null (può essere vuota)</li>
+ *   <li>La lista dei comuni non contiene mai valori null</li>
+ *   <li>La lista dei comuni non contiene mai duplicati (case-insensitive)</li>
+ * </ul>
+ *
  * @see java.io.Serializable
  */
 public class Comprensorio implements Serializable {
@@ -40,34 +47,13 @@ public class Comprensorio implements Serializable {
      * Costruisce un Comprensorio con il nome specificato e lista vuota di comuni.
      *
      * @param nome il nome del comprensorio
+     *
+     * @post getNome() restituisce il nome fornito
+     * @post getComuni() restituisce una lista vuota
      */
     public Comprensorio(String nome) {
         this.nome = nome; // Accetta anche null, anche se non consigliato
         this.comuni = new ArrayList<>(); // Inizializza una lista vuota
-    }
-
-    /**
-     * Costruisce un Comprensorio con nome e lista di comuni specificati.
-     * <p>
-     * I comuni duplicati o null vengono automaticamente filtrati.
-     *
-     * @param nome   il nome del comprensorio
-     * @param comuni la collezione iniziale dei comuni (se null, viene creata una
-     *               lista vuota)
-     */
-    public Comprensorio(String nome, Collection<String> comuni) {
-        this.nome = nome;
-        this.comuni = new ArrayList<>(); // Inizializza una lista vuota
-
-        // Se la collezione di comuni non è null, aggiunge ogni comune valido
-        // (non null e non già presente) alla lista interna
-        if (comuni != null) {
-            for (String comune : comuni) {
-                if (comune != null && !hasComune(comune)) {
-                    this.comuni.add(comune);
-                }
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------------
@@ -78,6 +64,8 @@ public class Comprensorio implements Serializable {
      * Restituisce il nome del comprensorio.
      *
      * @return il nome del comprensorio
+     *
+     * @post il valore restituito è uguale al nome assegnato al comprensorio
      */
     public String getNome() {
         return this.nome;
@@ -90,6 +78,8 @@ public class Comprensorio implements Serializable {
      * potrebbe causare inconsistenze (hashCode cambierà).
      *
      * @param nome il nuovo nome del comprensorio
+     *
+     * @post getNome() restituisce il valore fornito
      */
     public void setNome(String nome) {
         this.nome = nome;
@@ -103,6 +93,11 @@ public class Comprensorio implements Serializable {
      * @return una lista non modificabile dei comuni
      * @see #addComune(String)
      * @see #removeComune(String)
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito non contiene elementi null
+     * @post il valore restituito non contiene duplicati (case-insensitive)
+     * @post il valore restituito è una vista non modificabile della lista interna
      */
     public List<String> getComuni() {
         // Restituisce una vista non modificabile della lista interna
@@ -111,18 +106,11 @@ public class Comprensorio implements Serializable {
     }
 
     /**
-     * Restituisce il numero di comuni nel comprensorio.
-     *
-     * @return il numero di comuni
-     */
-    public int getNumeroComuniCount() {
-        return this.comuni.size();
-    }
-
-    /**
      * Verifica se il comprensorio non contiene alcun comune.
      *
      * @return true se il comprensorio è vuoto, false altrimenti
+     *
+     * @post il valore restituito è true se e solo se getNumeroComuniCount() == 0
      */
     public boolean isEmpty() {
         return this.comuni.isEmpty();
@@ -140,6 +128,10 @@ public class Comprensorio implements Serializable {
      *
      * @param comune il nome del comune da aggiungere
      * @return true se il comune è stato aggiunto, false se era null o già presente
+     *
+     * @post se restituisce true, hasComune(comune) == true
+     * @post se restituisce true, getNumeroComuniCount() è aumentato di 1
+     * @post se comune == null o hasComune(comune) == true, restituisce false e lo stato non è modificato
      */
     public boolean addComune(String comune) {
         // Verifica se il comune è null o già presente (case-insensitive)
@@ -151,40 +143,15 @@ public class Comprensorio implements Serializable {
     }
 
     /**
-     * Aggiunge tutti i comuni della collezione specificata.
-     * <p>
-     * Vengono aggiunti solo i comuni non nulli e non già presenti.
-     *
-     * @param comuni la collezione di comuni da aggiungere
-     * @return il numero di comuni effettivamente aggiunti
-     */
-    public int addComuni(Collection<String> comuni) {
-        // Se la collezione è null, non viene aggiunto nessun comune
-        if (comuni == null) {
-            return 0;
-        }
-
-        // Tiene traccia del numero di comuni effettivamente aggiunti
-        int aggiunti = 0;
-
-        // Iterazione su tutti i comuni della collezione
-        for (String comune : comuni) {
-            // addComune gestirà la validazione (non null, non duplicato)
-            if (addComune(comune)) {
-                aggiunti++;
-            }
-        }
-
-        return aggiunti;
-    }
-
-    /**
      * Verifica se un comune è presente nel comprensorio.
      * <p>
      * Il confronto è case-insensitive.
      *
      * @param comune il nome del comune da verificare
      * @return true se presente, false altrimenti o se null
+     *
+     * @post se comune == null, restituisce false
+     * @post il valore restituito riflette correttamente la presenza o assenza del comune nel comprensorio
      */
     public boolean hasComune(String comune) {
         // Se il comune è null, non può essere presente nel comprensorio
@@ -203,51 +170,6 @@ public class Comprensorio implements Serializable {
         return false;
     }
 
-    /**
-     * Rimuove un comune dal comprensorio.
-     * <p>
-     * Il confronto è case-insensitive.
-     *
-     * @param comune il nome del comune da rimuovere
-     * @return true se il comune è stato trovato e rimosso, false altrimenti
-     */
-    public boolean removeComune(String comune) {
-        // Se il comune è null, non può essere rimosso
-        if (comune == null) {
-            return false;
-        }
-
-        // Utilizza un iteratore per rimuovere in modo sicuro durante l'iterazione
-        Iterator<String> it = this.comuni.iterator();
-        while (it.hasNext()) {
-            String c = it.next();
-            if (c.equalsIgnoreCase(comune)) {
-                it.remove(); // Rimuove il comune corrente dall'iteratore
-                return true; // Comune trovato e rimosso
-            }
-        }
-
-        // Se non è stata trovata corrispondenza, restituisce false
-        return false;
-    }
-
-    /**
-     * Rimuove tutti i comuni dal comprensorio.
-     */
-    public void clearComuni() {
-        this.comuni.clear();
-    }
-
-    /**
-     * Restituisce un array contenente tutti i comuni del comprensorio.
-     *
-     * @return un array di stringhe contenente i nomi dei comuni
-     */
-    public String[] getComuniAsArray() {
-        // Converte la lista in un array di stringhe
-        return this.comuni.toArray(new String[0]);
-    }
-
     // -----------------------------------------------------------------------------------
     // METODI OVERRIDE DI OBJECT
     // -----------------------------------------------------------------------------------
@@ -258,6 +180,10 @@ public class Comprensorio implements Serializable {
      * Include il nome e l'elenco dei comuni con formattazione.
      *
      * @return rappresentazione in stringa del comprensorio
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene il nome del comprensorio
+     * @post il valore restituito contiene una rappresentazione di tutti i comuni
      */
     @Override
     public String toString() {
@@ -287,6 +213,11 @@ public class Comprensorio implements Serializable {
      * @param obj l'oggetto da confrontare
      * @return true se l'oggetto è un Comprensorio con lo stesso nome, false
      *         altrimenti
+     *
+     * @post se this e obj sono lo stesso oggetto (riferimento identico), restituisce true
+     * @post se obj è null o non è un'istanza di Comprensorio, restituisce false
+     * @post se il nome di questo comprensorio è null, restituisce false
+     * @post se obj è un Comprensorio e entrambi i nomi non sono null, restituisce true se e solo se i nomi sono uguali ignorando case
      */
     @Override
     public boolean equals(Object obj) {
@@ -314,6 +245,9 @@ public class Comprensorio implements Serializable {
      * Basato sul nome convertito in minuscolo per coerenza con equals().
      *
      * @return hash code del nome in minuscolo, o 0 se nome è null
+     *
+     * @post se this.nome == null, restituisce 0
+     * @post se due comprensori sono uguali secondo equals(), hanno lo stesso hashCode()
      */
     @Override
     public int hashCode() {

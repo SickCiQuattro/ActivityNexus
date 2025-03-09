@@ -20,6 +20,14 @@ import java.util.Objects;
  * <li><b>Fattore di conversione</b>: Rapporto tra unità di diversi livelli</li>
  * </ul>
  *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>La mappa dei fattori di conversione non è mai null</li>
+ *   <li>Tutti i fattori di conversione memorizzati sono positivi (> 0)</li>
+ *   <li>Il livello di riferimento è sempre maggiore o uguale a 1</li>
+ *   <li>Non esiste mai un fattore di conversione per il livello di riferimento nella mappa</li>
+ * </ul>
+ *
  * @see TreeNode
  * @see Categoria
  * @see ConversioneGerarchie
@@ -34,7 +42,6 @@ public class FattoreConversione implements Serializable {
     public static final String LIVELLO_RIFERIMENTO_MINIMO = "Il livello di riferimento deve essere almeno 1";
     public static final String FATTORE_CONVERSIONE_POSITIVO = "Il fattore di conversione deve essere positivo";
     public static final String LIVELLO_RIFERIMENTO_NON_AGGIUNGIBILE = "Non è possibile aggiungere un fattore per il livello di riferimento";
-    public static final String LIVELLO_RIFERIMENTO_NON_RIMOVIBILE = "Non è possibile rimuovere il fattore per il livello di riferimento";
 
     /** Nodo foglia che serve come riferimento per le conversioni */
     private TreeNode<Categoria> fogliaRiferimento;
@@ -61,6 +68,10 @@ public class FattoreConversione implements Serializable {
      *
      * @param fogliaRiferimento il nodo da usare come riferimento
      * @throws NullPointerException se fogliaRiferimento è null
+     *
+     * @pre fogliaRiferimento != null
+     * @post getFogliaRiferimento() restituisce il nodo fornito
+     * @post il livello di riferimento è impostato al livello del nodo fornito
      */
     public void setNodoRiferimento(TreeNode<Categoria> fogliaRiferimento) {
         // Verifica che il nodo non sia null, lanciando un'eccezione in caso contrario
@@ -76,6 +87,10 @@ public class FattoreConversione implements Serializable {
      *
      * @param livelloRiferimento il livello da usare come riferimento
      * @throws IllegalArgumentException se il livello è inferiore a 1
+     *
+     * @pre livelloRiferimento >= 1
+     * @post this.livelloRiferimento == livelloRiferimento
+     * @post la mappa dei fattori non contiene il livello di riferimento come chiave
      */
     public void setLivelloRiferimento(int livelloRiferimento) {
         // Verifica che il livello sia valido (almeno 1, poiché i livelli partono da 1)
@@ -91,56 +106,16 @@ public class FattoreConversione implements Serializable {
      * Restituisce il nodo foglia utilizzato come riferimento.
      *
      * @return il nodo foglia di riferimento, può essere null
+     *
+     * @post il valore restituito può essere null se non è stato ancora impostato un nodo di riferimento
      */
     public TreeNode<Categoria> getFogliaRiferimento() {
         return fogliaRiferimento;
     }
 
-    /**
-     * Restituisce il livello del nodo di riferimento.
-     *
-     * @return il livello del nodo di riferimento
-     */
-    public int getLivelloRiferimento() {
-        return livelloRiferimento;
-    }
-
     // -----------------------------------------------------------------------------------
     // METODI DI GESTIONE DEI FATTORI DI CONVERSIONE
     // -----------------------------------------------------------------------------------
-
-    /**
-     * Verifica se un fattore di conversione può essere aggiunto.
-     * <p>
-     * Un fattore può essere aggiunto se il livello è diverso dal riferimento
-     * e non esiste già un fattore per quel livello.
-     *
-     * @param livello il livello da verificare
-     * @return true se è possibile aggiungere un fattore
-     */
-    public boolean isAggiungibileFattoreConversione(int livello) {
-        // Un fattore può essere aggiunto solo se:
-        // 1. Il livello è diverso dal livello di riferimento (che ha sempre fattore
-        // 1.0)
-        // 2. Non esiste già un fattore per questo livello
-        return livello != livelloRiferimento && !fattoriConversione.containsKey(livello);
-    }
-
-    /**
-     * Verifica se esiste un fattore di conversione per un livello.
-     * <p>
-     * Restituisce true per il livello di riferimento o se esiste un fattore
-     * definito.
-     *
-     * @param livello il livello da verificare
-     * @return true se esiste un fattore per il livello
-     */
-    public boolean hasFattoreConversione(int livello) {
-        // Un fattore esiste se:
-        // 1. È il livello di riferimento (ha sempre fattore 1.0 implicito)
-        // 2. Oppure è presente nella mappa dei fattori
-        return livello == livelloRiferimento || fattoriConversione.containsKey(livello);
-    }
 
     /**
      * Aggiunge un fattore di conversione per un livello.
@@ -152,6 +127,11 @@ public class FattoreConversione implements Serializable {
      * @param fattore il valore del fattore di conversione
      * @throws IllegalArgumentException se fattore ≤ 0 o livello =
      *                                  livelloRiferimento
+     *
+     * @pre fattore > 0
+     * @pre livello != livelloRiferimento
+     * @post getFattoreDiretto(livello) restituisce il fattore fornito
+     * @post la mappa dei fattori contiene una voce per il livello specificato
      */
     public void addFattoreConversione(int livello, double fattore) {
         // Il fattore deve essere positivo (una conversione non può essere nulla o
@@ -172,30 +152,16 @@ public class FattoreConversione implements Serializable {
     }
 
     /**
-     * Rimuove un fattore di conversione.
-     *
-     * @param livello il livello per cui rimuovere il fattore
-     * @return true se il fattore è stato rimosso, false se non esisteva
-     * @throws IllegalArgumentException se il livello è uguale al riferimento
-     */
-    public boolean removeFattoreConversione(int livello) {
-        // Non è possibile rimuovere il fattore per il livello di riferimento
-        // (che è sempre 1.0 per definizione)
-        if (livello == livelloRiferimento) {
-            throw new IllegalArgumentException(LIVELLO_RIFERIMENTO_NON_RIMOVIBILE);
-        }
-
-        // Tenta di rimuovere il fattore dalla mappa e restituisce true se era presente
-        return fattoriConversione.remove(livello) != null;
-    }
-
-    /**
      * Restituisce il fattore di conversione diretto rispetto al riferimento.
      * <p>
      * Per il livello di riferimento restituisce sempre 1.0.
      *
      * @param livello il livello per cui ottenere il fattore
      * @return il fattore diretto, 1.0 per il riferimento, null se non definito
+     *
+     * @post se livello == livelloRiferimento, restituisce 1.0
+     * @post se livello != livelloRiferimento e esiste un fattore per questo livello, restituisce tale fattore
+     * @post se livello != livelloRiferimento e non esiste un fattore per questo livello, restituisce null
      */
     public Double getFattoreDiretto(int livello) {
         // Per il livello di riferimento, il fattore è sempre 1.0 per definizione
@@ -223,6 +189,14 @@ public class FattoreConversione implements Serializable {
      * @param livelloPartenza il livello di partenza
      * @param livelloArrivo   il livello di arrivo
      * @return il fattore calcolato, null se mancano i fattori necessari
+     *
+     * @post se livelloPartenza == livelloArrivo, restituisce 1.0
+     * @post se livelloPartenza == livelloRiferimento, restituisce getFattoreDiretto(livelloArrivo)
+     * @post se livelloArrivo == livelloRiferimento e esiste un fattore per livelloPartenza,
+     *       restituisce 1/getFattoreDiretto(livelloPartenza)
+     * @post se livelloPartenza != livelloRiferimento e livelloArrivo != livelloRiferimento,
+     *       restituisce getFattoreDiretto(livelloArrivo)/getFattoreDiretto(livelloPartenza)
+     *       se entrambi i fattori esistono, altrimenti null
      */
     public Double getFattoreConversione(int livelloPartenza, int livelloArrivo) {
         // CASO 0: Se i livelli sono uguali, il fattore è 1 (identità)
@@ -269,27 +243,5 @@ public class FattoreConversione implements Serializable {
                 return null;
             }
         }
-    }
-
-    /**
-     * Rimuove tutti i fattori di conversione memorizzati.
-     * <p>
-     * Il livello di riferimento viene mantenuto.
-     */
-    public void clearFattori() {
-        // Rimuove tutti i fattori di conversione dalla mappa
-        fattoriConversione.clear();
-    }
-
-    /**
-     * Restituisce il numero di fattori di conversione memorizzati.
-     * <p>
-     * Non include il livello di riferimento (implicito).
-     *
-     * @return il numero di fattori definiti
-     */
-    public int getNumeroFattori() {
-        // Restituisce il numero di fattori memorizzati nella mappa
-        return fattoriConversione.size();
     }
 }
