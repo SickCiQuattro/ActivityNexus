@@ -1,7 +1,6 @@
 package view;
 
 import java.util.*;
-import java.io.IOException;
 
 /**
  * Interfaccia utente a console con funzionalità avanzate di visualizzazione.
@@ -16,9 +15,6 @@ public class ConsoleView {
 
     /** Scanner per input utente */
     private final Scanner scanner = new Scanner(System.in);
-
-    /** Flag per supporto codici ANSI */
-    private final boolean supportsAnsi = true;
 
     // -----------------------------------------------------------------------------------
     // COSTANTI PER LA FORMATTAZIONE
@@ -175,6 +171,30 @@ public class ConsoleView {
     }
 
     /**
+     * Ottiene un input numerico con validazione del range.
+     *
+     * @param prompt il messaggio di richiesta
+     * @param min    valore minimo accettabile
+     * @param max    valore massimo accettabile
+     * @return il numero inserito entro il range specificato
+     */
+    public float getFloatInput(String prompt, float min, float max) {
+        while (true) {
+            try {
+                String input = getInput(prompt + " [" + min + "-" + max + "]:");
+                float value = Float.parseFloat(input);
+                if (value >= min && value <= max) {
+                    return value;
+                } else {
+                    showErrorMessage("Inserire un valore compreso tra " + min + " e " + max);
+                }
+            } catch (NumberFormatException e) {
+                showErrorMessage("Inserire un numero valido");
+            }
+        }
+    }
+
+    /**
      * Richiede conferma (sì/no) all'utente.
      *
      * @param prompt il messaggio di richiesta
@@ -182,13 +202,13 @@ public class ConsoleView {
      */
     public boolean getConfirmation(String prompt) {
         while (true) {
-            String input = getInput(prompt + " (s/n):").toLowerCase();
+            String input = getInput(prompt + " (s/n): ").toLowerCase();
             if (input.equals("s") || input.equals("si") || input.equals("y") || input.equals("yes")) {
                 return true;
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                showErrorMessage("Risposta non valida. Utilizzare 's' per confermare o 'n' per annullare.");
+                showErrorMessage("Risposta non valida. Utilizzare 's' per confermare o 'n' per annullare");
             }
         }
     }
@@ -205,6 +225,8 @@ public class ConsoleView {
      * Pulisce lo schermo del terminale.
      */
     public void clearScreen() {
+        // Flag per supporto codici ANSI
+        boolean supportsAnsi = true;
         if (supportsAnsi) {
             System.out.print("\033[H\033[2J");
             System.out.flush();
@@ -247,7 +269,6 @@ public class ConsoleView {
                 MENU_VIEW_CONVERSION_FACTORS,
                 MENU_CREATE_COMPRENSORIO,
                 MENU_CREATE_GERARCHIA,
-                MENU_DEFINE_CONVERSIONS,
                 MENU_EXIT);
 
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
@@ -260,9 +281,8 @@ public class ConsoleView {
         clearScreen();
 
         List<String> menuItems = List.of(
-                GREEN + "1. Visualizza Attività" + RESET,
-                GREEN + "2. Registra Nuova Attività" + RESET,
-                CYAN + "3. Visualizza Statistiche" + RESET,
+                GREEN + "1. Visualizza categorie" + RESET,
+                GREEN + "2. Formula proposta di scambio d'opera" + RESET,
                 RED + "0. Uscita" + RESET);
 
         printMenuBox(USER_MENU_TITLE, menuItems);

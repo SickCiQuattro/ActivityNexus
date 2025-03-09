@@ -30,6 +30,7 @@ import java.util.Objects;
  * @see java.io.Serializable
  */
 public class Utente implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Costanti di sicurezza

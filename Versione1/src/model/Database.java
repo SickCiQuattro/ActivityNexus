@@ -4,9 +4,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Repository centrale per tutti i dati dell'applicazione.
@@ -85,8 +84,13 @@ public class Database {
     }
 
     /**
-     * Registra un nuovo utente nel database.
+     * Registra un nuovo utente configuratore nel sistema.
+     * <p>
+     * Verifica che lo username non sia già in uso nel sistema, quindi crea e
+     * aggiunge
+     * un nuovo utente Configuratore con le credenziali specificate.
      *
+
      * @param username lo username dell'utente (deve essere univoco)
      * @param password la password dell'utente
      * @param isConfig true per creare un Configuratore, false per un Utente
@@ -97,17 +101,75 @@ public class Database {
      * @post se esiste già un utente con lo stesso username, restituisce false e lo stato non cambia
      * @post se restituisce true, è stato creato un nuovo utente del tipo appropriato e aggiunto al database
      */
-    public boolean registerUtente(String username, String password, boolean isConfig) {
-        // Verifica dei parametri e unicità dello username
-        if (username == null || password == null || hasUtente(username)) {
+
+    public boolean registraConfiguratore(String username, String password) {
+        // Valida i parametri obbligatori
+        Objects.requireNonNull(username, "Username non può essere null");
+        Objects.requireNonNull(password, "Password non può essere null");
+
+        // Verifica che lo username non sia già utilizzato
+        if (hasUtente(username)) {
             return false;
         }
 
-        // Crea il tipo appropriato di utente in base al flag isConfig
-        Utente utente = isConfig ? new Configuratore(username, password) : new Utente(username, password);
+        // Crea e registra il nuovo utente configuratore
+        Configuratore configuratore = new Configuratore(username, password);
+        return this.addUtente(configuratore);
+    }
 
-        // Tenta di aggiungere l'utente al database
-        return this.addUtente(utente);
+    /**
+     * Registra un nuovo utente fruitore nel sistema.
+     * <p>
+     * Verifica che lo username non sia già in uso, quindi crea e aggiunge un nuovo
+     * utente Fruitore
+     * con le credenziali e informazioni personali specificate.
+     *
+     * @param username     lo username univoco per il nuovo fruitore
+     * @param password     la password in chiaro (sarà oggetto di hashing)
+     * @param email        l'indirizzo email del fruitore
+     * @param comprensorio il comprensorio geografico di appartenenza (può essere
+     *                     null)
+     * @return true se la registrazione è avvenuta con successo, false se lo
+     *         username esiste già
+     * @throws NullPointerException se username, password o email sono null
+     */
+    public boolean registraFruitore(String username, String password, String email, Comprensorio comprensorio) {
+        // Valida i parametri obbligatori
+        Objects.requireNonNull(username, "Username non può essere null");
+        Objects.requireNonNull(password, "Password non può essere null");
+        Objects.requireNonNull(email, "Email non può essere null");
+
+        // Verifica che lo username non sia già utilizzato
+        if (hasUtente(username)) {
+            return false;
+        }
+
+        // Crea e registra il nuovo utente fruitore
+        Fruitore fruitore = new Fruitore(username, password, email, comprensorio);
+        return this.addUtente(fruitore);
+    }
+
+    /**
+     * Verifica se esiste un utente con lo username specificato.
+     *
+     * @param username lo username da verificare (case-sensitive)
+     * @return true se non esiste, false altrimenti
+     */
+    public boolean esisteUtente(String username) {
+        // Verifica che lo username non sia null
+        if (username == null) {
+            return true;
+        }
+
+        // Cerca tra tutti gli utenti uno con lo username corrispondente
+        for (Utente utente : this.utenti) {
+            if (utente.getUsername().equals(username)) { // Confronto case-sensitive
+                return false;
+            }
+        }
+
+        // Nessuna corrispondenza trovata
+        return true;
     }
 
     /**
@@ -293,10 +355,13 @@ public class Database {
             return "Nessun comprensorio presente.";
         }
 
+        int count = 1;
+
         // Costruisce la rappresentazione in stringa di tutti i comprensori
         StringBuilder sb = new StringBuilder();
         for (Comprensorio c : this.comprensori) {
-            sb.append(c.toString()).append("\n");
+            sb.append(String.format("[%d] %s", count, c.toString())).append("\n");
+            count++;
         }
         return sb.toString();
     }

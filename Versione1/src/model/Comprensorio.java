@@ -28,6 +28,7 @@ import java.util.*;
  */
 public class Comprensorio implements Serializable {
     // Identificatore di versione per la serializzazione
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Nome del comprensorio, utilizzato come identificatore univoco

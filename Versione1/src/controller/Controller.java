@@ -7,6 +7,9 @@ import model.*;
 import util.UserUtil;
 import view.ConsoleView;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +46,9 @@ import java.util.Stack;
  * @see view.ConsoleView
  */
 public class Controller {
-    // TODO: Dividere il Controller in classi più piccole per gestire le
-    // funzionalità specifiche
+    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le
+    // funzionalità
+    // da monilitico a moduli più piccoli e coesi
 
     private Database database;
     private final ConsoleView view;
@@ -113,11 +117,7 @@ public class Controller {
                         break;
 
                     case "2": // Registrazione
-                        if (handleRegistration()) {
-                            // Se la registrazione va a buon fine, salva i dati utente
-                            salvaUtenti();
-                            view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
-                        }
+                        handleRegistration();
                         break;
 
                     case "0": // Uscita
@@ -135,7 +135,10 @@ public class Controller {
             } catch (Exception e) {
                 // Gestione errori imprevisti per evitare che l'applicazione si arresti
                 view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
-                e.printStackTrace(); // Stampa lo stack trace per il debug
+
+                // Logging dell'errore invece di una semplice stack trace
+                logErrore(e);
+
                 view.pressEnterToContinue(); // Attende input utente prima di continuare
             }
         }
@@ -321,7 +324,8 @@ public class Controller {
     private void handleLogin() {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
         if (database.getUtenti().isEmpty()) {
-            view.showMessage(ControllerConstants.NO_USERS_REGISTERED);
+            view.showErrorMessage(ControllerConstants.NO_USERS_REGISTERED);
+            view.pressEnterToContinue();
             return;
         }
 
@@ -330,7 +334,8 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showMessage(ControllerConstants.LOGIN_FAILED);
+            view.showErrorMessage(ControllerConstants.LOGIN_FAILED);
+            view.pressEnterToContinue();
             return;
         }
 
@@ -342,8 +347,9 @@ public class Controller {
             // Se è un configuratore, mostra il menu corrispondente
             manageConfiguratore();
         } else {
+            Fruitore fruitore = (Fruitore) utente;
             // Altrimenti è un fruitore (funzionalità future)
-            view.showMessage("TODO menu Fruitore");
+            manageFruitore(fruitore);
         }
     }
 
@@ -366,16 +372,40 @@ public class Controller {
      * @post Se la registrazione ha successo, i dati utente vengono salvati su file (tramite salvaUtenti())
      * @post Viene mostrato un messaggio appropriato all'utente in base all'esito della registrazione
      */
-    private boolean handleRegistration() {
-        // Tenta la registrazione dell'utente
-        boolean checkRegistration = registerUtente();
+    private void handleRegistration() {
+        // Presentazione delle opzioni di registrazione
+        view.showMessage(ControllerConstants.TITLE_REGISTRATION);
 
-        // Mostra un messaggio di esito (successo o fallimento)
-        view.showMessage(
-                checkRegistration ? ControllerConstants.REGISTRATION_SUCCESS : ControllerConstants.REGISTRATION_FAILED);
+        // Determinazione del tipo di account (Configuratore o Fruitore)
+        boolean isConfiguratore = this.view.getConfirmation(ControllerConstants.PROMPT_CONFIG_ROLE);
+        boolean registrazioneCompletata;
 
-        // Ritorna l'esito della registrazione per ulteriori elaborazioni
-        return checkRegistration;
+        try {
+            if (isConfiguratore) {
+                registrazioneCompletata = registraConfiguratore();
+            } else {
+                // Verifica preliminare: per i fruitori serve almeno un comprensorio
+                if (database.getComprensori().isEmpty()) {
+                    view.showErrorMessage(ControllerConstants.ERROR_NO_COMPRENSORI_REGISTRATION);
+                    return;
+                }
+                registrazioneCompletata = registraFruitore();
+            }
+
+            // Mostra il messaggio appropriato in base all'esito
+            if (registrazioneCompletata) {
+                view.showSuccessMessage(ControllerConstants.REGISTRATION_SUCCESS);
+                // Salva i dati utente dopo registrazione riuscita
+                salvaUtenti();
+                view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
+            } else {
+                view.showErrorMessage(ControllerConstants.REGISTRATION_CANCELLED);
+            }
+            this.view.pressEnterToContinue();
+        } catch (Exception e) {
+            view.showErrorMessage(String.format(
+                    ControllerConstants.ERROR_REGISTRATION, e.getMessage()));
+        }
     }
 
     /**
@@ -624,6 +654,47 @@ public class Controller {
         this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
     }
 
+    private void manageFruitore(Fruitore fruitore) {
+        // Ciclo principale del menu fruitore
+        while (true) {
+            try {
+                // Mostra il menu fruitore e ottiene la scelta dell'utente
+                view.showMenuFruitore();
+                String choice = view.getInput(ControllerConstants.PROMPT_CHOICE);
+
+                // Elabora la scelta dell'utente
+                switch (choice) {
+                    case "1": // Visualizza gerarchie
+                        Gerarchia gerarchiaScelta = selezionaGerarchia();
+                        // visualizzare
+                        this.view.showMessage(gerarchiaScelta.toString());
+                        break;
+
+                    case "2": // Proposta scambio d'opera
+                        propostaScambioOpera(fruitore);
+                        break;
+
+                    case "0": // Logout
+                        // Termina il ciclo e ritorna al menu principale
+                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        return;
+
+                    default:
+                        // Gestione di input non validi
+                        view.showMessage(ControllerConstants.INVALID_OPTION);
+                }
+
+                // Pausa per permettere all'utente di leggere i risultati
+                view.pressEnterToContinue();
+
+            } catch (Exception e) {
+                // Gestione centralizzata delle eccezioni per garantire robustezza
+                view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
+                view.pressEnterToContinue();
+            }
+        }
+    }
+
     // -----------------------------------------------------------------------------------
     // METODI DI AUTENTICAZIONE E REGISTRAZIONE
     // -----------------------------------------------------------------------------------
@@ -657,7 +728,54 @@ public class Controller {
     }
 
     /**
-     * Registra un nuovo utente nel sistema.
+     * Registra un nuovo utente configuratore nel sistema.
+     * <p>
+     * Il processo include:
+     * <ul>
+     * <li>Verifica di sicurezza preliminare</li>
+     * <li>Acquisizione di username valido e univoco</li>
+     * <li>Acquisizione di password sicura</li>
+     * <li>Creazione dell'account nel database</li>
+     * </ul>
+     *
+     * @return true se la registrazione è completata con successo, false altrimenti
+     */
+    private boolean registraConfiguratore() {
+        // Mostra intestazione per la registrazione configuratore
+        view.showMessage(ControllerConstants.TITLE_REGISTRA_CONFIGURATORE);
+
+        // Verifica di sicurezza preliminare per prevenire registrazioni automatizzate
+        if (!defaultUtente()) {
+            view.showErrorMessage(ControllerConstants.SECURITY_CHECK_FAILED);
+            return false;
+        }
+
+        // Acquisizione username valido e verifica unicità
+        String username = getUsername();
+        if (username == null) {
+            view.showErrorMessage(ControllerConstants.USERNAME_ACQUISITION_FAILED);
+            return false;
+        }
+
+        // Verifica che lo username non sia già utilizzato
+        if (!database.esisteUtente(username)) {
+            view.showErrorMessage(ControllerConstants.ERROR_USERNAME_ALREADY_EXISTS);
+            return false;
+        }
+
+        // Acquisizione password valida
+        String password = getPassword();
+        if (password == null) {
+            view.showErrorMessage(ControllerConstants.PASSWORD_ACQUISITION_FAILED);
+            return false;
+        }
+
+        // Registrazione effettiva nel database
+        return database.registraConfiguratore(username, password);
+    }
+
+    /**
+     * Registra un nuovo utente fruitore nel sistema.
      * <p>
      * Coordina l'intero processo di registrazione utente che include:
      * <ul>
@@ -678,28 +796,97 @@ public class Controller {
      * @post Se lo username scelto è già in uso, la registrazione fallisce
      * @post Se l'utente annulla il processo, la registrazione fallisce senza modificare il database
      */
-    public boolean registerUtente() {
-        // Step 1: Autenticazione di sicurezza con credenziali temporanee
-        // Questo passaggio previene registrazioni automatizzate o non autorizzate
-        if (!defaultUtente())
-            return false; // Se l'autenticazione fallisce, interrompi la registrazione
+    private boolean registraFruitore() {
+        // Mostra intestazione per la registrazione fruitore
+        view.showMessage(ControllerConstants.TITLE_REGISTRA_FRUITORE);
 
-        // Step 2: Raccolta di uno username valido
+        // Selezione del comprensorio di appartenenza
+        Comprensorio comprensorio = selezionaComprensorio();
+        if (comprensorio == null) {
+            return false;
+        }
+
+        // Acquisizione username valido e verifica unicità
         String username = getUsername();
-        if (username == null)
-            return false; // Se l'utente non fornisce uno username valido, interrompi
+        if (username == null) {
+            view.showErrorMessage(ControllerConstants.USERNAME_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Step 3: Raccolta di una password valida
+        // Verifica che lo username non sia già utilizzato
+        if (!database.esisteUtente(username)) {
+            view.showErrorMessage(ControllerConstants.ERROR_USERNAME_ALREADY_EXISTS);
+            return false;
+        }
+
+        // Acquisizione password valida
         String password = getPassword();
-        if (password == null)
-            return false; // Se l'utente non fornisce una password valida, interrompi
+        if (password == null) {
+            view.showErrorMessage(ControllerConstants.PASSWORD_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Step 4: Determinazione del tipo di account (Configuratore o Fruitore)
-        boolean isConfig = getUserChoice(ControllerConstants.PROMPT_CONFIG_ROLE);
+        // Acquisizione e validazione email
+        String email = getEmailValida();
+        if (email == null) {
+            view.showErrorMessage(ControllerConstants.EMAIL_ACQUISITION_FAILED);
+            return false;
+        }
 
-        // Step 5: Registrazione effettiva dell'utente nel database
-        // Il metodo ritorna true se la registrazione ha successo, false altrimenti
-        return database.registerUtente(username, password, isConfig);
+        // Registrazione effettiva nel database
+        return database.registraFruitore(username, password, email, comprensorio);
+    }
+
+    /**
+     * Richiede e valida un indirizzo email dall'utente.
+     *
+     * @return l'indirizzo email validato, o null se il processo è annullato
+     */
+    private String getEmailValida() {
+        final int MAX_TENTATIVI = 3;
+
+        for (int tentativo = 0; tentativo < MAX_TENTATIVI; tentativo++) {
+            String email = view.getInput(ControllerConstants.PROMPT_MAIL);
+
+            // Annullamento inserimento
+            if (email.equals("0")) {
+                return null;
+            }
+
+            // Validazione di base: controllo formato email
+            if (validaFormatoEmail(email)) {
+                return email;
+            }
+
+            // Messaggio di errore con tentativi rimanenti
+            int tentativi_rimanenti = MAX_TENTATIVI - tentativo - 1;
+            view.showErrorMessage(String.format(
+                    ControllerConstants.ERROR_INVALID_EMAIL,
+                    tentativi_rimanenti > 0 ? tentativi_rimanenti : "nessun"));
+        }
+
+        return null;
+    }
+
+    /**
+     * Valida il formato di un indirizzo email.
+     * 
+     * @param email l'indirizzo email da validare
+     * @return true se il formato è valido, false altrimenti
+     */
+    private boolean validaFormatoEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        // Validazione di base: deve contenere @ e almeno un punto dopo @
+        int chiocciola = email.indexOf('@');
+        if (chiocciola < 1 || chiocciola == email.length() - 1) {
+            return false;
+        }
+
+        String dominio = email.substring(chiocciola + 1);
+        return dominio.contains(".") && !dominio.startsWith(".");
     }
 
     /**
@@ -909,11 +1096,68 @@ public class Controller {
                 this.view.showMessage(String.format(ControllerConstants.INFO_COMUNI_AGGIUNTI, comuniAggiunti));
 
                 // Chiede all'utente se vuole aggiungere un altro comune
-                if (!getUserChoice(ControllerConstants.PROMPT_ADD_ALTRO_COMUNE)) {
+                if (!this.view.getConfirmation(ControllerConstants.PROMPT_ADD_ALTRO_COMUNE)) {
                     finished = true; // Termina il ciclo se l'utente sceglie di non continuare
                 }
             }
         }
+    }
+
+    /**
+     * Permette all'utente di selezionare un comprensorio geografico.
+     * <p>
+     * Mostra un elenco numerato di tutti i comprensori disponibili nel sistema
+     * e acquisisce la scelta dell'utente. Consente anche di annullare l'operazione.
+     *
+     * @return il comprensorio selezionato, o null se l'operazione è annullata o non
+     *         ci sono comprensori
+     */
+    public Comprensorio selezionaComprensorio() {
+        // Recupera la lista dei comprensori disponibili
+        List<Comprensorio> comprensori = new ArrayList<>(this.database.getComprensori());
+
+        // Verifica se ci sono comprensori disponibili
+        if (comprensori.isEmpty()) {
+            this.view.showErrorMessage(ControllerConstants.ERROR_NO_COMPRENSORI);
+            return null;
+        }
+
+        // Mostra il titolo della selezione
+        this.view.showMessage(ControllerConstants.TITLE_SELEZIONA_COMPRENSORIO);
+        this.view.showMessage(ControllerConstants.INFO_SELEZIONE_COMPRENSORIO);
+
+        // Visualizza l'elenco dei comprensori in formato numerato
+        for (int i = 0; i < comprensori.size(); i++) {
+            Comprensorio comprensorio = comprensori.get(i);
+
+            // Formato: [1] Nome Comprensorio (3 comuni)
+            this.view.showMessage(String.format(ControllerConstants.FORMATO_COMPRENSORIO_LISTA,
+                    i + 1,
+                    comprensorio.getNome(),
+                    comprensorio.getComuni().size()));
+        }
+
+        // Mostra le istruzioni per annullare
+        this.view.showMessage(ControllerConstants.INFO_ANNULLA_SELEZIONE);
+
+        // Richiedi la selezione dell'utente (0 per annullare, 1-N per selezionare)
+        int index = this.view.getIntInput(
+                ControllerConstants.PROMPT_COMPRENSORIO_INDEX,
+                0,
+                comprensori.size());
+
+        // Gestione dell'annullamento dell'operazione
+        if (index == 0) {
+            return null;
+        }
+
+        // Recupera e mostra il comprensorio selezionato
+        Comprensorio selezionato = comprensori.get(index - 1);
+        this.view.showSuccessMessage(String.format(
+                ControllerConstants.SUCCESS_COMPRENSORIO_SELEZIONATO,
+                selezionato.getNome()));
+
+        return selezionato;
     }
 
     // -----------------------------------------------------------------------------------
@@ -1113,7 +1357,7 @@ public class Controller {
             // Per le altre categorie è opzionale, in base alla scelta dell'utente
             view.showMessage("\n" + ControllerConstants.INFO_CAMPO_PROPRIETA);
             view.showMessage(ControllerConstants.INFO_CAMPO_FOGLIE);
-            aggiungiCampo = getUserChoice(ControllerConstants.PROMPT_CAMPO_CARATTERISTICO);
+            aggiungiCampo = this.view.getConfirmation(ControllerConstants.PROMPT_CAMPO_CARATTERISTICO);
         }
 
         // Creazione del campo se necessario
@@ -1268,7 +1512,7 @@ public class Controller {
 
             // Dopo il primo valore, chiede se l'utente vuole aggiungerne altri
             if (valoreCount >= 1) {
-                if (!getUserChoice(ControllerConstants.PROMPT_ALTRO_VALORE)) {
+                if (!this.view.getConfirmation(ControllerConstants.PROMPT_ALTRO_VALORE)) {
                     finished = true; // Termina se l'utente non vuole aggiungere altri valori
                 }
             }
@@ -1617,7 +1861,7 @@ public class Controller {
         // categorie
         while (corrente != null) {
             // addFirst per avere l'ordine corretto (dalla radice alla foglia)
-            percorso.add(0, corrente.data());
+            percorso.addFirst(corrente.data());
             corrente = corrente.parent(); // Risale al nodo genitore
         }
 
@@ -1756,6 +2000,171 @@ public class Controller {
     }
 
     // -----------------------------------------------------------------------------------
+    // METODI DI GESTIONE DI SCAMBI D'OPERA
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Gestisce il processo di creazione di una proposta di scambio d'opera.
+     * <p>
+     * Il processo si articola in diverse fasi:
+     * <ol>
+     *   <li>Selezione della categoria richiesta (ciò che il fruitore desidera ricevere)</li>
+     *   <li>Indicazione del numero di ore richieste</li>
+     *   <li>Selezione della categoria offerta (ciò che il fruitore è disposto a offrire)</li>
+     *   <li>Calcolo automatico delle ore da offrire in base ai fattori di conversione</li>
+     *   <li>Conferma e registrazione della proposta</li>
+     * </ol>
+     *
+     * @param fruitore il fruitore che sta creando la proposta di scambio
+     */
+    private void propostaScambioOpera(Fruitore fruitore) {
+        // Intestazione e spiegazione del processo
+        view.showMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
+        view.showMessage(ControllerConstants.INFO_PROPOSTA_DESCRIZIONE);
+        
+        // FASE 1: Selezione della prestazione richiesta
+        view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_RICHIESTA);
+        
+        // Selezione della gerarchia di origine
+        view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
+        Gerarchia gerarchiaOrigine = selezionaGerarchia();
+        if (gerarchiaOrigine == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+
+        // Selezione della foglia (attività concreta) dalla gerarchia origine
+        view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        view.showMessage(gerarchiaOrigine.toStringSelezioneFoglia());
+        TreeNode<Categoria> fogliaRichiesta = selezionaFoglia(gerarchiaOrigine);
+        if (fogliaRichiesta == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // FASE 2: Acquisizione delle ore richieste
+        view.showMessage("\n" + ControllerConstants.STEP_ORE_RICHIESTE);
+        int oreRichieste = view.getIntInput(
+            String.format(ControllerConstants.PROMPT_ORE_RICHIESTE, 
+                        fogliaRichiesta.data().getNome()),
+            1, 100); // Limitiamo a 100 ore per praticità
+
+        // FASE 3: Selezione della prestazione offerta
+        view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_OFFERTA);
+        
+        // Selezione della gerarchia di destinazione
+        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, 
+                                    fogliaRichiesta.data().getNome()));
+        Gerarchia gerarchiaDestinazione = selezionaGerarchia();
+        if (gerarchiaDestinazione == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // Selezione della categoria foglia per l'offerta
+        view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
+        view.showMessage(gerarchiaDestinazione.toStringSelezioneFoglia());
+        TreeNode<Categoria> fogliaOfferta = selezionaFoglia(gerarchiaDestinazione);
+        if (fogliaOfferta == null) {
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // Verifica che non si stia offrendo la stessa categoria richiesta
+        if (fogliaRichiesta.data().equals(fogliaOfferta.data())) {
+            view.showErrorMessage(ControllerConstants.ERROR_STESSA_CATEGORIA);
+            view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
+            return;
+        }
+        
+        // FASE 4: Calcolo delle ore offerte in base ai fattori di conversione
+        view.showMessage("\n" + ControllerConstants.STEP_CALCOLO_CONVERSIONE);
+        
+        // Calcolo del fattore di conversione complessivo
+        double fattoreConversione = calcolaFattoreConversione(
+            gerarchiaOrigine, fogliaRichiesta,
+            gerarchiaDestinazione, fogliaOfferta);
+
+        view.showMessage(String.format(ControllerConstants.STEP_FATTORE_CONV, fattoreConversione));
+
+        // Calcolo delle ore offerte basate sul fattore di conversione
+        double oreOfferteOriginali = oreRichieste * fattoreConversione;
+        int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
+        
+        // FASE 5: Presentazione del risultato e conferma
+        view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
+        view.showMessage(String.format(ControllerConstants.INFO_RIEPILOGO_PROPOSTA,
+                oreRichieste, fogliaRichiesta.data().getNome(),
+                oreOfferte, fogliaOfferta.data().getNome()));
+        
+        // Chiede la conferma dell'utente
+        boolean accetta = view.getConfirmation(ControllerConstants.PROMPT_CONFERMA_PROPOSTA);
+        
+        // FASE 6: Creazione e registrazione della proposta
+        Prestazione prestazioneRichiesta = new Prestazione(fogliaRichiesta.data(), oreRichieste);
+        Prestazione prestazioneOfferta = new Prestazione(fogliaOfferta.data(), oreOfferte);
+        
+        StatoProposta stato = accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA;
+        Proposta proposta = new Proposta(prestazioneRichiesta, prestazioneOfferta, stato);
+        
+        // Aggiunge la proposta al fruitore e mostra il messaggio appropriato
+        fruitore.aggiungiProposta(proposta);
+        
+        if (accetta) {
+            view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
+            view.showMessage("\n" + proposta.toString());
+            
+            // Salva gli utenti per persistere le proposte
+            salvaUtenti();
+        } else {
+            view.showMessage(ControllerConstants.INFO_PROPOSTA_RITIRATA);
+        }
+    }
+
+    /**
+     * Calcola il fattore di conversione tra due categorie foglia in diverse gerarchie.
+     * <p>
+     * Il calcolo coinvolge tre componenti:
+     * <ol>
+     *   <li>Fattore interno alla prima gerarchia (dalla foglia al nodo di riferimento)</li>
+     *   <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
+     *   <li>Fattore interno alla seconda gerarchia (dal nodo di riferimento alla foglia)</li>
+     * </ol>
+     * 
+     * @param gerarchiaOrigine gerarchia della categoria richiesta
+     * @param fogliaRichiesta categoria foglia richiesta
+     * @param gerarchiaDestinazione gerarchia della categoria offerta
+     * @param fogliaOfferta categoria foglia offerta
+     * @return il fattore di conversione complessivo
+     */
+    private double calcolaFattoreConversione(
+            Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
+            Gerarchia gerarchiaDestinazione, TreeNode<Categoria> fogliaOfferta) {
+        
+        // 1. Fattore interno alla gerarchia di origine (dalla foglia al nodo di riferimento)
+        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
+                fogliaRichiesta.level(),
+                gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
+        
+        // 2. Fattore tra gerarchie diverse (tra i nodi di riferimento)
+        double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
+        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
+            // Se le gerarchie sono diverse, ottiene il fattore tra i loro nodi di riferimento
+            fattoreInterGerarchia = database.getConversioneGerarchie().getFattoreConversione(
+                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
+                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
+        }
+        
+        // 3. Fattore interno alla gerarchia di destinazione (dal nodo di riferimento alla foglia)
+        double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
+                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),
+                fogliaOfferta.level());
+        
+        // Calcolo del fattore combinato
+        return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
+    }
+
+    // -----------------------------------------------------------------------------------
     // METODI DI SUPPORTO PER L'INPUT UTENTE
     // -----------------------------------------------------------------------------------
 
@@ -1825,7 +2234,7 @@ public class Controller {
     }
 
     /**
-     * Acquisisce una scelta binaria (sì/no) dall'utente.
+     * Registra un errore nel sistema di logging dell'applicazione.
      * <p>
      * Richiede all'utente di inserire 's' per sì o 'n' per no,
      * validando l'input fino a ottenere una risposta valida.
@@ -1840,23 +2249,46 @@ public class Controller {
      * @post Il metodo termina solo quando l'utente ha fornito una risposta valida ('s' o 'n')
      * @post Durante il processo vengono mostrati messaggi appropriati per guidare l'utente verso un input valido
      */
-    // TODO: sostituire con view.getConfirmation
-    private boolean getUserChoice(String messaggio) {
-        while (true) {
-            // Richiede una risposta all'utente, mostrando il messaggio specificato
-            String role = view.getInput(messaggio);
+    private void logErrore(Exception e) {
+        // Inizializza un builder per il messaggio di log
+        StringBuilder logMessage = new StringBuilder();
+        logMessage.append("\n=== ERRORE APPLICAZIONE ===\n");
+        logMessage.append("Contesto: ").append("Errore imprevisto nel menu principale").append("\n");
+        logMessage.append("Timestamp: ").append(new java.util.Date()).append("\n");
+        logMessage.append("Tipo errore: ").append(e.getClass().getName()).append("\n");
+        logMessage.append("Messaggio: ").append(e.getMessage()).append("\n");
 
-            // Verifica se la risposta è affermativa
-            if (role.equalsIgnoreCase("s"))
-                return true;
+        // Aggiungi informazioni sulla causa originale dell'errore, se presente
+        Throwable causa = e.getCause();
+        if (causa != null) {
+            logMessage.append("Causa: ").append(causa.getMessage()).append("\n");
+        }
 
-            // Verifica se la risposta è negativa
-            if (role.equalsIgnoreCase("n"))
-                return false;
+        // Aggiungi stack trace formattata
+        logMessage.append("Stack trace:\n");
+        for (StackTraceElement element : e.getStackTrace()) {
+            // Includi solo elementi relativi al nostro package per ridurre il rumore
+            if (element.getClassName().startsWith("model") ||
+                    element.getClassName().startsWith("controller") ||
+                    element.getClassName().startsWith("view")) {
+                logMessage.append("  at ").append(element).append("\n");
+            }
+        }
 
-            // Se l'input non è valido, mostra un messaggio di errore
-            // e richiede un nuovo tentativo
-            view.showMessage(ControllerConstants.ERROR_INVALID_INPUT);
+        // Registra l'errore nel file di log (in modalità sviluppo stampa su console)
+        this.view.showErrorMessage(logMessage.toString());
+
+        try {
+            // Scrivi l'errore su un file di log per riferimento futuro
+            String logFilePath = "error_log.txt";
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter(logFilePath, true)); // true = append mode
+            writer.write(logMessage.toString());
+            writer.newLine();
+            writer.close();
+        } catch (IOException loggingError) {
+            // In caso di errore durante il logging, stampa almeno un avviso
+            this.view.showErrorMessage("Impossibile scrivere nel file di log: " + loggingError.getMessage());
         }
     }
 }
