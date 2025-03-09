@@ -100,6 +100,7 @@ public class Database {
      * @post se username == null o password == null, restituisce false e lo stato non cambia
      * @post se esiste già un utente con lo stesso username, restituisce false e lo stato non cambia
      * @post se restituisce true, è stato creato un nuovo utente del tipo appropriato e aggiunto al database
+     */
 
     public boolean registraConfiguratore(String username, String password) {
         // Valida i parametri obbligatori
