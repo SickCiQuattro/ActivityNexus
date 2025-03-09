@@ -10,17 +10,22 @@ import java.util.Set;
  * Campo caratteristico di una categoria nel sistema gerarchico.
  * <p>
  * Rappresenta una proprietà di una categoria che può assumere valori da un
- * dominio
- * predefinito. Ogni valore nel dominio, rappresentato da un
- * {@link ValoreCampo},
- * definisce una possibile specializzazione della categoria.
+ * dominio predefinito. Ogni valore nel dominio, rappresentato da un
+ * {@link ValoreCampo}, definisce una possibile specializzazione della categoria.
  * <p>
  * All'interno della struttura gerarchica:
  * <ul>
  * <li>Le categorie non-foglia hanno un campo che determina le possibili
- * sottocategorie</li>
+ * sotto categorie</li>
  * <li>Le categorie foglia (attività concrete) non hanno campi
  * caratteristici</li>
+ * </ul>
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>Il nome del campo non è mai null</li>
+ *   <li>Il dominio non contiene mai valori null</li>
+ *   <li>L'insieme dominio non è mai null (può essere vuoto)</li>
  * </ul>
  *
  * @see ValoreCampo
@@ -50,10 +55,12 @@ public class Campo implements Serializable {
     /**
      * Costruisce un Campo con il nome specificato e dominio vuoto.
      *
-     * @param nome il nome del campo (non deve essere null)
+     * @param nome il nome del campo
      * @throws NullPointerException se il nome è null
-     * 
-     * @see #addValore(ValoreCampo)
+     *
+     * @pre nome != null
+     * @post getNome() restituisce il nome fornito
+     * @post getDominio() restituisce un insieme vuoto
      */
     public Campo(String nome) {
         // Delega al costruttore più completo con un HashSet vuoto come dominio iniziale
@@ -63,9 +70,13 @@ public class Campo implements Serializable {
     /**
      * Costruisce un Campo con il nome e il dominio specificati.
      *
-     * @param nome    il nome del campo (non deve essere null)
+     * @param nome    il nome del campo
      * @param dominio l'insieme iniziale di valori per il campo
      * @throws NullPointerException se il nome è null
+     *
+     * @pre nome != null
+     * @post getNome() restituisce il nome fornito
+     * @post getDominio() contiene tutti i valori non-null di dominio
      */
     public Campo(String nome, Set<ValoreCampo> dominio) {
         // Verifica che il nome non sia null e lancia eccezione in caso contrario
@@ -93,6 +104,8 @@ public class Campo implements Serializable {
      * Restituisce il nome del campo.
      *
      * @return il nome del campo, mai null
+     *
+     * @post il valore restituito non è null
      */
     public String getNome() {
         return this.nome;
@@ -101,8 +114,11 @@ public class Campo implements Serializable {
     /**
      * Imposta il nome del campo.
      *
-     * @param nome il nuovo nome del campo (non deve essere null)
+     * @param nome il nuovo nome del campo
      * @throws NullPointerException se il nome è null
+     *
+     * @pre nome != null
+     * @post getNome() restituisce il valore fornito
      */
     public void setNome(String nome) {
         // Verifica che il nuovo nome non sia null prima di assegnarlo
@@ -113,21 +129,13 @@ public class Campo implements Serializable {
      * Restituisce una vista non modificabile del dominio dei valori.
      *
      * @return una vista immutabile dell'insieme dei valori del dominio
-     * @see #addValore(ValoreCampo)
-     * @see #removeValore(ValoreCampo)
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è un insieme non modificabile
      */
     public Set<ValoreCampo> getDominio() {
         // Restituisce una vista immutabile per proteggere l'incapsulamento
         return Collections.unmodifiableSet(this.dominio);
-    }
-
-    /**
-     * Restituisce il numero di valori nel dominio del campo.
-     *
-     * @return la dimensione del dominio, 0 se vuoto
-     */
-    public int getDominioDimensione() {
-        return this.dominio.size();
     }
 
     // -----------------------------------------------------------------------------------
@@ -137,56 +145,18 @@ public class Campo implements Serializable {
     /**
      * Aggiunge un valore al dominio del campo.
      *
-     * @param valore il valore da aggiungere (non deve essere null)
-     * @return true se il valore è stato aggiunto, false se era già presente
+     * @param valore il valore da aggiungere
      * @throws NullPointerException se il valore è null
+     *
+     * @pre valore != null
+     * @post getDominio().contains(valore) == true
      */
-    public boolean addValore(ValoreCampo valore) {
+    public void addValore(ValoreCampo valore) {
         // Verifica che il valore non sia null e lancia eccezione in caso contrario
         Objects.requireNonNull(valore, ERRORE_VALORE_NULLO);
 
         // Tenta di aggiungere il valore al dominio
-        return this.dominio.add(valore);
-    }
-
-    /**
-     * Rimuove un valore dal dominio del campo.
-     *
-     * @param valore il valore da rimuovere
-     * @return true se il valore è stato rimosso, false se non era presente o era
-     *         null
-     */
-    public boolean removeValore(ValoreCampo valore) {
-        // Se il valore è null, non è possibile rimuoverlo
-        return valore != null && this.dominio.remove(valore);
-    }
-
-    /**
-     * Rimuove un valore dal dominio specificandone il nome.
-     *
-     * @param nomeValore il nome del valore da rimuovere
-     * @return true se il valore è stato trovato e rimosso, false altrimenti
-     */
-    public boolean removeValore(String nomeValore) {
-        // Se il nome è null, non è possibile identificare un valore da rimuovere
-        if (nomeValore == null) {
-            return false;
-        }
-
-        // Utilizza removeIf con un predicato per rimuovere il valore con il nome
-        // specificato
-        return dominio.removeIf(valore -> nomeValore.equals(valore.getNome()));
-    }
-
-    /**
-     * Verifica se un valore è presente nel dominio del campo.
-     *
-     * @param valore il valore da cercare
-     * @return true se il valore è presente, false altrimenti o se null
-     */
-    public boolean hasValore(ValoreCampo valore) {
-        // Se il valore è null, non può essere presente nel dominio
-        return valore != null && this.dominio.contains(valore);
+        this.dominio.add(valore);
     }
 
     /**
@@ -194,6 +164,8 @@ public class Campo implements Serializable {
      *
      * @param nomeValore il nome del valore da cercare
      * @return true se un valore con quel nome è presente, false altrimenti
+     *
+     * @post il valore restituito riflette correttamente la presenza o assenza di un valore con il nome specificato
      */
     public boolean hasValore(String nomeValore) {
         // Se il nome è null, non è possibile identificare un valore da cercare
@@ -212,38 +184,6 @@ public class Campo implements Serializable {
         return false;
     }
 
-    /**
-     * Cerca e restituisce un valore nel dominio dato il suo nome.
-     *
-     * @param nomeValore il nome del valore da cercare
-     * @return il ValoreCampo corrispondente, o null se non trovato o se il nome è
-     *         null
-     */
-    public ValoreCampo getValoreByNome(String nomeValore) {
-        // Se il nome è null, non è possibile identificare un valore da cercare
-        if (nomeValore == null) {
-            return null;
-        }
-
-        // Itera su tutti i valori per trovare uno con il nome specificato
-        for (ValoreCampo valore : this.dominio) {
-            if (nomeValore.equals(valore.getNome())) {
-                return valore;
-            }
-        }
-
-        // Nessun valore con il nome specificato trovato
-        return null;
-    }
-
-    /**
-     * Verifica se il campo ha almeno un valore nel suo dominio.
-     *
-     * @return true se il dominio contiene almeno un valore, false se è vuoto
-     */
-    public boolean hasDominio() {
-        return !this.dominio.isEmpty();
-    }
 
     // -----------------------------------------------------------------------------------
     // METODI OVERRIDE DI OBJECT
@@ -254,6 +194,8 @@ public class Campo implements Serializable {
      * Include il nome del campo seguito dalla lista dei valori nel dominio.
      *
      * @return una rappresentazione in stringa del campo formattata su più righe
+     *
+     * @post il valore restituito non è null
      */
     @Override
     public String toString() {
@@ -279,6 +221,8 @@ public class Campo implements Serializable {
      *
      * @param obj l'oggetto da confrontare con questo campo
      * @return true se l'oggetto è un Campo uguale a questo, false altrimenti
+     *
+     * @post il valore restituito è true solo se obj è un Campo con nome e dominio uguali
      */
     @Override
     public boolean equals(Object obj) {
@@ -302,6 +246,8 @@ public class Campo implements Serializable {
      * Calcola l'hash code del campo basato su nome e dominio.
      *
      * @return l'hash code del campo
+     *
+     * @post se due campi sono uguali secondo equals(), hanno lo stesso hashCode()
      */
     @Override
     public int hashCode() {
