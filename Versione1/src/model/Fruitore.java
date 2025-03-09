@@ -16,7 +16,13 @@ import java.util.Objects;
  * <p>
  * A differenza dei configuratori, i fruitori hanno accesso limitato
  * alle funzionalità del sistema.
- * 
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ * <li>mail != null</li>
+ * <li>isConfig() == false</li>
+ * </ul>
+ *
  * @see Utente
  * @see Comprensorio
  */
@@ -44,6 +50,13 @@ public class Fruitore extends Utente implements Serializable {
      * @param mail         indirizzo email del fruitore
      * @param comprensorio comprensorio geografico di appartenenza
      * @throws NullPointerException se username, password o mail sono null
+     *
+     * @pre username != null
+     * @pre password != null
+     * @pre mail != null
+     * @post getMail() == mail
+     * @post getComprensorio() == comprensorio
+     * @post isConfiguratore() == false
      */
     public Fruitore(String username, String password, String mail, Comprensorio comprensorio) {
         // false indica che non è un configuratore
@@ -54,21 +67,11 @@ public class Fruitore extends Utente implements Serializable {
     }
 
     /**
-     * Costruisce un nuovo fruitore senza comprensorio specificato.
-     *
-     * @param username nome utente univoco
-     * @param password password in chiaro
-     * @param mail     indirizzo email del fruitore
-     * @throws NullPointerException se username, password o mail sono null
-     */
-    public Fruitore(String username, String password, String mail) {
-        this(username, password, mail, null);
-    }
-
-    /**
      * Restituisce l'indirizzo email del fruitore.
      *
      * @return l'indirizzo email (mai null)
+     *
+     * @post risultato != null
      */
     public String getMail() {
         return mail;
@@ -79,6 +82,9 @@ public class Fruitore extends Utente implements Serializable {
      *
      * @param mail il nuovo indirizzo email
      * @throws NullPointerException se mail è null
+     *
+     * @pre mail != null
+     * @post getMail() == mail
      */
     public void setMail(String mail) {
         this.mail = Objects.requireNonNull(mail, MAIL_NON_NULL);
@@ -88,6 +94,8 @@ public class Fruitore extends Utente implements Serializable {
      * Restituisce il comprensorio di appartenenza del fruitore.
      *
      * @return il comprensorio (può essere null)
+     *
+     * @post risultato == this.comprensorio
      */
     public Comprensorio getComprensorio() {
         return comprensorio;
@@ -97,6 +105,8 @@ public class Fruitore extends Utente implements Serializable {
      * Imposta un nuovo comprensorio di appartenenza per il fruitore.
      *
      * @param comprensorio il nuovo comprensorio
+     *
+     * @post getComprensorio() == comprensorio
      */
     public void setComprensorio(Comprensorio comprensorio) {
         this.comprensorio = comprensorio;
@@ -106,6 +116,8 @@ public class Fruitore extends Utente implements Serializable {
      * Verifica se il fruitore ha un comprensorio assegnato.
      *
      * @return true se il fruitore ha un comprensorio, false altrimenti
+     *
+     * @post risultato == (getComprensorio() != null)
      */
     public boolean haComprensorio() {
         return this.comprensorio != null;
@@ -133,6 +145,10 @@ public class Fruitore extends Utente implements Serializable {
      * Restituisce una rappresentazione testuale del fruitore.
      *
      * @return stringa con dettagli del fruitore
+     *
+     * @post risultato != null
+     * @post risultato contiene this.getUsername() e this.getMail()
+     * @post se this.comprensorio != null, risultato contiene this.comprensorio.getNome()
      */
     @Override
     public String toString() {
@@ -157,6 +173,9 @@ public class Fruitore extends Utente implements Serializable {
      *
      * @param obj l'oggetto da confrontare
      * @return true se l'oggetto è un fruitore con lo stesso username
+     *
+     * @post risultato == super.equals(obj)
+     * @post risultato == true implica obj instanceof Utente && ((Utente)obj).getUsername().equals(this.getUsername())
      */
     @Override
     public boolean equals(Object obj) {
@@ -167,6 +186,9 @@ public class Fruitore extends Utente implements Serializable {
      * Calcola l'hashcode basato sullo username (ereditato da Utente).
      *
      * @return hashcode basato sullo username
+     *
+     * @post risultato == super.hashCode()
+     * @post se x.equals(y) == true, allora x.hashCode() == y.hashCode()
      */
     @Override
     public int hashCode() {
