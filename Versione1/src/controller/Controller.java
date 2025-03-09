@@ -334,8 +334,7 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showErrorMessage(ControllerConstants.LOGIN_FAILED);
-            view.pressEnterToContinue();
+            view.showMessage(ControllerConstants.LOGIN_FAILED);
             return;
         }
 
@@ -542,8 +541,7 @@ public class Controller {
      * Verifica la presenza di gerarchie nel sistema.
      * <p>
      * Controlla se esistono gerarchie configurate e mostra un messaggio
-     * appropriato in caso negativo. Utilizzato come precondizione per operazioni
-     * che necessitano di almeno una gerarchia esistente.
+     * appropriato in caso negativo.
      *
      * @return true se esistono gerarchie nel database, false altrimenti
      *
@@ -775,26 +773,7 @@ public class Controller {
     }
 
     /**
-     * Registra un nuovo utente fruitore nel sistema.
-     * <p>
-     * Coordina l'intero processo di registrazione utente che include:
-     * <ul>
-     * <li>Raccolta e validazione dello username</li>
-     * <li>Raccolta e validazione della password</li>
-     * <li>Determinazione del tipo di account (Configuratore o Fruitore)</li>
-     * <li>Creazione dell'utente nel database</li>
-     * <li>Persistenza dei dati utente su file</li>
-     * </ul>
-     *
-     * @return true se la registrazione è completata con successo, false altrimenti
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Se la registrazione ha successo, un nuovo utente è aggiunto al database
-     * @post Se la registrazione ha successo, i dati utente sono salvati su file (tramite salvaUtenti())
-     * @post Se la registrazione fallisce, il database rimane invariato
-     * @post Se lo username scelto è già in uso, la registrazione fallisce
-     * @post Se l'utente annulla il processo, la registrazione fallisce senza modificare il database
+
      */
     private boolean registraFruitore() {
         // Mostra intestazione per la registrazione fruitore
@@ -870,7 +849,7 @@ public class Controller {
 
     /**
      * Valida il formato di un indirizzo email.
-     * 
+     *
      * @param email l'indirizzo email da validare
      * @return true se il formato è valido, false altrimenti
      */
@@ -1291,6 +1270,7 @@ public class Controller {
     /**
      * Crea una nuova categoria e la aggiunge alla gerarchia specificata.
      * <p>
+     * Il metodo crea e configura completamente la categoria prima di restituirla.
      * Guida l'utente nel processo di creazione di una categoria che include:
      * <ol>
      * <li>Acquisizione e validazione del nome della categoria</li>
@@ -2021,10 +2001,10 @@ public class Controller {
         // Intestazione e spiegazione del processo
         view.showMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
         view.showMessage(ControllerConstants.INFO_PROPOSTA_DESCRIZIONE);
-        
+
         // FASE 1: Selezione della prestazione richiesta
         view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_RICHIESTA);
-        
+
         // Selezione della gerarchia di origine
         view.showMessage(ControllerConstants.MSG_LISTA_GERARCHIE);
         Gerarchia gerarchiaOrigine = selezionaGerarchia();
@@ -2041,26 +2021,26 @@ public class Controller {
             view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
             return;
         }
-        
+
         // FASE 2: Acquisizione delle ore richieste
         view.showMessage("\n" + ControllerConstants.STEP_ORE_RICHIESTE);
         int oreRichieste = view.getIntInput(
-            String.format(ControllerConstants.PROMPT_ORE_RICHIESTE, 
+            String.format(ControllerConstants.PROMPT_ORE_RICHIESTE,
                         fogliaRichiesta.data().getNome()),
             1, 100); // Limitiamo a 100 ore per praticità
 
         // FASE 3: Selezione della prestazione offerta
         view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_OFFERTA);
-        
+
         // Selezione della gerarchia di destinazione
-        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, 
+        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE,
                                     fogliaRichiesta.data().getNome()));
         Gerarchia gerarchiaDestinazione = selezionaGerarchia();
         if (gerarchiaDestinazione == null) {
             view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
             return;
         }
-        
+
         // Selezione della categoria foglia per l'offerta
         view.showMessage(ControllerConstants.MSG_LISTA_FOGLIE);
         view.showMessage(gerarchiaDestinazione.toStringSelezioneFoglia());
@@ -2069,17 +2049,17 @@ public class Controller {
             view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
             return;
         }
-        
+
         // Verifica che non si stia offrendo la stessa categoria richiesta
         if (fogliaRichiesta.data().equals(fogliaOfferta.data())) {
             view.showErrorMessage(ControllerConstants.ERROR_STESSA_CATEGORIA);
             view.showMessage(ControllerConstants.INFO_OPERAZIONE_ANNULLATA);
             return;
         }
-        
+
         // FASE 4: Calcolo delle ore offerte in base ai fattori di conversione
         view.showMessage("\n" + ControllerConstants.STEP_CALCOLO_CONVERSIONE);
-        
+
         // Calcolo del fattore di conversione complessivo
         double fattoreConversione = calcolaFattoreConversione(
             gerarchiaOrigine, fogliaRichiesta,
@@ -2090,30 +2070,30 @@ public class Controller {
         // Calcolo delle ore offerte basate sul fattore di conversione
         double oreOfferteOriginali = oreRichieste * fattoreConversione;
         int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
-        
+
         // FASE 5: Presentazione del risultato e conferma
         view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
         view.showMessage(String.format(ControllerConstants.INFO_RIEPILOGO_PROPOSTA,
                 oreRichieste, fogliaRichiesta.data().getNome(),
                 oreOfferte, fogliaOfferta.data().getNome()));
-        
+
         // Chiede la conferma dell'utente
         boolean accetta = view.getConfirmation(ControllerConstants.PROMPT_CONFERMA_PROPOSTA);
-        
+
         // FASE 6: Creazione e registrazione della proposta
         Prestazione prestazioneRichiesta = new Prestazione(fogliaRichiesta.data(), oreRichieste);
         Prestazione prestazioneOfferta = new Prestazione(fogliaOfferta.data(), oreOfferte);
-        
+
         StatoProposta stato = accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA;
         Proposta proposta = new Proposta(prestazioneRichiesta, prestazioneOfferta, stato);
-        
+
         // Aggiunge la proposta al fruitore e mostra il messaggio appropriato
         fruitore.aggiungiProposta(proposta);
-        
+
         if (accetta) {
             view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
             view.showMessage("\n" + proposta.toString());
-            
+
             // Salva gli utenti per persistere le proposte
             salvaUtenti();
         } else {
@@ -2130,7 +2110,7 @@ public class Controller {
      *   <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
      *   <li>Fattore interno alla seconda gerarchia (dal nodo di riferimento alla foglia)</li>
      * </ol>
-     * 
+     *
      * @param gerarchiaOrigine gerarchia della categoria richiesta
      * @param fogliaRichiesta categoria foglia richiesta
      * @param gerarchiaDestinazione gerarchia della categoria offerta
@@ -2140,12 +2120,12 @@ public class Controller {
     private double calcolaFattoreConversione(
             Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
             Gerarchia gerarchiaDestinazione, TreeNode<Categoria> fogliaOfferta) {
-        
+
         // 1. Fattore interno alla gerarchia di origine (dalla foglia al nodo di riferimento)
         double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
                 fogliaRichiesta.level(),
                 gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
-        
+
         // 2. Fattore tra gerarchie diverse (tra i nodi di riferimento)
         double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
         if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
@@ -2154,12 +2134,12 @@ public class Controller {
                     gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
                     gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
         }
-        
+
         // 3. Fattore interno alla gerarchia di destinazione (dal nodo di riferimento alla foglia)
         double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
                 gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),
                 fogliaOfferta.level());
-        
+
         // Calcolo del fattore combinato
         return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
     }
@@ -2234,20 +2214,6 @@ public class Controller {
     }
 
     /**
-     * Registra un errore nel sistema di logging dell'applicazione.
-     * <p>
-     * Richiede all'utente di inserire 's' per sì o 'n' per no,
-     * validando l'input fino a ottenere una risposta valida.
-     * Utilizzato per decisioni semplici durante i processi interattivi.
-     *
-     * @param messaggio il messaggio da mostrare all'utente per la richiesta
-     * @return true se l'utente risponde affermativamente ('s'), false altrimenti ('n')
-     *
-     * @pre this.view != null
-     * @pre messaggio != null
-     * @post Il valore restituito corrisponde esattamente alla scelta dell'utente: true per 's', false per 'n'
-     * @post Il metodo termina solo quando l'utente ha fornito una risposta valida ('s' o 'n')
-     * @post Durante il processo vengono mostrati messaggi appropriati per guidare l'utente verso un input valido
      */
     private void logErrore(Exception e) {
         // Inizializza un builder per il messaggio di log
