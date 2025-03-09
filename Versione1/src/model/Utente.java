@@ -18,8 +18,15 @@ import java.util.Objects;
  * <p>
  * Implementa sicurezza con hashing SHA-256 e salt casuale.
  *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>Lo username non è mai null</li>
+ *   <li>La password hashed non è mai null</li>
+ *   <li>Il salt non è mai null ed ha sempre una dimensione di DIMENSIONE_SALT byte</li>
+ *   <li>Due utenti sono uguali se e solo se hanno lo stesso username (case-sensitive)</li>
+ * </ul>
+ *
  * @see Configuratore
- * @see Fruitore
  * @see java.io.Serializable
  */
 public class Utente implements Serializable {
@@ -51,11 +58,17 @@ public class Utente implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Costruisce un utente fruitore con username e password specificati.
+     * Crea un nuovo utente non configuratore.
      *
-     * @param username nome utente univoco per identificare l'utente
-     * @param password password in chiaro che verrà trasformata in hash
+     * @param username lo username scelto per l'utente
+     * @param password la password in chiaro (sarà hashata internamente)
      * @throws NullPointerException se username è null
+     *
+     * @pre username != null
+     * @post this.username == username
+     * @post isConfig() == false
+     * @post viene generato un salt casuale di DIMENSIONE_SALT byte
+     * @post hashedPassword contiene l'hash SHA-256 della password con il salt generato
      */
     public Utente(String username, String password) {
         // Delega al costruttore completo, specificando isConfig=false (utente fruitore)
@@ -63,12 +76,18 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Costruisce un utente con username, password e tipo specificati.
+     * Crea un nuovo utente specificando il tipo.
      *
-     * @param username nome utente univoco
-     * @param password password in chiaro
+     * @param username lo username scelto per l'utente
+     * @param password la password in chiaro (sarà hashata internamente)
      * @param isConfig true per configuratore, false per fruitore
      * @throws NullPointerException se username è null
+     *
+     * @pre username != null
+     * @post this.username == username
+     * @post isConfig() == isConfig
+     * @post viene generato un salt casuale di DIMENSIONE_SALT byte
+     * @post hashedPassword contiene l'hash SHA-256 della password con il salt generato
      */
     public Utente(String username, String password, boolean isConfig) {
         // Verifica che l'username non sia null, lanciando un'eccezione in caso
@@ -93,6 +112,8 @@ public class Utente implements Serializable {
      * Restituisce lo username dell'utente.
      *
      * @return lo username (mai null)
+     *
+     * @post il valore restituito non è null
      */
     public String getUsername() {
         return username;
@@ -105,6 +126,9 @@ public class Utente implements Serializable {
      *
      * @param username il nuovo username
      * @throws NullPointerException se username è null
+     *
+     * @pre username != null
+     * @post this.username == username
      */
     public void setUsername(String username) {
         // Verifica che il nuovo username non sia null
@@ -115,6 +139,8 @@ public class Utente implements Serializable {
      * Verifica se l'utente è un configuratore con privilegi amministrativi.
      *
      * @return true se configuratore, false se fruitore
+     *
+     * @post il valore restituito riflette lo stato attuale dell'utente
      */
     public boolean isConfig() {
         return isConfig;
@@ -132,6 +158,11 @@ public class Utente implements Serializable {
      * @param username nome utente da verificare
      * @param password password da verificare
      * @return true se le credenziali sono valide, false altrimenti
+     *
+     * @post se username == null o password == null, restituisce false
+     * @post restituisce true se e solo se l'username fornito corrisponde esattamente a this.username
+     *       e l'hash della password fornita con il salt memorizzato corrisponde a hashedPassword
+     * @post lo stato dell'utente non viene modificato
      */
     public boolean verificaCredenziali(String username, String password) {
         // Controllo preventivo: se username o password sono null, le credenziali non
@@ -159,6 +190,11 @@ public class Utente implements Serializable {
      * @param salt     il salt da aggiungere per maggiore sicurezza
      * @return hash in formato Base64
      * @throws RuntimeException se l'algoritmo SHA-256 non è disponibile
+     *
+     * @pre password != null
+     * @pre salt != null
+     * @post il valore restituito non è null
+     * @post il valore restituito è una stringa Base64 dell'hash SHA-256 di password+salt
      */
     private String hashPassword(String password, byte[] salt) {
         try {
@@ -184,6 +220,10 @@ public class Utente implements Serializable {
      * Genera un salt casuale di 20 byte per migliorare la sicurezza dell'hash.
      *
      * @return array di 20 byte casuali
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito ha una lunghezza esattamente pari a DIMENSIONE_SALT
+     * @post il valore restituito contiene bytes generati con SecureRandom
      */
     private byte[] generateSalt() {
         // Crea un'istanza di SecureRandom per generare numeri pseudocasuali sicuri
@@ -206,6 +246,9 @@ public class Utente implements Serializable {
      * Restituisce una rappresentazione testuale dell'utente.
      *
      * @return stringa con username e tipo di utente
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene lo username e il tipo di utente
      */
     @Override
     public String toString() {
@@ -222,6 +265,10 @@ public class Utente implements Serializable {
      *
      * @param obj l'oggetto da confrontare
      * @return true se l'oggetto è un Utente con lo stesso username
+     *
+     * @post se obj == this, restituisce true
+     * @post se obj == null o obj non è di tipo Utente, restituisce false
+     * @post restituisce true se e solo se obj è un Utente e obj.getUsername().equals(this.username)
      */
     @Override
     public boolean equals(Object obj) {
@@ -243,9 +290,13 @@ public class Utente implements Serializable {
     }
 
     /**
-     * Calcola l'hash code basato solo sullo username.
+     * Calcola l'hash code per questo utente.
+     * <p>
+     * L'hash è basato solo sullo username in accordo con equals().
      *
-     * @return hash code dello username
+     * @return l'hash code calcolato in base allo username
+     *
+     * @post se due utenti sono uguali secondo equals(), hanno lo stesso hashCode()
      */
     @Override
     public int hashCode() {

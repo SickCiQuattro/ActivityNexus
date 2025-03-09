@@ -20,6 +20,22 @@ import java.util.Set;
  * <p>
  * Fornisce funzionalità CRUD complete e persistenza dei dati tramite
  * serializzazione.
+ *
+ * <p><b>Invarianti:</b>
+ * <ul>
+ *   <li>Le collezioni di utenti, comprensori e gerarchie non sono mai null (possono essere vuote)</li>
+ *   <li>L'oggetto conversioneGerarchie non è mai null</li>
+ *   <li>Tutti gli elementi contenuti nelle collezioni non sono null</li>
+ *   <li>Non ci sono utenti duplicati (stesso username)</li>
+ *   <li>Non ci sono comprensori duplicati (stesso nome)</li>
+ *   <li>Non ci sono gerarchie duplicate (stessa radice)</li>
+ * </ul>
+ *
+ * @see Utente
+ * @see Configuratore
+ * @see Comprensorio
+ * @see Gerarchia
+ * @see ConversioneGerarchie
  */
 public class Database {
     // Collezioni principali di entità
@@ -30,6 +46,11 @@ public class Database {
 
     /**
      * Inizializza un database vuoto con tutte le collezioni pronte per l'uso.
+     *
+     * @post utenti è un nuovo HashSet vuoto non-null
+     * @post comprensori è un nuovo HashSet vuoto non-null
+     * @post gerarchie è un nuovo HashSet vuoto non-null
+     * @post conversioneGerarchie è una nuova istanza non-null
      */
     public Database() {
         this.utenti = new HashSet<>();
@@ -47,6 +68,10 @@ public class Database {
      *
      * @param utente l'utente da aggiungere
      * @return true se l'utente è stato aggiunto, false se già presente o null
+     *
+     * @post se utente == null, restituisce false e lo stato non cambia
+     * @post se un utente con lo stesso username esiste già, restituisce false e lo stato non cambia
+     * @post se restituisce true, l'utente è stato aggiunto alla collezione
      */
     public boolean addUtente(Utente utente) {
         // Verifica che l'utente non sia null prima di tentare di aggiungerlo
@@ -147,6 +172,11 @@ public class Database {
      * @param username lo username dell'utente
      * @param password la password dell'utente
      * @return l'utente autenticato, o null se credenziali errate
+     *
+     * @post se username == null o password == null o utenti è vuoto, restituisce null
+     * @post restituisce null se nessun utente ha corrispondenza di username e password
+     * @post se trovato, restituisce l'istanza utente corrispondente alle credenziali
+     * @post lo stato del database non viene modificato
      */
     public Utente loginUtente(String username, String password) {
         // Verifica parametri di base e se ci sono utenti
@@ -170,6 +200,10 @@ public class Database {
      *
      * @param username lo username da verificare (case-sensitive)
      * @return true se lo username esiste, false altrimenti
+     *
+     * @post se username == null, restituisce false
+     * @post restituisce true se e solo se esiste un utente con lo username specificato
+     * @post lo stato del database non viene modificato
      */
     public boolean hasUtente(String username) {
         // Verifica che lo username non sia null
@@ -192,6 +226,10 @@ public class Database {
      * Restituisce una vista non modificabile della collezione degli utenti.
      *
      * @return vista non modificabile degli utenti
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post lo stato del database non viene modificato
      */
     public Set<Utente> getUtenti() {
         // Restituisce una vista non modificabile della collezione per proteggere
@@ -203,6 +241,10 @@ public class Database {
      * Imposta la collezione degli utenti, creando una copia difensiva.
      *
      * @param utenti la nuova collezione di utenti
+     *
+     * @post se utenti == null, viene creata una collezione vuota
+     * @post se utenti != null, viene creata una copia difensiva della collezione
+     * @post this.utenti contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
      */
     public void setUtenti(Set<Utente> utenti) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
@@ -219,6 +261,10 @@ public class Database {
      *
      * @param comprensorio il comprensorio da aggiungere
      * @return true se aggiunto con successo, false se già presente o null
+     *
+     * @post se comprensorio == null, restituisce false e lo stato non cambia
+     * @post se un comprensorio con lo stesso nome esiste già, restituisce false e lo stato non cambia
+     * @post se restituisce true, il comprensorio è stato aggiunto alla collezione
      */
     public boolean addComprensorio(Comprensorio comprensorio) {
         // Verifica che il comprensorio non sia null
@@ -235,6 +281,10 @@ public class Database {
      *
      * @param nome il nome del comprensorio (case-insensitive)
      * @return true se esiste, false altrimenti
+     *
+     * @post se nome == null, restituisce false
+     * @post restituisce true se e solo se esiste un comprensorio con il nome specificato (case-insensitive)
+     * @post lo stato del database non viene modificato
      */
     public boolean hasComprensorio(String nome) {
         // Verifica che il nome non sia null
@@ -258,6 +308,10 @@ public class Database {
      * Restituisce una vista non modificabile dei comprensori.
      *
      * @return vista non modificabile dei comprensori
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post lo stato del database non viene modificato
      */
     public Set<Comprensorio> getComprensori() {
         // Restituisce una vista non modificabile della collezione
@@ -268,6 +322,10 @@ public class Database {
      * Imposta la collezione dei comprensori, creando una copia difensiva.
      *
      * @param comprensori la nuova collezione di comprensori
+     *
+     * @post se comprensori == null, viene creata una collezione vuota
+     * @post se comprensori != null, viene creata una copia difensiva della collezione
+     * @post this.comprensori contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
      */
     public void setComprensori(Set<Comprensorio> comprensori) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
@@ -279,6 +337,11 @@ public class Database {
      * Restituisce una rappresentazione testuale di tutti i comprensori.
      *
      * @return stringa formattata con tutti i comprensori
+     *
+     * @post il valore restituito non è null
+     * @post se comprensori è vuoto, restituisce un messaggio appropriato
+     * @post se comprensori non è vuoto, restituisce una rappresentazione di tutti i comprensori
+     * @post lo stato del database non viene modificato
      */
     public String toStringComprensori() {
         // Gestisce il caso in cui non ci sono comprensori
@@ -286,13 +349,10 @@ public class Database {
             return "Nessun comprensorio presente.";
         }
 
-        int count = 1;
-
         // Costruisce la rappresentazione in stringa di tutti i comprensori
         StringBuilder sb = new StringBuilder();
         for (Comprensorio c : this.comprensori) {
-            sb.append(String.format("[%d] %s", count, c.toString())).append("\n");
-            count++;
+            sb.append(c.toString()).append("\n");
         }
         return sb.toString();
     }
@@ -306,6 +366,10 @@ public class Database {
      *
      * @param gerarchia la gerarchia da aggiungere
      * @return true se aggiunta con successo, false se già presente o null
+     *
+     * @post se gerarchia == null, restituisce false e lo stato non cambia
+     * @post se una gerarchia con la stessa radice esiste già, restituisce false e lo stato non cambia
+     * @post se restituisce true, la gerarchia è stata aggiunta alla collezione
      */
     public boolean addGerarchia(Gerarchia gerarchia) {
         // Verifica che la gerarchia non sia null
@@ -322,6 +386,10 @@ public class Database {
      *
      * @param nome il nome della categoria radice (case-sensitive)
      * @return true se esiste, false altrimenti
+     *
+     * @post se nome == null, restituisce false
+     * @post restituisce true se e solo se esiste una gerarchia con radice avente il nome specificato
+     * @post lo stato del database non viene modificato
      */
     public boolean hasGerarchia(String nome) {
         // Verifica che il nome non sia null
@@ -345,6 +413,10 @@ public class Database {
      * Restituisce una vista non modificabile delle gerarchie.
      *
      * @return vista non modificabile delle gerarchie
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post lo stato del database non viene modificato
      */
     public Set<Gerarchia> getGerarchie() {
         // Restituisce una vista non modificabile della collezione
@@ -355,6 +427,10 @@ public class Database {
      * Imposta la collezione delle gerarchie, creando una copia difensiva.
      *
      * @param gerarchie la nuova collezione di gerarchie
+     *
+     * @post se gerarchie == null, viene creata una collezione vuota
+     * @post se gerarchie != null, viene creata una copia difensiva della collezione
+     * @post this.gerarchie contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
      */
     public void setGerarchie(Set<Gerarchia> gerarchie) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
@@ -368,6 +444,11 @@ public class Database {
      * @param index l'indice della gerarchia (0-based)
      * @return la gerarchia all'indice specificato
      * @throws IndexOutOfBoundsException se l'indice non è valido
+     *
+     * @pre 0 <= index < gerarchie.size()
+     * @post il valore restituito è la gerarchia corrispondente all'indice specificato
+     * @post lo stato del database non viene modificato
+     * @throws IndexOutOfBoundsException se index < 0 o index >= gerarchie.size()
      */
     public Gerarchia getGerarchia(int index) {
         // Converte il set in una lista per accedere per indice
@@ -381,6 +462,11 @@ public class Database {
      * Restituisce una rappresentazione testuale di tutte le gerarchie.
      *
      * @return stringa formattata con tutte le gerarchie
+     *
+     * @post il valore restituito non è null
+     * @post se gerarchie è vuoto, restituisce un messaggio appropriato
+     * @post se gerarchie non è vuoto, restituisce una rappresentazione di tutte le gerarchie
+     * @post lo stato del database non viene modificato
      */
     public String toStringGerarchie() {
         // Gestisce il caso in cui non ci sono gerarchie
@@ -403,7 +489,11 @@ public class Database {
     /**
      * Restituisce l'oggetto di gestione delle conversioni tra gerarchie.
      *
-     * @return l'oggetto di conversione tra categorie
+     * @return l'oggetto di conversione tra categorie (mai null)
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è l'istanza conversioneGerarchie del database
+     * @post lo stato del database non viene modificato
      */
     public ConversioneGerarchie getConversioneGerarchie() {
         return this.conversioneGerarchie;
