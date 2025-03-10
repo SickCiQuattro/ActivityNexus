@@ -3,6 +3,8 @@ package model;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Rappresenta una proposta di scambio di prestazioni d'opera.
@@ -41,6 +43,12 @@ public class Proposta implements Serializable {
     /** Stato corrente della proposta */
     private StatoProposta stato;
 
+    /** Data di creazione della proposta */
+    private LocalDateTime dataCreazione;
+
+    private LocalDateTime dataModifica;
+
+
     /**
      * Crea una nuova proposta di scambio con i dettagli specificati.
      *
@@ -60,6 +68,8 @@ public class Proposta implements Serializable {
         this.richiesta = Objects.requireNonNull(richiesta, "La prestazione richiesta non può essere null");
         this.offerta = Objects.requireNonNull(offerta, "La prestazione offerta non può essere null");
         this.stato = Objects.requireNonNull(stato, "Lo stato della proposta non può essere null");
+        this.dataCreazione = LocalDateTime.now();
+        this.dataModifica = null;
     }
 
 
@@ -78,6 +88,7 @@ public class Proposta implements Serializable {
     public boolean chiudiProposta() {
         if (stato == StatoProposta.APERTA) {
             stato = StatoProposta.CHIUSA;
+            this.dataModifica = LocalDateTime.now();
             return true;
         }
         return false;
@@ -98,6 +109,7 @@ public class Proposta implements Serializable {
     public boolean ritiraProposta() {
         if (stato == StatoProposta.APERTA) {
             stato = StatoProposta.RITIRATA;
+            this.dataModifica = LocalDateTime.now();
             return true;
         }
         return false;
@@ -167,10 +179,19 @@ public class Proposta implements Serializable {
      */
     @Override
     public String toString() {
-        return "PROPOSTA:\n" +
+        StringBuilder sb = new StringBuilder();
+        sb.append("PROPOSTA:\n" +
                 "Richiesta: " + richiesta.toString() +
                 "\nOfferta: " + offerta.toString() +
-                "\nStato: " + stato.toString();
+                "\nStato: " + stato.toString() +
+                "\nData creazione: "
+                + dataCreazione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        if (dataModifica != null) {
+            sb.append("\nLa proposta è passata da " + StatoProposta.APERTA + " a " + stato + " il " +
+                    dataModifica.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     /**
