@@ -672,6 +672,13 @@ public class Controller {
                         propostaScambioOpera(fruitore);
                         break;
 
+                    case "3": // Visualizza proposte di scambio
+                        visualizzaProposteScambio(fruitore);
+                        break;
+
+                    case "4":
+                        modificaStatoProposta(fruitore);
+                        break;
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
                         view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
@@ -2142,6 +2149,95 @@ public class Controller {
 
         // Calcolo del fattore combinato
         return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
+    }
+
+    private void visualizzaProposteScambio(Fruitore fruitore) {
+        // Ottiene le proposte di scambio attive del fruitore
+        List<Proposta> proposte = fruitore.getProposte();
+
+        // Visualizza le proposte attive
+        if (proposte.isEmpty()) {
+            view.showMessage("Non hai proposte di scambio");
+        } else {
+            view.showMessage("Ecco le tue proposte di scambio:\n");
+            for (Proposta proposta : proposte) {
+                view.showMessage(proposta.toString());
+            }
+        }
+    }
+
+    /**
+     * Permette all'utente di selezionare una proposta aperta e modificarne lo stato.
+     * <p>
+     * Mostra un elenco numerato di tutte le proposte aperte del fruitore
+     * e acquisisce la scelta dell'utente. Consente anche di annullare l'operazione.
+     *
+     * @param fruitore il fruitore le cui proposte devono essere gestite
+     * @return true se una proposta è stata modificata, false altrimenti
+     *
+     * @pre fruitore != null
+     * @post Se l'utente seleziona una proposta valida e conferma la modifica,
+     *       lo stato della proposta viene aggiornato a RITIRATA
+     */
+    private boolean modificaStatoProposta(Fruitore fruitore) {
+        // Recupera la lista delle proposte aperte disponibili
+        List<Proposta> proposteAperte = fruitore.getProposteAperte();
+
+        // Verifica se ci sono proposte aperte disponibili
+        if (proposteAperte.isEmpty()) {
+            this.view.showMessage(ControllerConstants.MSG_NESSUNA_PROPOSTA_APERTA);
+            return false;
+        }
+
+        // Mostra il titolo della selezione
+        this.view.showMessage(ControllerConstants.TITLE_MODIFICA_PROPOSTA);
+        this.view.showMessage(ControllerConstants.INFO_SELEZIONE_PROPOSTA);
+
+        // Visualizza l'elenco delle proposte in formato numerato
+        for (int i = 0; i < proposteAperte.size(); i++) {
+            this.view.showMessage("[" + (i + 1) + "]\n" + proposteAperte.get(i).toString());
+        }
+
+        // Mostra le istruzioni per annullare
+        this.view.showMessage(ControllerConstants.INFO_ANNULLA_SELEZIONE);
+
+        // Richiedi la selezione dell'utente (0 per annullare, 1-N per selezionare)
+        int index = this.view.getIntInput(ControllerConstants.PROMPT_SELEZIONA_PROPOSTA, 0, proposteAperte.size());
+
+        // Validazione dell'input
+        if (index < 0 || index > proposteAperte.size()) {
+            this.view.showErrorMessage(ControllerConstants.ERROR_INDICE_NON_VALIDO);
+            return false;
+        }
+
+        // Gestione dell'annullamento dell'operazione
+        if (index == 0) {
+            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            return false;
+        }
+
+        // Recupera la proposta selezionata
+        Proposta propostaSelezionata = proposteAperte.get(index - 1);
+
+        // Chiede conferma per ritirare la proposta
+        boolean conferma = this.view.getConfirmation(ControllerConstants.PROMPT_CONFERMA_RITIRO);
+
+        if (conferma) {
+            // Modifica lo stato della proposta
+            boolean risultato = propostaSelezionata.ritiraProposta();
+
+            if (risultato) {
+                this.view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_RITIRATA);
+                salvaUtenti(); // Persisti le modifiche
+                return true;
+            } else {
+                this.view.showErrorMessage(ControllerConstants.ERROR_MODIFICA_PROPOSTA);
+                return false;
+            }
+        } else {
+            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            return false;
+        }
     }
 
     // -----------------------------------------------------------------------------------
