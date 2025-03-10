@@ -1,5 +1,7 @@
 package model;
 
+import com.scalified.tree.TreeNode;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
@@ -30,7 +32,7 @@ public class Prestazione implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /** Categoria foglia che identifica il tipo di prestazione */
-    private final Categoria categoria;
+    private final TreeNode<Categoria> categoria;
 
     /** Durata in ore della prestazione (valore positivo) */
     private final int ore;
@@ -48,7 +50,7 @@ public class Prestazione implements Serializable {
      * @post getCategoria() == categoria
      * @post getOre() == ore
      */
-    public Prestazione(Categoria categoria, int ore) {
+    public Prestazione(TreeNode<Categoria> categoria, int ore) {
         this.categoria = Objects.requireNonNull(categoria, "La categoria non può essere null");
         if (ore <= 0) {
             throw new IllegalArgumentException("Le ore devono essere un valore positivo");
@@ -65,7 +67,7 @@ public class Prestazione implements Serializable {
      * @post risultato != null
      * @post risultato == this.categoria
      */
-    public Categoria getCategoria() {
+    public TreeNode<Categoria> getCategoria() {
         return categoria;
     }
 
@@ -134,6 +136,6 @@ public class Prestazione implements Serializable {
      */
     @Override
     public String toString() {
-        return categoria.getNome() + ", " + ore + " ore";
+        return categoria.data().getNome() + ", " + ore + " ore";
     }
 }
