@@ -17,17 +17,17 @@ public enum StatoProposta implements Serializable {
     /**
      * Proposta disponibile per l'accettazione.
      */
-    APERTA("Proposta aperta"),
+    APERTA("APERTA"),
 
     /**
      * Proposta accettata e in fase di esecuzione.
      */
-    CHIUSA("Proposta accettata"),
+    CHIUSA("ACCETTATA"),
 
     /**
      * Proposta ritirata dal propositore.
      */
-    RITIRATA("Proposta ritirata");
+    RITIRATA("RITIRATA");
 
     private final String descrizione;
 
