@@ -269,6 +269,7 @@ public class ConsoleView {
                 MENU_VIEW_CONVERSION_FACTORS,
                 MENU_CREATE_COMPRENSORIO,
                 MENU_CREATE_GERARCHIA,
+                GREEN + "6. Visualizza proposte" + RESET,
                 MENU_EXIT);
 
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
@@ -283,7 +284,9 @@ public class ConsoleView {
         List<String> menuItems = List.of(
                 GREEN + "1. Visualizza categorie" + RESET,
                 GREEN + "2. Formula proposta di scambio d'opera" + RESET,
-                RED + "0. Uscita" + RESET);
+                GREEN + "3. Visualizza proposte di scambio d'opera" + RESET,
+                GREEN + "4. Ritira una proposta aperta" + RESET,
+                MENU_EXIT);
 
         printMenuBox(USER_MENU_TITLE, menuItems);
     }
