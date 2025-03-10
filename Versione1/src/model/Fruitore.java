@@ -137,6 +137,16 @@ public class Fruitore extends Utente implements Serializable {
         return proposte;
     }
 
+    public ArrayList<Proposta> getProposteAperte() {
+        ArrayList<Proposta> proposteAperte = new ArrayList<>();
+        for (Proposta proposta : proposte) {
+            if(proposta.getStato() == StatoProposta.APERTA){
+                proposteAperte.add(proposta);
+            }
+        }
+        return proposteAperte;
+    }
+
     /**
      * Aggiunge una proposta di attività alla lista del fruitore.
      *
