@@ -211,6 +211,16 @@ public class ControllerConstants {
     public static final String PROMPT_CONFERMA_PROPOSTA = "Confermi questa proposta di scambio?";
     public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
     public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata";
+    // Messaggi per la gestione delle proposte
+    public static final String MSG_NESSUNA_PROPOSTA_APERTA = "Non hai proposte aperte da modificare.";
+    public static final String TITLE_MODIFICA_PROPOSTA = "=== MODIFICA STATO PROPOSTA ===";
+    public static final String INFO_SELEZIONE_PROPOSTA = "Seleziona la proposta da modificare:";
+    public static final String PROMPT_SELEZIONA_PROPOSTA = "Inserisci il numero della proposta da modificare (0 per annullare): ";
+    public static final String ERROR_INDICE_NON_VALIDO = "Indice non valido. Riprova.";
+    public static final String MSG_OPERAZIONE_ANNULLATA = "Operazione annullata.";
+    public static final String PROMPT_CONFERMA_RITIRO = "Sei sicuro di voler ritirare questa proposta? ";
+    public static final String SUCCESS_PROPOSTA_RITIRATA = "Proposta ritirata con successo!";
+    public static final String ERROR_MODIFICA_PROPOSTA = "Impossibile modificare la proposta. Potrebbe essere già chiusa o ritirata.";
     // Costanti per separatori visivi
     public static final String SEPARATORE = "\n----------------------------------------------------------";
 
