@@ -21,14 +21,16 @@ import java.util.Set;
  * Fornisce funzionalità CRUD complete e persistenza dei dati tramite
  * serializzazione.
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti:</b>
  * <ul>
- *   <li>Le collezioni di utenti, comprensori e gerarchie non sono mai null (possono essere vuote)</li>
- *   <li>L'oggetto conversioneGerarchie non è mai null</li>
- *   <li>Tutti gli elementi contenuti nelle collezioni non sono null</li>
- *   <li>Non ci sono utenti duplicati (stesso username)</li>
- *   <li>Non ci sono comprensori duplicati (stesso nome)</li>
- *   <li>Non ci sono gerarchie duplicate (stessa radice)</li>
+ * <li>Le collezioni di utenti, comprensori e gerarchie non sono mai null
+ * (possono essere vuote)</li>
+ * <li>L'oggetto conversioneGerarchie non è mai null</li>
+ * <li>Tutti gli elementi contenuti nelle collezioni non sono null</li>
+ * <li>Non ci sono utenti duplicati (stesso username)</li>
+ * <li>Non ci sono comprensori duplicati (stesso nome)</li>
+ * <li>Non ci sono gerarchie duplicate (stessa radice)</li>
  * </ul>
  *
  * @see Utente
@@ -70,7 +72,8 @@ public class Database {
      * @return true se l'utente è stato aggiunto, false se già presente o null
      *
      * @post se utente == null, restituisce false e lo stato non cambia
-     * @post se un utente con lo stesso username esiste già, restituisce false e lo stato non cambia
+     * @post se un utente con lo stesso username esiste già, restituisce false e lo
+     *       stato non cambia
      * @post se restituisce true, l'utente è stato aggiunto alla collezione
      */
     public boolean addUtente(Utente utente) {
@@ -86,12 +89,14 @@ public class Database {
     /**
      * Registra un nuovo utente configuratore nel sistema.
      * <p>
-     * Crea un nuovo utente con ruolo Configuratore, verificando prima che lo username
+     * Crea un nuovo utente con ruolo Configuratore, verificando prima che lo
+     * username
      * richiesto non sia già utilizzato. Il processo include:
      * <ol>
      * <li>Validazione dei parametri obbligatori</li>
      * <li>Verifica dell'unicità dello username nel sistema</li>
-     * <li>Creazione di una nuova istanza Configuratore con le credenziali specificate</li>
+     * <li>Creazione di una nuova istanza Configuratore con le credenziali
+     * specificate</li>
      * <li>Aggiunta dell'utente alla collezione del database</li>
      * </ol>
      * <p>
@@ -99,14 +104,17 @@ public class Database {
      *
      * @param username lo username univoco per il nuovo configuratore
      * @param password la password in chiaro (sarà oggetto di hashing)
-     * @return true se la registrazione è avvenuta con successo, false se lo username esiste già
+     * @return true se la registrazione è avvenuta con successo, false se lo
+     *         username esiste già
      *
      * @pre username != null
      * @pre password != null
      * @pre this.utenti != null
      * @post se restituisce true, hasUtente(username) == true
-     * @post se restituisce true, un nuovo Configuratore è stato aggiunto alla collezione utenti
-     * @post se hasUtente(username) == true prima dell'invocazione, restituisce false e lo stato non cambia
+     * @post se restituisce true, un nuovo Configuratore è stato aggiunto alla
+     *       collezione utenti
+     * @post se hasUtente(username) == true prima dell'invocazione, restituisce
+     *       false e lo stato non cambia
      * @throws NullPointerException se username o password sono null
      */
     public boolean registraConfiguratore(String username, String password) {
@@ -132,7 +140,8 @@ public class Database {
      * <ol>
      * <li>Validazione dei parametri obbligatori (username, password, email)</li>
      * <li>Verifica dell'unicità dello username nel sistema</li>
-     * <li>Creazione di una nuova istanza Fruitore con le credenziali e informazioni specificate</li>
+     * <li>Creazione di una nuova istanza Fruitore con le credenziali e informazioni
+     * specificate</li>
      * <li>Aggiunta dell'utente alla collezione del database</li>
      * </ol>
      * <p>
@@ -141,16 +150,20 @@ public class Database {
      * @param username     lo username univoco per il nuovo fruitore
      * @param password     la password in chiaro (sarà oggetto di hashing)
      * @param email        l'indirizzo email del fruitore
-     * @param comprensorio il comprensorio geografico di appartenenza (può essere null)
-     * @return true se la registrazione è avvenuta con successo, false se lo username esiste già
+     * @param comprensorio il comprensorio geografico di appartenenza (può essere
+     *                     null)
+     * @return true se la registrazione è avvenuta con successo, false se lo
+     *         username esiste già
      *
      * @pre username != null
      * @pre password != null
      * @pre email != null
      * @pre this.utenti != null
      * @post se restituisce true, hasUtente(username) == true
-     * @post se restituisce true, un nuovo Fruitore è stato aggiunto alla collezione utenti
-     * @post se hasUtente(username) == true prima dell'invocazione, restituisce false e lo stato non cambia
+     * @post se restituisce true, un nuovo Fruitore è stato aggiunto alla collezione
+     *       utenti
+     * @post se hasUtente(username) == true prima dell'invocazione, restituisce
+     *       false e lo stato non cambia
      * @throws NullPointerException se username, password o email sono null
      */
     public boolean registraFruitore(String username, String password, String email, Comprensorio comprensorio) {
@@ -172,19 +185,24 @@ public class Database {
     /**
      * Verifica se uno username è disponibile per la registrazione.
      * <p>
-     * Controlla se non esiste già un utente con lo username specificato nel sistema.
+     * Controlla se non esiste già un utente con lo username specificato nel
+     * sistema.
      * Il confronto è case-sensitive (distingue tra maiuscole e minuscole).
      * <p>
-     * Nota: Il nome del metodo può essere fuorviante - restituisce true se lo username
+     * Nota: Il nome del metodo può essere fuorviante - restituisce true se lo
+     * username
      * è DISPONIBILE (non esiste), false se è già utilizzato.
      *
      * @param username lo username da verificare
-     * @return true se lo username è disponibile (non esiste), false se è già utilizzato
+     * @return true se lo username è disponibile (non esiste), false se è già
+     *         utilizzato
      *
      * @pre this.utenti != null
      * @post se username == null, restituisce true
-     * @post se esiste un utente u tale che u.getUsername().equals(username), restituisce false
-     * @post se non esiste un utente u tale che u.getUsername().equals(username), restituisce true
+     * @post se esiste un utente u tale che u.getUsername().equals(username),
+     *       restituisce false
+     * @post se non esiste un utente u tale che u.getUsername().equals(username),
+     *       restituisce true
      * @post lo stato del database non viene modificato
      */
     public boolean esisteUtente(String username) {
@@ -211,9 +229,12 @@ public class Database {
      * @param password la password dell'utente
      * @return l'utente autenticato, o null se credenziali errate
      *
-     * @post se username == null o password == null o utenti è vuoto, restituisce null
-     * @post restituisce null se nessun utente ha corrispondenza di username e password
-     * @post se trovato, restituisce l'istanza utente corrispondente alle credenziali
+     * @post se username == null o password == null o utenti è vuoto, restituisce
+     *       null
+     * @post restituisce null se nessun utente ha corrispondenza di username e
+     *       password
+     * @post se trovato, restituisce l'istanza utente corrispondente alle
+     *       credenziali
      * @post lo stato del database non viene modificato
      */
     public Utente loginUtente(String username, String password) {
@@ -240,7 +261,8 @@ public class Database {
      * @return true se lo username esiste, false altrimenti
      *
      * @post se username == null, restituisce false
-     * @post restituisce true se e solo se esiste un utente con lo username specificato
+     * @post restituisce true se e solo se esiste un utente con lo username
+     *       specificato
      * @post lo stato del database non viene modificato
      */
     public boolean hasUtente(String username) {
@@ -266,7 +288,8 @@ public class Database {
      * @return vista non modificabile degli utenti
      *
      * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
      * @post lo stato del database non viene modificato
      */
     public Set<Utente> getUtenti() {
@@ -282,12 +305,135 @@ public class Database {
      *
      * @post se utenti == null, viene creata una collezione vuota
      * @post se utenti != null, viene creata una copia difensiva della collezione
-     * @post this.utenti contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
+     * @post this.utenti contiene tutti e soli gli elementi della collezione fornita
+     *       (o nessuno se era null)
      */
     public void setUtenti(Set<Utente> utenti) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
         // null
         this.utenti = utenti != null ? new HashSet<>(utenti) : new HashSet<>();
+    }
+
+    /**
+     * Ottiene tutti i fruitori che appartengono allo stesso comprensorio
+     * dell'utente specificato.
+     * <p>
+     * Questo metodo è utile per operazioni che richiedono l'identificazione di
+     * potenziali
+     * partner di scambio all'interno dello stesso comprensorio geografico, come
+     * richiesto
+     * dalle regole di business per la realizzazione degli scambi.
+     * 
+     * @param utente        l'utente di riferimento di cui trovare i fruitori nello
+     *                      stesso comprensorio
+     * @param includiUtente se true include l'utente di riferimento nel risultato,
+     *                      altrimenti lo esclude
+     * @return lista di fruitori che appartengono allo stesso comprensorio
+     *         dell'utente
+     * @throws IllegalArgumentException se l'utente non è un fruitore o è null
+     * 
+     * @pre utente != null
+     * @pre utente deve essere un Fruitore (non un Configuratore)
+     * @post La lista restituita contiene solo Fruitori appartenenti allo stesso
+     *       comprensorio dell'utente
+     * @post Se includiUtente è false, l'utente di riferimento non è incluso nella
+     *       lista restituita
+     * @post Se non ci sono altri fruitori nello stesso comprensorio, viene
+     *       restituita una lista vuota
+     */
+    public List<Fruitore> getFruitoriStessoComprensorio(Utente utente, boolean includiUtente) {
+        // Verifica che l'utente sia valido
+        if (utente == null) {
+            throw new IllegalArgumentException("L'utente non può essere null");
+        }
+
+        if (utente.isConfig()) {
+            throw new IllegalArgumentException("L'utente deve essere un fruitore");
+        }
+
+        // Cast a Fruitore e recupero del comprensorio
+        Fruitore fruitoreRiferimento = (Fruitore) utente;
+        Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
+
+        // Lista dove verranno inseriti i fruitori dello stesso comprensorio
+        List<Fruitore> fruitoriStessoComprensorio = new ArrayList<>();
+
+        // Itera su tutti gli utenti nel database
+        for (Utente altroUtente : this.getUtenti()) {
+            // Salta i configuratori
+            if (altroUtente.isConfig()) {
+                continue;
+            }
+
+            Fruitore altroFruitore = (Fruitore) altroUtente;
+
+            // Verifica se è lo stesso utente e se deve essere incluso
+            if (altroFruitore.equals(fruitoreRiferimento) && !includiUtente) {
+                continue;
+            }
+
+            // Verifica se il fruitore appartiene allo stesso comprensorio
+            if (altroFruitore.getComprensorio().equals(comprensorioRiferimento)) {
+                fruitoriStessoComprensorio.add(altroFruitore);
+            }
+        }
+
+        return fruitoriStessoComprensorio;
+    }
+
+    /**
+     * Versione semplificata che esclude sempre l'utente di riferimento.
+     * 
+     * @param utente l'utente di riferimento
+     * @return lista di fruitori che appartengono allo stesso comprensorio, escluso
+     *         l'utente specificato
+     */
+    public List<Fruitore> getFruitoriStessoComprensorio(Utente utente) {
+        return getFruitoriStessoComprensorio(utente, false);
+    }
+
+    /**
+     * Ottiene tutte le proposte di scambio aperte formulate dai fruitori dello
+     * stesso comprensorio.
+     * 
+     * @param utente        l'utente di riferimento di cui trovare le proposte nel
+     *                      comprensorio
+     * @param includiUtente se includere anche le proposte dell'utente di
+     *                      riferimento
+     * @return lista di proposte aperte nel comprensorio dell'utente
+     * @throws IllegalArgumentException se l'utente non è un fruitore o è null
+     */
+    public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
+        List<Fruitore> fruitoriComprensorio = getFruitoriStessoComprensorio(utente, includiUtente);
+        List<Proposta> proposteAperte = new ArrayList<>();
+
+        for (Fruitore fruitore : fruitoriComprensorio) {
+            for (Proposta proposta : fruitore.getProposte()) {
+                if (proposta.getStato() == StatoProposta.APERTA) {
+                    proposteAperte.add(proposta);
+                }
+            }
+        }
+
+        return proposteAperte;
+    }
+
+    /**
+     * Ottiene il fruitore che ha formulato una specifica proposta di scambio.
+     * 
+     * @param proposta la proposta di cui trovare il propositore
+     * @return il fruitore che ha formulato la proposta, o null se non trovato
+     */
+    public Fruitore getPropositoreProposta(Proposta proposta) {
+        for (Utente utente : this.getUtenti()) {
+            if (!utente.isConfig()) {
+                Fruitore fruitore = (Fruitore) utente;
+                if (fruitore.getProposte().contains(proposta)) {
+                    return fruitore;
+                }
+            }
+        }
+        return null;
     }
 
     // -----------------------------------------------------------------------------------
@@ -301,7 +447,8 @@ public class Database {
      * @return true se aggiunto con successo, false se già presente o null
      *
      * @post se comprensorio == null, restituisce false e lo stato non cambia
-     * @post se un comprensorio con lo stesso nome esiste già, restituisce false e lo stato non cambia
+     * @post se un comprensorio con lo stesso nome esiste già, restituisce false e
+     *       lo stato non cambia
      * @post se restituisce true, il comprensorio è stato aggiunto alla collezione
      */
     public boolean addComprensorio(Comprensorio comprensorio) {
@@ -321,7 +468,8 @@ public class Database {
      * @return true se esiste, false altrimenti
      *
      * @post se nome == null, restituisce false
-     * @post restituisce true se e solo se esiste un comprensorio con il nome specificato (case-insensitive)
+     * @post restituisce true se e solo se esiste un comprensorio con il nome
+     *       specificato (case-insensitive)
      * @post lo stato del database non viene modificato
      */
     public boolean hasComprensorio(String nome) {
@@ -348,7 +496,8 @@ public class Database {
      * @return vista non modificabile dei comprensori
      *
      * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
      * @post lo stato del database non viene modificato
      */
     public Set<Comprensorio> getComprensori() {
@@ -362,8 +511,10 @@ public class Database {
      * @param comprensori la nuova collezione di comprensori
      *
      * @post se comprensori == null, viene creata una collezione vuota
-     * @post se comprensori != null, viene creata una copia difensiva della collezione
-     * @post this.comprensori contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
+     * @post se comprensori != null, viene creata una copia difensiva della
+     *       collezione
+     * @post this.comprensori contiene tutti e soli gli elementi della collezione
+     *       fornita (o nessuno se era null)
      */
     public void setComprensori(Set<Comprensorio> comprensori) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
@@ -378,7 +529,8 @@ public class Database {
      *
      * @post il valore restituito non è null
      * @post se comprensori è vuoto, restituisce un messaggio appropriato
-     * @post se comprensori non è vuoto, restituisce una rappresentazione di tutti i comprensori
+     * @post se comprensori non è vuoto, restituisce una rappresentazione di tutti i
+     *       comprensori
      * @post lo stato del database non viene modificato
      */
     public String toStringComprensori() {
@@ -408,7 +560,8 @@ public class Database {
      * @return true se aggiunta con successo, false se già presente o null
      *
      * @post se gerarchia == null, restituisce false e lo stato non cambia
-     * @post se una gerarchia con la stessa radice esiste già, restituisce false e lo stato non cambia
+     * @post se una gerarchia con la stessa radice esiste già, restituisce false e
+     *       lo stato non cambia
      * @post se restituisce true, la gerarchia è stata aggiunta alla collezione
      */
     public boolean addGerarchia(Gerarchia gerarchia) {
@@ -428,7 +581,8 @@ public class Database {
      * @return true se esiste, false altrimenti
      *
      * @post se nome == null, restituisce false
-     * @post restituisce true se e solo se esiste una gerarchia con radice avente il nome specificato
+     * @post restituisce true se e solo se esiste una gerarchia con radice avente il
+     *       nome specificato
      * @post lo stato del database non viene modificato
      */
     public boolean hasGerarchia(String nome) {
@@ -455,7 +609,8 @@ public class Database {
      * @return vista non modificabile delle gerarchie
      *
      * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione interna
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
      * @post lo stato del database non viene modificato
      */
     public Set<Gerarchia> getGerarchie() {
@@ -470,7 +625,8 @@ public class Database {
      *
      * @post se gerarchie == null, viene creata una collezione vuota
      * @post se gerarchie != null, viene creata una copia difensiva della collezione
-     * @post this.gerarchie contiene tutti e soli gli elementi della collezione fornita (o nessuno se era null)
+     * @post this.gerarchie contiene tutti e soli gli elementi della collezione
+     *       fornita (o nessuno se era null)
      */
     public void setGerarchie(Set<Gerarchia> gerarchie) {
         // Crea una copia difensiva della collezione o una nuova collezione vuota se
@@ -486,7 +642,8 @@ public class Database {
      * @throws IndexOutOfBoundsException se l'indice non è valido
      *
      * @pre 0 <= index < gerarchie.size()
-     * @post il valore restituito è la gerarchia corrispondente all'indice specificato
+     * @post il valore restituito è la gerarchia corrispondente all'indice
+     *       specificato
      * @post lo stato del database non viene modificato
      * @throws IndexOutOfBoundsException se index < 0 o index >= gerarchie.size()
      */
@@ -505,7 +662,8 @@ public class Database {
      *
      * @post il valore restituito non è null
      * @post se gerarchie è vuoto, restituisce un messaggio appropriato
-     * @post se gerarchie non è vuoto, restituisce una rappresentazione di tutte le gerarchie
+     * @post se gerarchie non è vuoto, restituisce una rappresentazione di tutte le
+     *       gerarchie
      * @post lo stato del database non viene modificato
      */
     public String toStringGerarchie() {
