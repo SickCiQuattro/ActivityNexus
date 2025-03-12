@@ -773,11 +773,19 @@ public class Database {
      *
      * @pre utente != null
      * @pre utente deve essere un Fruitore (non un Configuratore)
-     *
-     * @post La lista restituita contiene solo proposte aperte formulate da Fruitori
-     *       appartenenti allo stesso comprensorio dell'utente
-     * @post Se includiUtente è false, l'utente di riferimento non è incluso
-     *       nella lista restituita
+     * @pre ((Fruitore)utente).getComprensorio() != null
+     * 
+     * @post il valore restituito non è null
+     * @post tutti gli elementi nella lista restituita hanno stato ==
+     *       StatoProposta.APERTA
+     * @post tutti gli elementi nella lista restituita hanno
+     *       proponente.getComprensorio().equals(((Fruitore)utente).getComprensorio())
+     * @post se includiUtente == false, nessun elemento nella lista ha
+     *       proponente.equals(utente)
+     * @post lo stato del database non viene modificato
+     * 
+     * @throws ClassCastException   se utente non è un'istanza di Fruitore
+     * @throws NullPointerException se utente è null o il suo comprensorio è null
      */
     public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
         // Cast a Fruitore e recupero del comprensorio
@@ -814,9 +822,21 @@ public class Database {
 
     /**
      * Aggiunge un insieme chiuso al database.
+     * <p>
+     * Questo metodo aggiunge un nuovo insieme chiuso alla collezione gestita dal
+     * database.
+     * Un insieme chiuso rappresenta un ciclo di scambi valido tra fruitori.
      * 
      * @param insiemeChiuso l'insieme chiuso da aggiungere
-     * @return true se l'insieme è stato aggiunto con successo
+     * @return true se l'insieme è stato aggiunto con successo, false se era null o
+     *         già presente
+     *
+     * @pre this.insiemiChiusi != null
+     * @post se insiemeChiuso == null, restituisce false e lo stato non cambia
+     * @post se insiemeChiuso != null, l'insieme chiuso è stato aggiunto alla
+     *       collezione
+     * @post se l'insieme era già presente (equals), restituisce false e lo stato
+     *       non cambia
      */
     public boolean aggiungiInsiemeChiuso(InsiemeChiuso insiemeChiuso) {
         if (insiemeChiuso == null) {
@@ -827,8 +847,18 @@ public class Database {
 
     /**
      * Restituisce tutti gli insiemi chiusi presenti nel sistema.
+     * <p>
+     * Questo metodo fornisce una vista non modificabile di tutti gli insiemi chiusi
+     * attualmente presenti nel database, indipendentemente dal loro stato di
+     * notifica.
      * 
-     * @return lista non modificabile di insiemi chiusi
+     * @return lista non modificabile di tutti gli insiemi chiusi
+     *
+     * @pre this.insiemiChiusi != null
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
+     * @post lo stato del database non viene modificato
      */
     public List<InsiemeChiuso> getInsiemiChiusi() {
         return Collections.unmodifiableList(insiemiChiusi);
@@ -836,8 +866,18 @@ public class Database {
 
     /**
      * Restituisce gli insiemi chiusi non ancora notificati.
+     * <p>
+     * Filtra la collezione di insiemi chiusi, restituendo solo quelli
+     * che non sono ancora stati notificati ai fruitori coinvolti.
+     * Questo metodo è utile per i configuratori che devono gestire le notifiche.
      * 
      * @return lista di insiemi chiusi non notificati
+     *
+     * @pre this.insiemiChiusi != null
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene solo insiemi chiusi dove isNotificato()
+     *       == false
+     * @post lo stato del database non viene modificato
      */
     public List<InsiemeChiuso> getInsiemiChiusiNonNotificati() {
         List<InsiemeChiuso> nonNotificati = new ArrayList<>();
@@ -1060,6 +1100,22 @@ public class Database {
         }
     }
 
+    /**
+     * Serializza la collezione degli insiemi chiusi nel file specificato.
+     * <p>
+     * Salva in modo persistente tutti gli insiemi chiusi presenti nel database,
+     * permettendo di ricaricarli in sessioni future dell'applicazione.
+     *
+     * @param filePath il percorso del file in cui salvare gli insiemi chiusi
+     *
+     * @pre this.insiemiChiusi != null
+     * @pre filePath != null
+     * @post Il file specificato contiene una rappresentazione serializzata della
+     *       collezione insiemiChiusi
+     * @post Se si verifica un'eccezione durante la serializzazione, viene stampato
+     *       lo stack trace
+     * @post Lo stato del database non viene modificato
+     */
     public void serializeInsiemiChiusi(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this.insiemiChiusi);
@@ -1068,6 +1124,21 @@ public class Database {
         }
     }
 
+    /**
+     * Deserializza la collezione degli insiemi chiusi dal file specificato.
+     * <p>
+     * Carica gli insiemi chiusi precedentemente salvati, ripristinando lo stato
+     * della collezione come era al momento della serializzazione.
+     *
+     * @param filePath il percorso del file da cui caricare gli insiemi chiusi
+     *
+     * @pre filePath != null
+     * @post Se il file esiste ed è valido, this.insiemiChiusi contiene gli insiemi
+     *       chiusi deserializzati
+     * @post Se il file è vuoto, this.insiemiChiusi rimane invariato
+     * @post Se si verifica un'eccezione durante la deserializzazione, viene
+     *       stampato lo stack trace
+     */
     public void deserializeInsiemiChiusi(String filePath) {
         try {
             FileInputStream fis = new FileInputStream(filePath);
