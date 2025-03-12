@@ -42,6 +42,7 @@ public class Database {
     private Set<Gerarchia> gerarchie;
     private ConversioneGerarchie conversioneGerarchie;
     private Set<Proposta> proposte;
+    private List<InsiemeChiuso> insiemiChiusi;
 
     /**
      * Inizializza un database vuoto con tutte le collezioni pronte per l'uso.
@@ -57,11 +58,44 @@ public class Database {
         this.gerarchie = new HashSet<>();
         this.conversioneGerarchie = new ConversioneGerarchie();
         this.proposte = new HashSet<>();
+        this.insiemiChiusi = new ArrayList<>();
     }
 
     // -----------------------------------------------------------------------------------
     // METODI PER LA GESTIONE DEGLI UTENTI
     // -----------------------------------------------------------------------------------
+
+    /**
+     * Restituisce una vista non modificabile della collezione degli utenti.
+     *
+     * @return vista non modificabile degli utenti
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
+     * @post lo stato del database non viene modificato
+     */
+    public Set<Utente> getUtenti() {
+        // Restituisce una vista non modificabile della collezione per proteggere
+        // l'incapsulamento
+        return Collections.unmodifiableSet(this.utenti);
+    }
+
+    /**
+     * Imposta la collezione degli utenti, creando una copia difensiva.
+     *
+     * @param utenti la nuova collezione di utenti
+     *
+     * @post se utenti == null, viene creata una collezione vuota
+     * @post se utenti != null, viene creata una copia difensiva della collezione
+     * @post this.utenti contiene tutti e soli gli elementi della collezione fornita
+     *       (o nessuno se era null)
+     */
+    public void setUtenti(Set<Utente> utenti) {
+        // Crea una copia difensiva della collezione o una nuova collezione vuota se
+        // null
+        this.utenti = utenti != null ? new HashSet<>(utenti) : new HashSet<>();
+    }
 
     /**
      * Aggiunge un utente al database.
@@ -82,6 +116,106 @@ public class Database {
         // Tenta di aggiungere l'utente alla collezione
         // HashSet.add() restituisce false se l'elemento esiste già
         return this.utenti.add(utente);
+    }
+
+    /**
+     * Verifica se esiste un utente con lo username specificato.
+     *
+     * @param username lo username da verificare (case-sensitive)
+     * @return true se lo username esiste, false altrimenti
+     *
+     * @post se username == null, restituisce false
+     * @post restituisce true se e solo se esiste un utente con lo username
+     *       specificato
+     * @post lo stato del database non viene modificato
+     */
+    public boolean hasUtente(String username) {
+        // Verifica che lo username non sia null
+        if (username == null) {
+            return false;
+        }
+
+        // Cerca tra tutti gli utenti uno con lo username corrispondente
+        for (Utente utente : this.utenti) {
+            if (utente.getUsername().equals(username)) { // Confronto case-sensitive
+                return true;
+            }
+        }
+
+        // Nessuna corrispondenza trovata
+        return false;
+    }
+
+    /**
+     * Verifica se uno username è disponibile per la registrazione.
+     * <p>
+     * Controlla se non esiste già un utente con lo username specificato nel
+     * sistema.
+     * Il confronto è case-sensitive (distingue tra maiuscole e minuscole).
+     * <p>
+     * Nota: Il nome del metodo può essere fuorviante - restituisce true se lo
+     * username
+     * è DISPONIBILE (non esiste), false se è già utilizzato.
+     *
+     * @param username lo username da verificare
+     * @return true se lo username è disponibile (non esiste), false se è già
+     *         utilizzato
+     *
+     * @pre this.utenti != null
+     * @post se username == null, restituisce true
+     * @post se esiste un utente u tale che u.getUsername().equals(username),
+     *       restituisce false
+     * @post se non esiste un utente u tale che u.getUsername().equals(username),
+     *       restituisce true
+     * @post lo stato del database non viene modificato
+     */
+    public boolean esisteUtente(String username) {
+        // Verifica che lo username non sia null
+        if (username == null) {
+            return true;
+        }
+
+        // Cerca tra tutti gli utenti uno con lo username corrispondente
+        for (Utente utente : this.utenti) {
+            if (utente.getUsername().equals(username)) { // Confronto case-sensitive
+                return false;
+            }
+        }
+
+        // Nessuna corrispondenza trovata
+        return true;
+    }
+
+    /**
+     * Effettua il login verificando le credenziali fornite.
+     *
+     * @param username lo username dell'utente
+     * @param password la password dell'utente
+     * @return l'utente autenticato, o null se credenziali errate
+     *
+     * @post se username == null o password == null o utenti è vuoto, restituisce
+     *       null
+     * @post restituisce null se nessun utente ha corrispondenza di username e
+     *       password
+     * @post se trovato, restituisce l'istanza utente corrispondente alle
+     *       credenziali
+     * @post lo stato del database non viene modificato
+     */
+    public Utente loginUtente(String username, String password) {
+        // Verifica parametri di base e se ci sono utenti
+        if (username == null || password == null || this.utenti.isEmpty()) {
+            return null;
+        }
+
+        // Itera su tutti gli utenti per trovare corrispondenza con le credenziali
+        for (Utente utente : this.utenti) {
+            if (utente.verificaCredenziali(username, password)) {
+                return utente; // Restituisce l'utente se le credenziali corrispondono
+            }
+        }
+
+        // Nessuna corrispondenza trovata
+        return null;
     }
 
     /**
@@ -181,138 +315,6 @@ public class Database {
     }
 
     /**
-     * Verifica se uno username è disponibile per la registrazione.
-     * <p>
-     * Controlla se non esiste già un utente con lo username specificato nel
-     * sistema.
-     * Il confronto è case-sensitive (distingue tra maiuscole e minuscole).
-     * <p>
-     * Nota: Il nome del metodo può essere fuorviante - restituisce true se lo
-     * username
-     * è DISPONIBILE (non esiste), false se è già utilizzato.
-     *
-     * @param username lo username da verificare
-     * @return true se lo username è disponibile (non esiste), false se è già
-     *         utilizzato
-     *
-     * @pre this.utenti != null
-     * @post se username == null, restituisce true
-     * @post se esiste un utente u tale che u.getUsername().equals(username),
-     *       restituisce false
-     * @post se non esiste un utente u tale che u.getUsername().equals(username),
-     *       restituisce true
-     * @post lo stato del database non viene modificato
-     */
-    public boolean esisteUtente(String username) {
-        // Verifica che lo username non sia null
-        if (username == null) {
-            return true;
-        }
-
-        // Cerca tra tutti gli utenti uno con lo username corrispondente
-        for (Utente utente : this.utenti) {
-            if (utente.getUsername().equals(username)) { // Confronto case-sensitive
-                return false;
-            }
-        }
-
-        // Nessuna corrispondenza trovata
-        return true;
-    }
-
-    /**
-     * Effettua il login verificando le credenziali fornite.
-     *
-     * @param username lo username dell'utente
-     * @param password la password dell'utente
-     * @return l'utente autenticato, o null se credenziali errate
-     *
-     * @post se username == null o password == null o utenti è vuoto, restituisce
-     *       null
-     * @post restituisce null se nessun utente ha corrispondenza di username e
-     *       password
-     * @post se trovato, restituisce l'istanza utente corrispondente alle
-     *       credenziali
-     * @post lo stato del database non viene modificato
-     */
-    public Utente loginUtente(String username, String password) {
-        // Verifica parametri di base e se ci sono utenti
-        if (username == null || password == null || this.utenti.isEmpty()) {
-            return null;
-        }
-
-        // Itera su tutti gli utenti per trovare corrispondenza con le credenziali
-        for (Utente utente : this.utenti) {
-            if (utente.verificaCredenziali(username, password)) {
-                return utente; // Restituisce l'utente se le credenziali corrispondono
-            }
-        }
-
-        // Nessuna corrispondenza trovata
-        return null;
-    }
-
-    /**
-     * Verifica se esiste un utente con lo username specificato.
-     *
-     * @param username lo username da verificare (case-sensitive)
-     * @return true se lo username esiste, false altrimenti
-     *
-     * @post se username == null, restituisce false
-     * @post restituisce true se e solo se esiste un utente con lo username
-     *       specificato
-     * @post lo stato del database non viene modificato
-     */
-    public boolean hasUtente(String username) {
-        // Verifica che lo username non sia null
-        if (username == null) {
-            return false;
-        }
-
-        // Cerca tra tutti gli utenti uno con lo username corrispondente
-        for (Utente utente : this.utenti) {
-            if (utente.getUsername().equals(username)) { // Confronto case-sensitive
-                return true;
-            }
-        }
-
-        // Nessuna corrispondenza trovata
-        return false;
-    }
-
-    /**
-     * Restituisce una vista non modificabile della collezione degli utenti.
-     *
-     * @return vista non modificabile degli utenti
-     *
-     * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione
-     *       interna
-     * @post lo stato del database non viene modificato
-     */
-    public Set<Utente> getUtenti() {
-        // Restituisce una vista non modificabile della collezione per proteggere
-        // l'incapsulamento
-        return Collections.unmodifiableSet(this.utenti);
-    }
-
-    /**
-     * Imposta la collezione degli utenti, creando una copia difensiva.
-     *
-     * @param utenti la nuova collezione di utenti
-     *
-     * @post se utenti == null, viene creata una collezione vuota
-     * @post se utenti != null, viene creata una copia difensiva della collezione
-     * @post this.utenti contiene tutti e soli gli elementi della collezione fornita
-     *       (o nessuno se era null)
-     */
-    public void setUtenti(Set<Utente> utenti) {
-        // Crea una copia difensiva della collezione o una nuova collezione vuota se
-        // null
-        this.utenti = utenti != null ? new HashSet<>(utenti) : new HashSet<>();
-    }
-
-    /**
      * Ottiene tutti i fruitori che appartengono allo stesso comprensorio
      * dell'utente specificato.
      * <p>
@@ -380,55 +382,41 @@ public class Database {
         return getFruitoriStessoComprensorio(utente, false);
     }
 
-    /**
-     * Ottiene tutte le proposte di scambio aperte formulate dai fruitori dello
-     * stesso comprensorio.
-     *
-     * @param utente        l'utente di riferimento di cui trovare le proposte nel
-     *                      comprensorio
-     * @param includiUtente se includere anche le proposte dell'utente di
-     *                      riferimento
-     * @return lista di proposte aperte nel comprensorio dell'utente
-     *
-     * @pre utente != null
-     * @pre utente deve essere un Fruitore (non un Configuratore)
-     *
-     * @post La lista restituita contiene solo proposte aperte formulate da Fruitori
-     *       appartenenti allo stesso comprensorio dell'utente
-     * @post Se includiUtente è false, l'utente di riferimento non è incluso
-     *       nella lista restituita
-     */
-    public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
-        // Cast a Fruitore e recupero del comprensorio
-        Fruitore fruitoreRiferimento = (Fruitore) utente;
-        Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
-
-        // Lista per le proposte aperte dello stesso comprensorio
-        List<Proposta> proposteAperte = new ArrayList<>();
-
-        // Filtra tutte le proposte aperte
-        List<Proposta> tutteProposteAperte = getPropostePerStato(StatoProposta.APERTA);
-
-        for (Proposta proposta : tutteProposteAperte) {
-            Fruitore proponente = proposta.getPropostitore();
-
-            // Controlla che il proponente abbia lo stesso comprensorio
-            if (proponente.getComprensorio().equals(comprensorioRiferimento)) {
-                // Se non dobbiamo includere l'utente di riferimento e questo è la proposta dell'utente, la saltiamo
-                if (!includiUtente && proponente.equals(fruitoreRiferimento)) {
-                    continue;
-                }
-
-                proposteAperte.add(proposta);
-            }
-        }
-
-        return proposteAperte;
-    }
-
     // -----------------------------------------------------------------------------------
     // METODI PER LA GESTIONE DEI COMPRENSORI
     // -----------------------------------------------------------------------------------
+
+    /**
+     * Restituisce una vista non modificabile dei comprensori.
+     *
+     * @return vista non modificabile dei comprensori
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
+     * @post lo stato del database non viene modificato
+     */
+    public Set<Comprensorio> getComprensori() {
+        // Restituisce una vista non modificabile della collezione
+        return Collections.unmodifiableSet(this.comprensori);
+    }
+
+    /**
+     * Imposta la collezione dei comprensori, creando una copia difensiva.
+     *
+     * @param comprensori la nuova collezione di comprensori
+     *
+     * @post se comprensori == null, viene creata una collezione vuota
+     * @post se comprensori != null, viene creata una copia difensiva della
+     *       collezione
+     * @post this.comprensori contiene tutti e soli gli elementi della collezione
+     *       fornita (o nessuno se era null)
+     */
+    public void setComprensori(Set<Comprensorio> comprensori) {
+        // Crea una copia difensiva della collezione o una nuova collezione vuota se
+        // null
+        this.comprensori = comprensori != null ? new HashSet<>(comprensori) : new HashSet<>();
+    }
 
     /**
      * Aggiunge un comprensorio al database.
@@ -481,38 +469,6 @@ public class Database {
     }
 
     /**
-     * Restituisce una vista non modificabile dei comprensori.
-     *
-     * @return vista non modificabile dei comprensori
-     *
-     * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione
-     *       interna
-     * @post lo stato del database non viene modificato
-     */
-    public Set<Comprensorio> getComprensori() {
-        // Restituisce una vista non modificabile della collezione
-        return Collections.unmodifiableSet(this.comprensori);
-    }
-
-    /**
-     * Imposta la collezione dei comprensori, creando una copia difensiva.
-     *
-     * @param comprensori la nuova collezione di comprensori
-     *
-     * @post se comprensori == null, viene creata una collezione vuota
-     * @post se comprensori != null, viene creata una copia difensiva della
-     *       collezione
-     * @post this.comprensori contiene tutti e soli gli elementi della collezione
-     *       fornita (o nessuno se era null)
-     */
-    public void setComprensori(Set<Comprensorio> comprensori) {
-        // Crea una copia difensiva della collezione o una nuova collezione vuota se
-        // null
-        this.comprensori = comprensori != null ? new HashSet<>(comprensori) : new HashSet<>();
-    }
-
-    /**
      * Restituisce una rappresentazione testuale di tutti i comprensori.
      *
      * @return stringa formattata con tutti i comprensori
@@ -542,6 +498,37 @@ public class Database {
     // -----------------------------------------------------------------------------------
     // METODI PER LA GESTIONE DELLE GERARCHIE
     // -----------------------------------------------------------------------------------
+
+    /**
+     * Restituisce una vista non modificabile delle gerarchie.
+     *
+     * @return vista non modificabile delle gerarchie
+     *
+     * @post il valore restituito non è null
+     * @post il valore restituito è una vista non modificabile della collezione
+     *       interna
+     * @post lo stato del database non viene modificato
+     */
+    public Set<Gerarchia> getGerarchie() {
+        // Restituisce una vista non modificabile della collezione
+        return Collections.unmodifiableSet(this.gerarchie);
+    }
+
+    /**
+     * Imposta la collezione delle gerarchie, creando una copia difensiva.
+     *
+     * @param gerarchie la nuova collezione di gerarchie
+     *
+     * @post se gerarchie == null, viene creata una collezione vuota
+     * @post se gerarchie != null, viene creata una copia difensiva della collezione
+     * @post this.gerarchie contiene tutti e soli gli elementi della collezione
+     *       fornita (o nessuno se era null)
+     */
+    public void setGerarchie(Set<Gerarchia> gerarchie) {
+        // Crea una copia difensiva della collezione o una nuova collezione vuota se
+        // null
+        this.gerarchie = gerarchie != null ? new HashSet<>(gerarchie) : new HashSet<>();
+    }
 
     /**
      * Aggiunge una gerarchia al database.
@@ -591,37 +578,6 @@ public class Database {
 
         // Nessuna corrispondenza trovata
         return false;
-    }
-
-    /**
-     * Restituisce una vista non modificabile delle gerarchie.
-     *
-     * @return vista non modificabile delle gerarchie
-     *
-     * @post il valore restituito non è null
-     * @post il valore restituito è una vista non modificabile della collezione
-     *       interna
-     * @post lo stato del database non viene modificato
-     */
-    public Set<Gerarchia> getGerarchie() {
-        // Restituisce una vista non modificabile della collezione
-        return Collections.unmodifiableSet(this.gerarchie);
-    }
-
-    /**
-     * Imposta la collezione delle gerarchie, creando una copia difensiva.
-     *
-     * @param gerarchie la nuova collezione di gerarchie
-     *
-     * @post se gerarchie == null, viene creata una collezione vuota
-     * @post se gerarchie != null, viene creata una copia difensiva della collezione
-     * @post this.gerarchie contiene tutti e soli gli elementi della collezione
-     *       fornita (o nessuno se era null)
-     */
-    public void setGerarchie(Set<Gerarchia> gerarchie) {
-        // Crea una copia difensiva della collezione o una nuova collezione vuota se
-        // null
-        this.gerarchie = gerarchie != null ? new HashSet<>(gerarchie) : new HashSet<>();
     }
 
     /**
@@ -687,21 +643,45 @@ public class Database {
         return this.conversioneGerarchie;
     }
 
-
     // -----------------------------------------------------------------------------------
     // METODI PER LA GESTIONE DELLE PROPOSTE
     // -----------------------------------------------------------------------------------
 
     /**
+     * Aggiunge una proposta al database.
+     *
+     * @param proposta la proposta da aggiungere
+     * @return true se aggiunta con successo, false se già presente o null
+     *
+     * @pre proposta != null
+     * @post se proposta == null, restituisce false e lo stato non cambia
+     * @post se una proposta con lo stesso ID esiste già, restituisce false e lo
+     *       stato non cambia
+     * @post se restituisce true, la proposta è stata aggiunta alla collezione
+     */
+    public boolean aggiungiProposta(Proposta proposta) {
+        // Verifica che la proposta non sia null
+        if (proposta == null) {
+            return false;
+        }
+
+        // Tenta di aggiungere la proposta alla collezione
+        return this.proposte.add(proposta);
+    }
+
+    /**
      * Restituisce una lista di proposte filtrate in base allo stato specificato.
      * Se lo stato specificato è null, restituisce tutte le proposte.
      *
-     * @param stato lo stato delle proposte da filtrare, o null per tutte le proposte
-     * @return lista contenente le proposte filtrate per stato, o tutte le proposte se stato è null
+     * @param stato lo stato delle proposte da filtrare, o null per tutte le
+     *              proposte
+     * @return lista contenente le proposte filtrate per stato, o tutte le proposte
+     *         se stato è null
      *
      * @post il valore restituito non è null
      * @post se stato è null, il valore restituito contiene tutte le proposte
-     * @post se stato non è null, il valore restituito contiene solo proposte con stato uguale al parametro
+     * @post se stato non è null, il valore restituito contiene solo proposte con
+     *       stato uguale al parametro
      * @post lo stato del database non viene modificato
      */
     public List<Proposta> getPropostePerStato(StatoProposta stato) {
@@ -724,13 +704,16 @@ public class Database {
     /**
      * Restituisce una lista di proposte filtrate in base al fruitore specificato.
      *
-     * @param fruitore il fruitore di riferimento per il filtro, o null per tutte le proposte
-     * @return lista contenente le proposte filtrate per fruitore, o tutte le proposte se fruitore è null
+     * @param fruitore il fruitore di riferimento per il filtro, o null per tutte le
+     *                 proposte
+     * @return lista contenente le proposte filtrate per fruitore, o tutte le
+     *         proposte se fruitore è null
      *
      * @pre fruitore != null
      *
      * @post il valore restituito non è null
-     * @post se fruitore non è null, il valore restituito contiene solo proposte del fruitore specificato
+     * @post se fruitore non è null, il valore restituito contiene solo proposte del
+     *       fruitore specificato
      * @post lo stato del database non viene modificato
      */
     public List<Proposta> getPropostePerFruitore(Fruitore fruitore) {
@@ -750,13 +733,16 @@ public class Database {
      * Se lo stato è null, restituisce tutte le proposte del fruitore specificato.
      *
      * @param fruitore il fruitore di cui recuperare le proposte
-     * @param stato lo stato delle proposte da filtrare, o null per tutte le proposte del fruitore
-     * @return lista contenente le proposte del fruitore filtrate per stato, o tutte le sue proposte se stato è null
+     * @param stato    lo stato delle proposte da filtrare, o null per tutte le
+     *                 proposte del fruitore
+     * @return lista contenente le proposte del fruitore filtrate per stato, o tutte
+     *         le sue proposte se stato è null
      *
      * @pre fruitore != null
      * @post il valore restituito non è null
      * @post il valore restituito contiene solo proposte del fruitore specificato
-     * @post se stato non è null, il valore restituito contiene solo proposte con stato uguale al parametro
+     * @post se stato non è null, il valore restituito contiene solo proposte con
+     *       stato uguale al parametro
      * @post lo stato del database non viene modificato
      * @throws NullPointerException se fruitore è null
      */
@@ -776,25 +762,91 @@ public class Database {
     }
 
     /**
-     * Aggiunge una proposta al database.
+     * Ottiene tutte le proposte di scambio aperte formulate dai fruitori dello
+     * stesso comprensorio.
      *
-     * @param proposta la proposta da aggiungere
-     * @return true se aggiunta con successo, false se già presente o null
+     * @param utente        l'utente di riferimento di cui trovare le proposte nel
+     *                      comprensorio
+     * @param includiUtente se includere anche le proposte dell'utente di
+     *                      riferimento
+     * @return lista di proposte aperte nel comprensorio dell'utente
      *
-     * @pre proposta != null
-     * @post se proposta == null, restituisce false e lo stato non cambia
-     * @post se una proposta con lo stesso ID esiste già, restituisce false e lo
-     *       stato non cambia
-     * @post se restituisce true, la proposta è stata aggiunta alla collezione
+     * @pre utente != null
+     * @pre utente deve essere un Fruitore (non un Configuratore)
+     *
+     * @post La lista restituita contiene solo proposte aperte formulate da Fruitori
+     *       appartenenti allo stesso comprensorio dell'utente
+     * @post Se includiUtente è false, l'utente di riferimento non è incluso
+     *       nella lista restituita
      */
-    public boolean aggiungiProposta(Proposta proposta) {
-        // Verifica che la proposta non sia null
-        if (proposta == null) {
-            return false;
+    public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
+        // Cast a Fruitore e recupero del comprensorio
+        Fruitore fruitoreRiferimento = (Fruitore) utente;
+        Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
+
+        // Lista per le proposte aperte dello stesso comprensorio
+        List<Proposta> proposteAperte = new ArrayList<>();
+
+        // Filtra tutte le proposte aperte
+        List<Proposta> tutteProposteAperte = getPropostePerStato(StatoProposta.APERTA);
+
+        for (Proposta proposta : tutteProposteAperte) {
+            Fruitore proponente = proposta.getPropostitore();
+
+            // Controlla che il proponente abbia lo stesso comprensorio
+            if (proponente.getComprensorio().equals(comprensorioRiferimento)) {
+                // Se non dobbiamo includere l'utente di riferimento e questo è la proposta
+                // dell'utente, la saltiamo
+                if (!includiUtente && proponente.equals(fruitoreRiferimento)) {
+                    continue;
+                }
+
+                proposteAperte.add(proposta);
+            }
         }
 
-        // Tenta di aggiungere la proposta alla collezione
-        return this.proposte.add(proposta);
+        return proposteAperte;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DEGLI INSIEMI CHIUSI
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Aggiunge un insieme chiuso al database.
+     * 
+     * @param insiemeChiuso l'insieme chiuso da aggiungere
+     * @return true se l'insieme è stato aggiunto con successo
+     */
+    public boolean aggiungiInsiemeChiuso(InsiemeChiuso insiemeChiuso) {
+        if (insiemeChiuso == null) {
+            return false;
+        }
+        return this.insiemiChiusi.add(insiemeChiuso);
+    }
+
+    /**
+     * Restituisce tutti gli insiemi chiusi presenti nel sistema.
+     * 
+     * @return lista non modificabile di insiemi chiusi
+     */
+    public List<InsiemeChiuso> getInsiemiChiusi() {
+        return Collections.unmodifiableList(insiemiChiusi);
+    }
+
+    /**
+     * Restituisce gli insiemi chiusi non ancora notificati.
+     * 
+     * @return lista di insiemi chiusi non notificati
+     */
+    public List<InsiemeChiuso> getInsiemiChiusiNonNotificati() {
+        List<InsiemeChiuso> nonNotificati = new ArrayList<>();
+        for (InsiemeChiuso insieme : insiemiChiusi) {
+            if (!insieme.isNotificato()) {
+                nonNotificati.add(insieme);
+            }
+        }
+        return nonNotificati;
     }
 
     // -----------------------------------------------------------------------------------
@@ -1004,6 +1056,27 @@ public class Database {
 
         } catch (IOException | ClassNotFoundException e) {
             // Gestisce errori di I/O o di classe non trovata
+            e.printStackTrace();
+        }
+    }
+
+    public void serializeInsiemiChiusi(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.insiemiChiusi);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserializeInsiemiChiusi(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+            if (fis.available() == 0) {
+                return;
+            }
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            this.insiemiChiusi = (List<InsiemeChiuso>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
