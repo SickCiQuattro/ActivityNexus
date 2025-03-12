@@ -220,6 +220,14 @@ public class Controller {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato di conversione"));
             }
 
+            // Carica i dati proposte se il file esiste
+            if (fileEsistente(ControllerConstants.PROPOSTE_FILE_PATH)) {
+                this.database.deserializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "proposte"));
+            } else {
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "proposta"));
+            }
+
             // Indica all'utente che il processo di caricamento è completato con successo
             view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
 
@@ -309,6 +317,7 @@ public class Controller {
             this.database.serializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
             this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
             this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
+            this.database.serializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
             view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
@@ -719,14 +728,16 @@ public class Controller {
                     case "2": // Proposta scambio d'opera
                         if (propostaScambioOpera(fruitore))
                             valutaProposteScambio(fruitore);
+                        // TODO: salvataggio proposte
                         break;
 
                     case "3": // Visualizza proposte di scambio
-                        visualizzaProposteScambio(fruitore);
+                        visualizzaProposteFruitore(fruitore);
                         break;
 
                     case "4":
                         modificaStatoProposta(fruitore);
+                        // TODO: salvataggio proposte
                         break;
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
@@ -2206,10 +2217,10 @@ public class Controller {
         Prestazione prestazioneOfferta = new Prestazione(fogliaOfferta, oreOfferte);
 
         StatoProposta stato = accetta ? StatoProposta.APERTA : StatoProposta.RITIRATA;
-        Proposta proposta = new Proposta(prestazioneRichiesta, prestazioneOfferta, stato);
+        Proposta proposta = new Proposta(fruitore, prestazioneRichiesta, prestazioneOfferta, stato);
 
         // Aggiunge la proposta al fruitore e mostra il messaggio appropriato
-        fruitore.aggiungiProposta(proposta);
+        this.database.aggiungiProposta(proposta);
 
         if (accetta) {
             view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
@@ -2224,15 +2235,25 @@ public class Controller {
         return false;
     }
 
-    private void valutaProposteScambio(Fruitore fruitore) {
-        // Verifica che il fruitore abbia almeno una proposta
-        if (fruitore.getProposte().isEmpty())
-            return;
-        // Ottiene l'ultima proposta del fruitore
-        Proposta propostaCorrente = fruitore.getProposte().getLast();
-        // Ottiene le proposte del comprensorio
-        List<Proposta> proposte = database.getProposteAperteStessoComprensorio(fruitore, false);
+    private boolean valutaProposteScambio(Fruitore fruitore) {
+        if (fruitore == null) {
+            return false;
+        }
 
+        List<Proposta> proposteFruitore = this.database.getPropostePerFruitore(fruitore);
+
+        // Verifica se il fruitore ha proposte di scambio
+        if (proposteFruitore.isEmpty())
+            return false;
+
+        // Ottiene l'ultima proposta del fruitore
+        Proposta propostaCorrente = proposteFruitore.getLast();
+        // Ottiene le proposte del comprensorio
+        List<Proposta> proposte = this.database.getProposteAperteStessoComprensorio(fruitore, false);
+
+        // TODO: completare implementazione
+
+        return true;
     }
 
     /**
@@ -2284,43 +2305,17 @@ public class Controller {
         return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
     }
 
-    /**
-     * Visualizza tutte le proposte di scambio associate ad un fruitore.
-     * <p>
-     * Recupera l'elenco completo delle proposte di scambio del fruitore e le
-     * presenta
-     * in modo formattato attraverso l'interfaccia utente. Se non esistono proposte,
-     * viene mostrato un messaggio informativo appropriato.
-     * <p>
-     * Le proposte sono visualizzate con i dettagli di richiesta, offerta e stato
-     * corrente,
-     * permettendo all'utente di avere una panoramica completa della propria
-     * attività
-     * di scambio.
-     *
-     * @param fruitore il fruitore di cui visualizzare le proposte di scambio
-     *
-     * @pre fruitore != null
-     * @pre this.view != null
-     * @post Le proposte del fruitore sono state visualizzate attraverso
-     *       l'interfaccia utente
-     * @post Se il fruitore non ha proposte, viene mostrato un messaggio informativo
-     * @post Lo stato delle proposte non viene modificato (operazione di sola
-     *       lettura)
-     * @post Lo stato del fruitore non viene alterato
-     */
-    private void visualizzaProposteScambio(Fruitore fruitore) {
-        // Ottiene le proposte di scambio attive del fruitore
-        List<Proposta> proposte = fruitore.getProposte();
+    public void visualizzaProposteFruitore (Fruitore fruitore) {
+        List<Proposta> proposte = this.database.getPropostePerFruitore(fruitore);
 
-        // Visualizza le proposte attive
         if (proposte.isEmpty()) {
-            view.showMessage("Non hai proposte di scambio");
-        } else {
-            view.showMessage("Ecco le tue proposte di scambio:\n");
-            for (Proposta proposta : proposte) {
-                view.showMessage(proposta.toString());
-            }
+            this.view.showMessage("Non hai alcuna proposta di scambo d'opera");
+            return;
+        }
+
+        this.view.showMessage("Ecco le tue proposte di scambio d'opera:");
+        for (Proposta proposta : proposte) {
+            this.view.showMessage(proposta.toString());
         }
     }
 
@@ -2338,7 +2333,7 @@ public class Controller {
      */
     private void modificaStatoProposta(Fruitore fruitore) {
         // Recupera la lista delle proposte aperte disponibili
-        List<Proposta> proposteAperte = fruitore.getProposteAperte();
+        List<Proposta> proposteAperte = this.database.getPropostePerFruitore(fruitore, StatoProposta.APERTA);
 
         // Verifica se ci sono proposte aperte disponibili
         if (proposteAperte.isEmpty()) {
@@ -2392,14 +2387,11 @@ public class Controller {
     }
 
     /**
-     * Visualizza tutte le proposte di scambio relative a una specifica categoria
-     * foglia.
+     * Visualizza tutte le proposte di scambio relative a una specifica categoria foglia.
      * <p>
-     * Il metodo permette all'utente di selezionare una gerarchia e una categoria
-     * foglia,
-     * per poi visualizzare tutte le proposte di scambio (sia in richiesta che in
-     * offerta)
-     * che coinvolgono quella categoria, raggruppate per fruitore.
+     * Il metodo permette all'utente di selezionare una gerarchia e una categoria foglia,
+     * per poi visualizzare tutte le proposte di scambio (sia in richiesta che in offerta)
+     * che coinvolgono quella categoria.
      * <p>
      * Il processo include:
      * <ol>
@@ -2410,11 +2402,9 @@ public class Controller {
      *
      * @pre database != null
      * @pre view != null
-     * @post Se ci sono gerarchie e proposte, vengono visualizzate tutte quelle che
-     *       coinvolgono
-     *       la categoria selezionata con i dettagli del fruitore associato
-     * @post Lo stato delle proposte non viene modificato (operazione di sola
-     *       lettura)
+     * @post Se ci sono gerarchie e proposte, vengono visualizzate tutte quelle che coinvolgono
+     *       la categoria selezionata
+     * @post Lo stato delle proposte non viene modificato (operazione di sola lettura)
      */
     private void visualizzaProposteTotali() {
         // Mostra il titolo dell'operazione
@@ -2422,7 +2412,6 @@ public class Controller {
 
         // Verifica che esistano gerarchie nel sistema
         if (!verificaPresenzaGerarchie()) {
-            this.view.showErrorMessage(ControllerConstants.NO_GERARCHIE);
             return;
         }
 
@@ -2451,44 +2440,26 @@ public class Controller {
         this.view.showMessage(String.format(ControllerConstants.INFO_PROPOSTE_PER_CATEGORIA,
                 foglia.data().getNome()));
 
+        // Ottiene tutte le proposte dal database
+        List<Proposta> tutteProposte = this.database.getPropostePerStato(null);
         boolean proposteFound = false;
 
-        // Iterate through all users
-        for (Utente utente : database.getUtenti()) {
-            if (utente.isConfig()) {
-                continue;
-            }
+        // Filtra e visualizza le proposte che coinvolgono la categoria selezionata
+        for (Proposta proposta : tutteProposte) {
+            // Controlla se la proposta richiede o offre la categoria selezionata
+            if (proposta.getRichiesta().getCategoria().data().equals(foglia.data()) ||
+                    proposta.getOfferta().getCategoria().data().equals(foglia.data())) {
 
-            Fruitore fruitore = (Fruitore) utente;
-            boolean fruitoreHasProposals = false;
+                proposteFound = true;
 
-            for (Proposta proposta : fruitore.getProposte()) {
-
-                if (proposta.getRichiesta().getCategoria().data().equals(foglia.data()) ||
-                        proposta.getOfferta().getCategoria().data().equals(foglia.data())) {
-
-                    if (!fruitoreHasProposals) {
-                        view.showMessage("\n" + String.format(ControllerConstants.INFO_PROPOSTE_FRUITORE,
-                                fruitore.getUsername(), fruitore.getMail()));
-                        fruitoreHasProposals = true;
-                        proposteFound = true;
-                    }
-
-                    // Display proposal details
-                    view.showMessage(proposta.toString());
-                }
+                this.view.showMessage(proposta.toString());
             }
         }
 
-        // Feedback all'utente se non sono state trovate proposte
+        // Se non sono state trovate proposte, mostra un messaggio appropriato
         if (!proposteFound) {
-            this.view.showMessage(String.format(ControllerConstants.MSG_NESSUNA_PROPOSTA_CATEGORIA,
-                    foglia.data().getNome()));
-        } else {
-            this.view.showMessage(ControllerConstants.SEPARATOR_LINE);
-            this.view.showSuccessMessage(ControllerConstants.SUCCESS_VISUALIZZAZIONE_COMPLETATA);
+            this.view.showMessage(String.format(ControllerConstants.MSG_NESSUNA_PROPOSTA_CATEGORIA, foglia.data().getNome()));
         }
-
     }
 
     // -----------------------------------------------------------------------------------
