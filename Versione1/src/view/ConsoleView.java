@@ -72,7 +72,8 @@ public class ConsoleView {
     private static final String MENU_VIEW_CONVERSION_FACTORS = GREEN + "3. Visualizza Fattori di Conversione" + RESET;
     private static final String MENU_CREATE_COMPRENSORIO = CYAN + "4. Crea Comprensorio" + RESET;
     private static final String MENU_CREATE_GERARCHIA = CYAN + "5. Crea Gerarchia" + RESET;
-    private static final String MENU_DEFINE_CONVERSIONS = CYAN + "6. Definisci Fattori di Conversione" + RESET;
+    private static final String MENU_VIEW_PROPOSTE = GREEN + "6. Visualizza proposte" + RESET;
+    private static final String MENU_VIEW_INSIEMI_CHIUSI = GREEN + "7. Visualizza insiemi chiusi" + RESET;
 
     // -----------------------------------------------------------------------------------
     // METODI PER L'INTERAZIONE BASE
@@ -269,7 +270,8 @@ public class ConsoleView {
                 MENU_VIEW_CONVERSION_FACTORS,
                 MENU_CREATE_COMPRENSORIO,
                 MENU_CREATE_GERARCHIA,
-                GREEN + "6. Visualizza proposte" + RESET,
+                MENU_VIEW_PROPOSTE,
+                MENU_VIEW_INSIEMI_CHIUSI,
                 MENU_EXIT);
 
         printMenuBox(CONFIGURATOR_MENU_TITLE, menuItems);
