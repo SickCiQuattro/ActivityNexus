@@ -92,7 +92,6 @@ public class Comprensorio implements Serializable {
      *
      * @return una lista non modificabile dei comuni
      * @see #addComune(String)
-     * @see #removeComune(String)
      *
      * @post il valore restituito non è null
      * @post il valore restituito non contiene elementi null
