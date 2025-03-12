@@ -1,12 +1,10 @@
 package controller;
 
 import com.scalified.tree.TreeNode;
-
 import constants.ControllerConstants;
-import model.*;
 import util.UserUtil;
+import model.*;
 import view.ConsoleView;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,7 +39,7 @@ import java.util.*;
  * dell'utilizzo</li>
  * </ul>
  *
- * @version 1.0
+ * @version 4.0
  * @see model.Database
  * @see view.ConsoleView
  */
@@ -717,6 +715,36 @@ public class Controller {
         this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
     }
 
+    /**
+     * Gestisce l'interfaccia e le funzionalità dell'utente fruitore.
+     * <p>
+     * Implementa un sottomenu dedicato alle operazioni del fruitore, permettendo
+     * di:
+     * <ul>
+     * <li>Visualizzare le gerarchie di categorie disponibili</li>
+     * <li>Creare proposte di scambio d'opera</li>
+     * <li>Visualizzare le proprie proposte attive</li>
+     * <li>Modificare lo stato delle proprie proposte (ritirare)</li>
+     * <li>Tornare al menu principale (logout)</li>
+     * </ul>
+     * <p>
+     * Il ciclo continua finché l'utente non sceglie di effettuare il logout.
+     *
+     * @param fruitore l'utente fruitore che sta utilizzando il sistema
+     * 
+     * @pre fruitore != null
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post L'utente può eseguire solo operazioni consentite al ruolo fruitore
+     * @post Ogni operazione completata è seguita da una pausa per consentire la
+     *       lettura dei risultati
+     * @post Il controllo ritorna al menu principale solo quando l'utente seleziona
+     *       l'opzione di logout
+     * @post Eventuali proposte di scambio create vengono salvate nel database
+     * @post Eventuali modifiche allo stato delle proposte sono persistenti
+     * @post Eventuali eccezioni durante le operazioni sono gestite senza
+     *       interrompere il flusso di esecuzione
+     */
     private void manageFruitore(Fruitore fruitore) {
         // Ciclo principale del menu fruitore
         while (true) {
@@ -807,14 +835,31 @@ public class Controller {
      * Registra un nuovo utente configuratore nel sistema.
      * <p>
      * Il processo include:
-     * <ul>
-     * <li>Verifica di sicurezza preliminare</li>
-     * <li>Acquisizione di username valido e univoco</li>
-     * <li>Acquisizione di password sicura</li>
-     * <li>Creazione dell'account nel database</li>
-     * </ul>
+     * <ol>
+     * <li>Verifica di sicurezza preliminare attraverso credenziali temporanee</li>
+     * <li>Acquisizione e validazione di uno username univoco</li>
+     * <li>Definizione di una password sicura</li>
+     * <li>Creazione dell'account configuratore nel database</li>
+     * </ol>
+     * <p>
+     * I configuratori hanno accesso a funzionalità amministrative avanzate come la
+     * gestione
+     * di comprensori, gerarchie e monitoraggio degli scambi.
      *
      * @return true se la registrazione è completata con successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se restituisce true, un nuovo utente configuratore è stato aggiunto al
+     *       database
+     * @post Se restituisce false, nessun utente è stato aggiunto e lo stato del
+     *       sistema rimane invariato
+     * @post Se la registrazione ha successo, l'utente configuratore ha privilegi
+     *       amministrativi
+     * @post Se la verifica di sicurezza fallisce, la registrazione viene interrotta
+     * @post Se lo username scelto è già in uso, la registrazione fallisce
+     * @post L'utente riceve feedback appropriato in caso di errori durante il
+     *       processo
      */
     private boolean registraConfiguratore() {
         // Mostra intestazione per la registrazione configuratore
@@ -851,7 +896,34 @@ public class Controller {
     }
 
     /**
-    
+     * Registra un nuovo utente fruitore nel sistema.
+     * <p>
+     * Guida l'utente attraverso il processo completo di registrazione che include:
+     * <ol>
+     * <li>Selezione del comprensorio geografico di appartenenza</li>
+     * <li>Acquisizione e validazione di uno username univoco</li>
+     * <li>Definizione di una password sicura</li>
+     * <li>Inserimento e validazione di un indirizzo email</li>
+     * <li>Creazione dell'account fruitore nel database</li>
+     * </ol>
+     * <p>
+     * Il processo include verifiche di unicità, validità dei format e controlli
+     * di sicurezza per garantire l'integrità dei dati utente.
+     *
+     * @return true se la registrazione è completata con successo, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @pre database.getComprensori() non è vuoto (verificato prima della chiamata)
+     * @post Se restituisce true, un nuovo fruitore è stato aggiunto al database
+     * @post Se restituisce false, nessun fruitore è stato aggiunto e lo stato del
+     *       sistema rimane invariato
+     * @post Se la registrazione ha successo, il fruitore è associato al
+     *       comprensorio selezionato
+     * @post Se la registrazione ha successo, le credenziali e i dati dell'utente
+     *       sono validati e persistenti
+     * @post L'utente riceve feedback appropriato in caso di errori durante il
+     *       processo
      */
     private boolean registraFruitore() {
         // Mostra intestazione per la registrazione fruitore
@@ -1174,11 +1246,37 @@ public class Controller {
     /**
      * Permette all'utente di selezionare un comprensorio geografico.
      * <p>
-     * Mostra un elenco numerato di tutti i comprensori disponibili nel sistema
-     * e acquisisce la scelta dell'utente. Consente anche di annullare l'operazione.
+     * Presenta all'utente un elenco numerato dei comprensori disponibili nel
+     * sistema
+     * e acquisisce la scelta tramite input numerico. Il processo include:
+     * <ol>
+     * <li>Verifica della presenza di comprensori nel database</li>
+     * <li>Visualizzazione dell'elenco numerato di comprensori con numero di
+     * comuni</li>
+     * <li>Acquisizione della scelta dell'utente (con possibilità di
+     * annullamento)</li>
+     * <li>Validazione della scelta e selezione del comprensorio corrispondente</li>
+     * </ol>
+     * <p>
+     * Questo metodo è utilizzato durante la registrazione dei fruitori e in altre
+     * operazioni che richiedono l'associazione a un comprensorio specifico.
      *
-     * @return il comprensorio selezionato, o null se l'operazione è annullata o non
-     *         ci sono comprensori
+     * @return il comprensorio selezionato dall'utente, o null se l'operazione è
+     *         annullata o non ci sono comprensori
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se il database non contiene comprensori, viene mostrato un messaggio di
+     *       errore e restituito null
+     * @post Se l'utente seleziona 0, l'operazione viene annullata e viene
+     *       restituito null
+     * @post Se l'utente seleziona un indice valido i (dove 1 ≤ i ≤ numero di
+     *       comprensori),
+     *       viene restituito il comprensorio corrispondente
+     * @post Se restituisce un valore non-null, questo rappresenta un comprensorio
+     *       valido selezionato dall'utente
+     * @post All'utente viene mostrata conferma della selezione effettuata o
+     *       dell'annullamento
      */
     public Comprensorio selezionaComprensorio() {
         // Recupera la lista dei comprensori disponibili
@@ -1621,9 +1719,45 @@ public class Controller {
     /**
      * Visualizza i fattori di conversione tra categorie di gerarchie diverse.
      * <p>
-     * Permette all'utente di selezionare una categoria foglia di origine
-     * e una gerarchia di destinazione, mostrando i fattori di conversione
-     * applicati.
+     * Questo metodo guida l'utente attraverso un processo interattivo che include:
+     * <ol>
+     * <li>Selezione della gerarchia di origine</li>
+     * <li>Selezione di una categoria foglia specifica all'interno della gerarchia
+     * di origine</li>
+     * <li>Selezione della gerarchia di destinazione per cui visualizzare i
+     * fattori</li>
+     * <li>Calcolo e visualizzazione del fattore di conversione per ogni foglia
+     * nella gerarchia di destinazione</li>
+     * </ol>
+     * <p>
+     * Il fattore di conversione viene calcolato considerando tre componenti:
+     * <ul>
+     * <li>Fattore interno alla gerarchia di origine (dalla foglia selezionata al
+     * nodo di riferimento)</li>
+     * <li>Fattore tra gerarchie (tra i nodi di riferimento delle due
+     * gerarchie)</li>
+     * <li>Fattore interno alla gerarchia di destinazione (dal nodo di riferimento a
+     * ogni foglia)</li>
+     * </ul>
+     * <p>
+     * Questa funzionalità permette ai configuratori di comprendere le relazioni
+     * quantitative tra
+     * diverse categorie nel sistema, facilitando la valutazione dell'equità negli
+     * scambi.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @pre database.getGerarchie() non è vuoto (verificato prima della chiamata
+     *      tramite verificaPresenzaGerarchie())
+     * @pre Per ogni gerarchia, esiste almeno un fattoreConversione definito
+     * @post L'utente visualizza i fattori di conversione dalla categoria
+     *       selezionata a tutte le categorie
+     *       della gerarchia di destinazione
+     * @post I fattori mostrati riflettono accuratamente le relazioni definite tra
+     *       le gerarchie
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
+     * @post L'utente comprende come convertire ore tra categorie diverse
+     *       appartenenti a gerarchie diverse
      */
     private void visualizzaFattoriConversione() {
         // Mostra il titolo della funzionalità
@@ -2123,19 +2257,44 @@ public class Controller {
     /**
      * Gestisce il processo di creazione di una proposta di scambio d'opera.
      * <p>
-     * Il processo si articola in diverse fasi:
+     * Guida l'utente attraverso un flusso interattivo che include:
      * <ol>
      * <li>Selezione della categoria richiesta (ciò che il fruitore desidera
      * ricevere)</li>
      * <li>Indicazione del numero di ore richieste</li>
      * <li>Selezione della categoria offerta (ciò che il fruitore è disposto a
      * offrire)</li>
-     * <li>Calcolo automatico delle ore da offrire in base ai fattori di
+     * <li>Calcolo automatico del fattore di conversione tra le categorie
+     * selezionate</li>
+     * <li>Determinazione delle ore da offrire in base al fattore di
      * conversione</li>
-     * <li>Conferma e registrazione della proposta</li>
+     * <li>Creazione e registrazione della proposta nel sistema</li>
      * </ol>
+     * <p>
+     * Il processo applica automaticamente i fattori di conversione tra gerarchie
+     * diverse
+     * per garantire l'equità dello scambio, considerando la specificità delle
+     * categorie
+     * coinvolte.
      *
      * @param fruitore il fruitore che sta creando la proposta di scambio
+     * @return true se la proposta è stata creata e registrata con successo, false
+     *         se l'utente ha annullato o la creazione è fallita
+     *
+     * @pre fruitore != null
+     * @pre this.view != null
+     * @pre this.database != null
+     * @pre database.getGerarchie() non è vuoto (deve esistere almeno una gerarchia
+     *      nel sistema)
+     * @post Se restituisce true, una nuova proposta è stata creata e registrata nel
+     *       database
+     * @post Se restituisce true, la proposta ha stato APERTA e viene salvata
+     *       tramite salvaUtenti()
+     * @post Se restituisce false, nessuna proposta attiva è stata aggiunta al
+     *       sistema (o è stata aggiunta con stato RITIRATA)
+     * @post L'utente riceve feedback appropriati durante l'intero processo
+     * @post Il calcolo delle ore offerte è basato sul fattore di conversione tra le
+     *       categorie selezionate
      */
     private Boolean propostaScambioOpera(Fruitore fruitore) {
         // Intestazione e spiegazione del processo
@@ -2245,30 +2404,42 @@ public class Controller {
     }
 
     /**
-     * Valuta le proposte di scambio compatibili con l'ultima proposta del fruitore.
+     * Valuta se è possibile creare un insieme chiuso di scambi con l'ultima
+     * proposta del fruitore.
      * <p>
-     * Analizza tutte le proposte attive degli altri fruitori appartenenti allo stesso comprensorio
-     * del fruitore specificato, cercando possibili corrispondenze con la sua ultima proposta.
-     * Il processo include:
+     * Analizza tutte le proposte attive degli altri fruitori appartenenti allo
+     * stesso comprensorio
+     * del fruitore specificato, cercando cicli di scambio che formino insiemi
+     * chiusi. Il processo include:
      * <ol>
-     * <li>Verifica della presenza di almeno una proposta per il fruitore</li>
-     * <li>Identificazione degli altri fruitori nello stesso comprensorio geografico</li>
-     * <li>Analisi delle proposte per trovare possibili corrispondenze di categoria</li>
-     * <li>Presentazione delle proposte compatibili all'utente</li>
-     * <li>Possibilità di accettare una delle proposte compatibili</li>
+     * <li>Verifica della presenza di proposte per il fruitore</li>
+     * <li>Creazione del grafo degli scambi potenziali tra fruitori dello stesso
+     * comprensorio</li>
+     * <li>Ricerca di cicli nel grafo che rappresentano scambi reciprocamente
+     * vantaggiosi</li>
+     * <li>Chiusura delle proposte coinvolte e creazione dell'insieme chiuso</li>
+     * <li>Notifica ai configuratori dell'insieme chiuso trovato</li>
      * </ol>
      * <p>
-     * Una proposta è considerata compatibile quando la categoria richiesta da un fruitore
-     * corrisponde alla categoria offerta dall'altro e viceversa.
+     * Un insieme chiuso è valido quando tutti i fruitori coinvolti ricevono una
+     * prestazione che
+     * soddisfa la loro richiesta e forniscono una prestazione che soddisfa la
+     * richiesta di un altro.
      *
-     * @param fruitore il fruitore di cui valutare l'ultima proposta
+     * @param fruitore il fruitore che ha appena creato una proposta
+     * 
      * @pre fruitore != null
      * @pre this.view != null
      * @pre this.database != null
-     * @post Se restituisce true, almeno una proposta è stata accettata e il suo stato è stato aggiornato
-     * @post Se non ci sono proposte compatibili o l'utente non ne accetta nessuna, restituisce false
-     * @post Se il fruitore non ha proposte o la sua ultima proposta non è aperta, restituisce false
-     * @post Se non ci sono altri fruitori nello stesso comprensorio, restituisce false
+     * @post Se viene trovato un ciclo valido, le proposte coinvolte vengono chiuse
+     *       (StatoProposta.CHIUSA)
+     * @post Se viene trovato un ciclo valido, viene creato un InsiemeChiuso nel
+     *       sistema
+     * @post Se viene trovato un ciclo valido, l'InsiemeChiuso viene salvato nel
+     *       database
+     * @post Se non viene trovato alcun ciclo valido, lo stato delle proposte rimane
+     *       invariato
+     * @post Gli utenti ricevono notifica appropriata sull'esito dell'operazione
      */
     private void valutaProposteScambio(Fruitore fruitore) {
         if (fruitore == null) {
@@ -2331,9 +2502,19 @@ public class Controller {
     }
 
     /**
-     * Classe interna privata che rappresenta un arco nel grafo degli scambi.
-     * Un arco rappresenta una relazione "fornisce a" tra due fruitori,
-     * basata su una proposta esistente.
+     * Classe interna che rappresenta un arco nel grafo degli scambi.
+     * <p>
+     * Un arco rappresenta una relazione direzionale "fornisce a" tra due fruitori,
+     * dove un fruitore offre una prestazione che soddisfa la richiesta di un altro.
+     * Ogni arco mantiene riferimenti a:
+     * <ul>
+     * <li>Il fruitore che fornisce la prestazione (fornitore)</li>
+     * <li>Il fruitore che riceve la prestazione (ricevente)</li>
+     * <li>La proposta che contiene i dettagli della prestazione</li>
+     * </ul>
+     * <p>
+     * Gli archi sono utilizzati per costruire il grafo che rappresenta tutte
+     * le possibili connessioni di scambio tra i fruitori del sistema.
      */
     private static class ArcoScambio {
         private final Fruitore fornitore;
@@ -2373,12 +2554,31 @@ public class Controller {
      * <p>
      * Nel grafo, ogni nodo è un fruitore e ogni arco rappresenta una possibile
      * relazione di scambio dove un fruitore (origine) può fornire ciò che
-     * un altro fruitore (destinazione) richiede.
+     * un altro fruitore (destinazione) richiede. Il grafo viene costruito
+     * considerando:
+     * <ul>
+     * <li>La corrispondenza tra categorie offerte e richieste</li>
+     * <li>La compatibilità tra ore offerte e ore richieste</li>
+     * <li>Le relazioni dirette e indirette tra tutte le proposte nel
+     * comprensorio</li>
+     * </ul>
      *
      * @param fruitoreCorrente il fruitore che ha appena creato una proposta
      * @param propostaCorrente la proposta appena creata
      * @param proposteAltri    le altre proposte aperte nel comprensorio
      * @return una mappa che rappresenta il grafo degli scambi potenziali
+     *
+     * @pre fruitoreCorrente != null
+     * @pre propostaCorrente != null
+     * @pre proposteAltri != null (può essere vuota)
+     * @pre propostaCorrente.getStato() == StatoProposta.APERTA
+     * @post Il grafo restituito non è null
+     * @post Ogni arco nel grafo rappresenta uno scambio potenziale valido tra due
+     *       fruitori
+     * @post Ogni arco contiene riferimenti validi a fruitore fornitore, fruitore
+     *       ricevente e proposta
+     * @post Il grafo include tutte le possibili connessioni compatibili tra le
+     *       proposte
      */
     private Map<Fruitore, List<ArcoScambio>> costruisciGrafoScambi(
             Fruitore fruitoreCorrente,
@@ -2437,8 +2637,28 @@ public class Controller {
     }
 
     /**
-     * Verifica se due prestazioni hanno categorie corrispondenti.
-     * Per formare un ciclo valido, le categorie devono corrispondere esattamente.
+     * Verifica se una prestazione offerta corrisponde a una prestazione richiesta.
+     * <p>
+     * Due prestazioni sono considerate corrispondenti quando:
+     * <ul>
+     * <li>Appartengono esattamente alla stessa categoria (no sottocategorie)</li>
+     * <li>Le ore offerte sono sufficienti a coprire le ore richieste</li>
+     * </ul>
+     * <p>
+     * Questa corrispondenza è fondamentale per stabilire potenziali scambi
+     * tra fruitori del sistema.
+     *
+     * @param offerta   la prestazione offerta da un fruitore
+     * @param richiesta la prestazione richiesta da un altro fruitore
+     * @return true se le prestazioni corrispondono, false altrimenti
+     *
+     * @pre offerta != null
+     * @pre richiesta != null
+     * @pre offerta.getCategoria() != null
+     * @pre richiesta.getCategoria() != null
+     * @post Il risultato è true se e solo se le categorie sono uguali e le ore
+     *       offerte >= ore richieste
+     * @post Lo stato delle prestazioni rimane invariato
      */
     private boolean matchCategorie(Prestazione offerta, Prestazione richiesta) {
         // Confronta le categorie delle due prestazioni
@@ -2450,10 +2670,19 @@ public class Controller {
     }
 
     /**
-     * Trova il fruitore che ha creato una proposta.
-     * 
-     * @param proposta la proposta di cui trovare il fruitore
-     * @return il fruitore che ha creato la proposta, o null se non trovato
+     * Trova il fruitore associato a una proposta.
+     * <p>
+     * Questa funzione di utilità recupera il fruitore che ha creato una specifica
+     * proposta,
+     * utilizzando il metodo diretto della proposta.
+     *
+     * @param proposta la proposta di cui trovare il fruitore proprietario
+     * @return il fruitore associato alla proposta, o null se non trovato
+     *
+     * @pre proposta != null
+     * @post Il risultato è il fruitore che ha creato la proposta o null se non
+     *       trovato
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
      */
     private Fruitore trovaFruitore(Proposta proposta) {
         return proposta.getPropostitore();
@@ -2461,10 +2690,36 @@ public class Controller {
 
     /**
      * Cerca un ciclo di scambio nel grafo partendo dal fruitore specificato.
+     * <p>
+     * Utilizza un algoritmo DFS (Depth-First Search) modificato per identificare
+     * cicli nel grafo che rappresentano insiemi chiusi di scambi. Un ciclo valido
+     * si verifica quando una serie di scambi forma un percorso che:
+     * <ul>
+     * <li>Parte da un fruitore e ritorna allo stesso fruitore</li>
+     * <li>Ogni fruitore nel ciclo riceve ciò che richiede e fornisce ciò che
+     * offre</li>
+     * <li>Tutte le categorie e ore sono compatibili negli scambi</li>
+     * </ul>
+     * <p>
+     * Quando viene trovato un ciclo valido, viene creato un insieme chiuso con
+     * tutti
+     * gli scambi e le proposte coinvolte.
      * 
      * @param fruitoreIniziale il fruitore da cui iniziare la ricerca
      * @param grafo            il grafo degli scambi potenziali
-     * @return un InsiemeChiuso se viene trovato un ciclo valido, altrimenti null
+     * @return un InsiemeChiuso se viene trovato un ciclo valido, null altrimenti
+     *
+     * @pre fruitoreIniziale != null
+     * @pre grafo != null
+     * @pre fruitoreIniziale.getComprensorio() != null
+     * @post Se viene trovato un ciclo valido, restituisce un InsiemeChiuso non null
+     * @post Se restituito, l'InsiemeChiuso contiene tutte le proposte e gli scambi
+     *       che formano il ciclo
+     * @post Se restituito, l'InsiemeChiuso ha lo stesso comprensorio del fruitore
+     *       iniziale
+     * @post Se non viene trovato alcun ciclo valido, restituisce null
+     * @post L'algoritmo considera tutti i possibili cicli partendo dal fruitore
+     *       iniziale
      */
     private InsiemeChiuso trovaCicloScambio(Fruitore fruitoreIniziale, Map<Fruitore, List<ArcoScambio>> grafo) {
         // Strutture dati per il tracciamento del percorso
@@ -2513,8 +2768,46 @@ public class Controller {
 
     /**
      * Esegue una ricerca in profondità (DFS) nel grafo per trovare cicli.
-     * 
-     * @return true se viene trovato un ciclo, false altrimenti
+     * <p>
+     * Implementa un algoritmo DFS modificato che tiene traccia del percorso
+     * corrente
+     * e rileva cicli che ritornano al nodo iniziale. Durante la ricerca:
+     * <ul>
+     * <li>Ogni nodo visitato viene marcato per evitare cicli spuri</li>
+     * <li>Il percorso corrente viene costruito aggiungendo archi man mano che si
+     * esplora</li>
+     * <li>Quando si trova un arco che torna al nodo iniziale, viene identificato un
+     * ciclo valido</li>
+     * <li>Gli archi entranti vengono registrati per poter ricostruire il ciclo
+     * completo</li>
+     * </ul>
+     *
+     * @param nodoIniziale     il nodo di partenza da cui deve chiudersi il ciclo
+     * @param nodoCorrente     il nodo attualmente in esame nella ricorsione
+     * @param grafo            il grafo degli scambi potenziali
+     * @param visitati         insieme dei fruitori già visitati in qualsiasi ramo
+     *                         della ricerca
+     * @param percorsoCorrente lista ordinata degli archi nel percorso corrente
+     * @param archiEntranti    mappa che associa a ogni fruitore l'arco con cui è
+     *                         stato raggiunto
+     * @param inPercorso       insieme dei fruitori nel percorso corrente (per
+     *                         rilevare cicli)
+     * @return true se viene trovato un ciclo valido, false altrimenti
+     *
+     * @pre nodoIniziale != null
+     * @pre nodoCorrente != null
+     * @pre grafo != null
+     * @pre visitati != null
+     * @pre percorsoCorrente != null
+     * @pre archiEntranti != null
+     * @pre inPercorso != null
+     * @post Se restituisce true, è stato trovato un ciclo valido che parte e
+     *       termina in nodoIniziale
+     * @post Se restituisce true, archiEntranti contiene tutti gli archi che formano
+     *       il ciclo
+     * @post Se restituisce false, non esiste alcun ciclo valido che parte da
+     *       nodoIniziale
+     * @post Lo stato del grafo rimane invariato durante l'esecuzione dell'algoritmo
      */
     private boolean dfs(Fruitore nodoIniziale, Fruitore nodoCorrente,
             Map<Fruitore, List<ArcoScambio>> grafo,
@@ -2561,7 +2854,29 @@ public class Controller {
 
     /**
      * Visualizza gli insiemi chiusi per il configuratore.
-     * Permette al configuratore di esaminare e notificare i fruitori coinvolti.
+     * <p>
+     * Presenta un elenco di tutti gli insiemi chiusi presenti nel sistema,
+     * permettendo al configuratore di:
+     * <ul>
+     * <li>Visualizzare i dettagli di ciascun insieme (fruitori, proposte e scambi
+     * coinvolti)</li>
+     * <li>Contrassegnare un insieme come notificato dopo aver contattato i
+     * fruitori</li>
+     * <li>Monitorare lo stato complessivo degli scambi nel sistema</li>
+     * </ul>
+     * <p>
+     * Gli insiemi chiusi vengono visualizzati in ordine cronologico di creazione,
+     * con indicazione dello stato di notifica.
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se esistono insiemi chiusi, vengono visualizzati con i relativi
+     *       dettagli
+     * @post Se l'utente contrassegna un insieme come notificato, il suo stato viene
+     *       aggiornato
+     * @post Se non esistono insiemi chiusi, viene mostrato un messaggio informativo
+     * @post Gli aggiornamenti allo stato di notifica vengono salvati in modo
+     *       persistente
      */
     private void visualizzaInsiemiChiusi() {
         List<InsiemeChiuso> insiemi = database.getInsiemiChiusi();
@@ -2598,23 +2913,49 @@ public class Controller {
     }
 
     /**
-     * Calcola il fattore di conversione tra due categorie foglia in diverse
-     * gerarchie.
+     * Calcola il fattore di conversione tra due categorie foglia, potenzialmente in
+     * gerarchie diverse.
      * <p>
-     * Il calcolo coinvolge tre componenti:
+     * Questo metodo implementa l'algoritmo di conversione completo che permette di
+     * stabilire una relazione
+     * quantitativa tra categorie diverse, considerando tre componenti:
      * <ol>
-     * <li>Fattore interno alla prima gerarchia (dalla foglia al nodo di
-     * riferimento)</li>
+     * <li>Fattore interno alla gerarchia di origine (dalla foglia richiesta al nodo
+     * di riferimento)</li>
      * <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
-     * <li>Fattore interno alla seconda gerarchia (dal nodo di riferimento alla
-     * foglia)</li>
+     * <li>Fattore interno alla gerarchia di destinazione (dal nodo di riferimento
+     * alla foglia offerta)</li>
      * </ol>
+     * <p>
+     * Il risultato finale è il prodotto di questi tre fattori, che permette di
+     * determinare
+     * il rapporto di conversione tra ore di categorie diverse, consentendo scambi
+     * equi
+     * tra prestazioni di natura differente.
      *
      * @param gerarchiaOrigine      gerarchia della categoria richiesta
-     * @param fogliaRichiesta       categoria foglia richiesta
+     * @param fogliaRichiesta       nodo foglia della categoria richiesta
      * @param gerarchiaDestinazione gerarchia della categoria offerta
-     * @param fogliaOfferta         categoria foglia offerta
+     * @param fogliaOfferta         nodo foglia della categoria offerta
      * @return il fattore di conversione complessivo
+     *
+     * @pre gerarchiaOrigine != null
+     * @pre fogliaRichiesta != null
+     * @pre gerarchiaDestinazione != null
+     * @pre fogliaOfferta != null
+     * @pre gerarchiaOrigine.getFattoreConversione() != null
+     * @pre gerarchiaDestinazione.getFattoreConversione() != null
+     * @pre gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento() != null
+     * @pre gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento() !=
+     *      null
+     * @pre fogliaRichiesta appartiene a gerarchiaOrigine
+     * @pre fogliaOfferta appartiene a gerarchiaDestinazione
+     * @post Il valore restituito è un numero decimale positivo > 0
+     * @post Se le gerarchie sono identiche, il fattore inter-gerarchia è 1.0
+     * @post Il fattore risultante è il prodotto di: fattoreIntraOrigine *
+     *       fattoreInterGerarchia * fattoreIntraDestinazione
+     * @post Il fattore può essere usato per convertire quantitativamente ore tra le
+     *       categorie specificate
      */
     private double calcolaFattoreConversione(
             Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
