@@ -16,6 +16,7 @@ public class ControllerConstants {
     public static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
     public static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
     public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
+    public static final String PROPOSTE_FILE_PATH = "src/data/proposte.ser";
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
     public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
@@ -222,12 +223,14 @@ public class ControllerConstants {
     public static final String SUCCESS_PROPOSTA_RITIRATA = "Proposta ritirata con successo!";
     public static final String ERROR_MODIFICA_PROPOSTA = "Impossibile modificare la proposta. Potrebbe essere già chiusa o ritirata";
     public static final String TITLE_PROPOSTE_CATEGORIA = "=== PROPOSTE PER CATEGORIA ===";
-    public static final String INFO_PROPOSTE_PER_CATEGORIA = "Proposte che coinvolgono la categoria: %s";
+    public static final String INFO_PROPOSTE_PER_CATEGORIA = "Proposte che coinvolgono la categoria \"%s\":\n";
+    public static final String HEADER_PROPOSTE_TROVATE = "✓ Proposte trovate: %d";
     public static final String INFO_PROPOSTE_FRUITORE = "Fruitore: %s (Email: %s)";
     public static final String MSG_NESSUNA_PROPOSTA_CATEGORIA = "Non ci sono proposte che coinvolgono la categoria \"%s\"";
     public static final String SUCCESS_VISUALIZZAZIONE_COMPLETATA = "Visualizzazione delle proposte completata con successo";
     public static final String SEPARATOR_LINE = "----------------------------------------";
     // Costanti per separatori visivi
     public static final String SEPARATORE = "\n----------------------------------------------------------";
+
 
 }
