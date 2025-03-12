@@ -17,6 +17,7 @@ public class ControllerConstants {
     public static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
     public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
     public static final String PROPOSTE_FILE_PATH = "src/data/proposte.ser";
+    public static final String INSIEMECHIUSO_FILE_PATH = "src/data/insiemechiuso.ser";
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
     public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
