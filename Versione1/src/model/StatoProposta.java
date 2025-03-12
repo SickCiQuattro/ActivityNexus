@@ -57,7 +57,7 @@ public enum StatoProposta implements Serializable {
      * @param nuovoStato lo stato di destinazione
      * @return true se la transizione è valida, false altrimenti
      */
-    public boolean puòPassareA(StatoProposta nuovoStato) {
+    public boolean puoPassareA(StatoProposta nuovoStato) {
         switch (this) {
             case APERTA:
                 // Da APERTA si può passare a CHIUSA o RITIRATA
