@@ -1,11 +1,7 @@
 package model;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Repository centrale per tutti i dati dell'applicazione.
@@ -45,6 +41,7 @@ public class Database {
     private Set<Comprensorio> comprensori;
     private Set<Gerarchia> gerarchie;
     private ConversioneGerarchie conversioneGerarchie;
+    private Set<Proposta> proposte;
 
     /**
      * Inizializza un database vuoto con tutte le collezioni pronte per l'uso.
@@ -59,6 +56,7 @@ public class Database {
         this.comprensori = new HashSet<>();
         this.gerarchie = new HashSet<>();
         this.conversioneGerarchie = new ConversioneGerarchie();
+        this.proposte = new HashSet<>();
     }
 
     // -----------------------------------------------------------------------------------
@@ -330,7 +328,6 @@ public class Database {
      *                      altrimenti lo esclude
      * @return lista di fruitori che appartengono allo stesso comprensorio
      *         dell'utente
-     * @throws IllegalArgumentException se l'utente non è un fruitore o è null
      * 
      * @pre utente != null
      * @pre utente deve essere un Fruitore (non un Configuratore)
@@ -342,15 +339,6 @@ public class Database {
      *       restituita una lista vuota
      */
     public List<Fruitore> getFruitoriStessoComprensorio(Utente utente, boolean includiUtente) {
-        // Verifica che l'utente sia valido
-        if (utente == null) {
-            throw new IllegalArgumentException("L'utente non può essere null");
-        }
-
-        if (utente.isConfig()) {
-            throw new IllegalArgumentException("L'utente deve essere un fruitore");
-        }
-
         // Cast a Fruitore e recupero del comprensorio
         Fruitore fruitoreRiferimento = (Fruitore) utente;
         Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
@@ -395,45 +383,47 @@ public class Database {
     /**
      * Ottiene tutte le proposte di scambio aperte formulate dai fruitori dello
      * stesso comprensorio.
-     * 
+     *
      * @param utente        l'utente di riferimento di cui trovare le proposte nel
      *                      comprensorio
      * @param includiUtente se includere anche le proposte dell'utente di
      *                      riferimento
      * @return lista di proposte aperte nel comprensorio dell'utente
-     * @throws IllegalArgumentException se l'utente non è un fruitore o è null
+     *
+     * @pre utente != null
+     * @pre utente deve essere un Fruitore (non un Configuratore)
+     *
+     * @post La lista restituita contiene solo proposte aperte formulate da Fruitori
+     *       appartenenti allo stesso comprensorio dell'utente
+     * @post Se includiUtente è false, l'utente di riferimento non è incluso
+     *       nella lista restituita
      */
     public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
-        List<Fruitore> fruitoriComprensorio = getFruitoriStessoComprensorio(utente, includiUtente);
+        // Cast a Fruitore e recupero del comprensorio
+        Fruitore fruitoreRiferimento = (Fruitore) utente;
+        Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
+
+        // Lista per le proposte aperte dello stesso comprensorio
         List<Proposta> proposteAperte = new ArrayList<>();
 
-        for (Fruitore fruitore : fruitoriComprensorio) {
-            for (Proposta proposta : fruitore.getProposte()) {
-                if (proposta.getStato() == StatoProposta.APERTA) {
-                    proposteAperte.add(proposta);
+        // Filtra tutte le proposte aperte
+        List<Proposta> tutteProposteAperte = getPropostePerStato(StatoProposta.APERTA);
+
+        for (Proposta proposta : tutteProposteAperte) {
+            Fruitore proponente = proposta.getPropostitore();
+
+            // Controlla che il proponente abbia lo stesso comprensorio
+            if (proponente.getComprensorio().equals(comprensorioRiferimento)) {
+                // Se non dobbiamo includere l'utente di riferimento e questo è la proposta dell'utente, la saltiamo
+                if (!includiUtente && proponente.equals(fruitoreRiferimento)) {
+                    continue;
                 }
+
+                proposteAperte.add(proposta);
             }
         }
 
         return proposteAperte;
-    }
-
-    /**
-     * Ottiene il fruitore che ha formulato una specifica proposta di scambio.
-     * 
-     * @param proposta la proposta di cui trovare il propositore
-     * @return il fruitore che ha formulato la proposta, o null se non trovato
-     */
-    public Fruitore getPropositoreProposta(Proposta proposta) {
-        for (Utente utente : this.getUtenti()) {
-            if (!utente.isConfig()) {
-                Fruitore fruitore = (Fruitore) utente;
-                if (fruitore.getProposte().contains(proposta)) {
-                    return fruitore;
-                }
-            }
-        }
-        return null;
     }
 
     // -----------------------------------------------------------------------------------
@@ -697,6 +687,116 @@ public class Database {
         return this.conversioneGerarchie;
     }
 
+
+    // -----------------------------------------------------------------------------------
+    // METODI PER LA GESTIONE DELLE PROPOSTE
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Restituisce una lista di proposte filtrate in base allo stato specificato.
+     * Se lo stato specificato è null, restituisce tutte le proposte.
+     *
+     * @param stato lo stato delle proposte da filtrare, o null per tutte le proposte
+     * @return lista contenente le proposte filtrate per stato, o tutte le proposte se stato è null
+     *
+     * @post il valore restituito non è null
+     * @post se stato è null, il valore restituito contiene tutte le proposte
+     * @post se stato non è null, il valore restituito contiene solo proposte con stato uguale al parametro
+     * @post lo stato del database non viene modificato
+     */
+    public List<Proposta> getPropostePerStato(StatoProposta stato) {
+        // Se lo stato è null, restituisce tutte le proposte
+        if (stato == null) {
+            return new ArrayList<>(this.proposte);
+        }
+
+        // Altrimenti filtra le proposte per lo stato specificato
+        List<Proposta> proposteFiltrate = new ArrayList<>();
+
+        for (Proposta proposta : this.proposte) {
+            if (proposta.getStato() == stato) {
+                proposteFiltrate.add(proposta);
+            }
+        }
+        return proposteFiltrate;
+    }
+
+    /**
+     * Restituisce una lista di proposte filtrate in base al fruitore specificato.
+     *
+     * @param fruitore il fruitore di riferimento per il filtro, o null per tutte le proposte
+     * @return lista contenente le proposte filtrate per fruitore, o tutte le proposte se fruitore è null
+     *
+     * @pre fruitore != null
+     *
+     * @post il valore restituito non è null
+     * @post se fruitore non è null, il valore restituito contiene solo proposte del fruitore specificato
+     * @post lo stato del database non viene modificato
+     */
+    public List<Proposta> getPropostePerFruitore(Fruitore fruitore) {
+        // Filtra le proposte per il fruitore specificato
+        List<Proposta> proposteFiltrate = new ArrayList<>();
+
+        for (Proposta proposta : this.proposte) {
+            if (proposta.getPropostitore().equals(fruitore)) {
+                proposteFiltrate.add(proposta);
+            }
+        }
+        return proposteFiltrate;
+    }
+
+    /**
+     * Restituisce una lista di proposte filtrate per fruitore e stato.
+     * Se lo stato è null, restituisce tutte le proposte del fruitore specificato.
+     *
+     * @param fruitore il fruitore di cui recuperare le proposte
+     * @param stato lo stato delle proposte da filtrare, o null per tutte le proposte del fruitore
+     * @return lista contenente le proposte del fruitore filtrate per stato, o tutte le sue proposte se stato è null
+     *
+     * @pre fruitore != null
+     * @post il valore restituito non è null
+     * @post il valore restituito contiene solo proposte del fruitore specificato
+     * @post se stato non è null, il valore restituito contiene solo proposte con stato uguale al parametro
+     * @post lo stato del database non viene modificato
+     * @throws NullPointerException se fruitore è null
+     */
+    public List<Proposta> getPropostePerFruitore(Fruitore fruitore, StatoProposta stato) {
+        List<Proposta> proposteFiltrate = new ArrayList<>();
+
+        for (Proposta proposta : this.proposte) {
+            if (proposta.getPropostitore().equals(fruitore)) {
+                // Se stato è null o corrisponde allo stato della proposta, aggiungi la proposta
+                if (stato == null || proposta.getStato() == stato) {
+                    proposteFiltrate.add(proposta);
+                }
+            }
+        }
+
+        return proposteFiltrate;
+    }
+
+    /**
+     * Aggiunge una proposta al database.
+     *
+     * @param proposta la proposta da aggiungere
+     * @return true se aggiunta con successo, false se già presente o null
+     *
+     * @pre proposta != null
+     * @post se proposta == null, restituisce false e lo stato non cambia
+     * @post se una proposta con lo stesso ID esiste già, restituisce false e lo
+     *       stato non cambia
+     * @post se restituisce true, la proposta è stata aggiunta alla collezione
+     */
+    public boolean aggiungiProposta(Proposta proposta) {
+        // Verifica che la proposta non sia null
+        if (proposta == null) {
+            return false;
+        }
+
+        // Tenta di aggiungere la proposta alla collezione
+        return this.proposte.add(proposta);
+    }
+
     // -----------------------------------------------------------------------------------
     // METODI DI SERIALIZZAZIONE E DESERIALIZZAZIONE
     // -----------------------------------------------------------------------------------
@@ -864,6 +964,46 @@ public class Database {
             ObjectInputStream ois = new ObjectInputStream(fis);
             this.conversioneGerarchie = (ConversioneGerarchie) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Serializza la collezione delle proposte nel file specificato.
+     *
+     * @param filePath il percorso del file in cui salvare le proposte
+     *
+     */
+    public void serializeProposte(String filePath) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(this.proposte);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deserializza la collezione delle proposte dal file specificato.
+     *
+     * @param filePath il percorso del file da cui caricare le proposte
+     *
+     */
+    public void deserializeProposte(String filePath) {
+        try {
+            FileInputStream fis = new FileInputStream(filePath);
+
+            // Verifica se il file è vuoto
+            if (fis.available() == 0) {
+                return; // File vuoto, niente da deserializzare
+            }
+
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            // Legge il Set di proposte dal file e lo assegna all'attributo
+            this.proposte = (Set<Proposta>) ois.readObject();
+
+        } catch (IOException | ClassNotFoundException e) {
+            // Gestisce errori di I/O o di classe non trovata
             e.printStackTrace();
         }
     }
