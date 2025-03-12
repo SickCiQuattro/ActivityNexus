@@ -3,7 +3,6 @@ package model;
 import com.scalified.tree.TraversalAction;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.LinkedMultiTreeNode;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
