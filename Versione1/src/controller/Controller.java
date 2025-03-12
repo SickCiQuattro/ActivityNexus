@@ -10,11 +10,7 @@ import view.ConsoleView;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Controller principale dell'applicazione che gestisce la logica di business e
@@ -228,6 +224,15 @@ public class Controller {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "proposta"));
             }
 
+            // Carica i dati insieme chiuso se il file esiste
+            if (fileEsistente(ControllerConstants.INSIEMECHIUSO_FILE_PATH)) {
+                this.database.deserializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "insieme chiuso"));
+            } else {
+                // Altrimenti, indica che si parte da zero per questa sezione
+                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato insieme chiuso"));
+            }
+
             // Indica all'utente che il processo di caricamento è completato con successo
             view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
 
@@ -318,6 +323,7 @@ public class Controller {
             this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
             this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
             this.database.serializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
+            this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
             view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
@@ -395,8 +401,6 @@ public class Controller {
      * <li>Selezione del tipo di account (Configuratore o Fruitore)</li>
      * <li>Creazione dell'account nel database</li>
      * </ol>
-     *
-     * @return true se la registrazione è completata con successo, false altrimenti
      *
      * @pre this.database != null
      * @pre this.view != null
@@ -502,6 +506,10 @@ public class Controller {
 
                     case "6": // Visualizza proposte di scambio
                         visualizzaProposteTotali();
+                        break;
+
+                    case "7": // Visualizza insiemi chiusi
+                        visualizzaInsiemiChiusi();
                         break;
 
                     case "0": // Logout
@@ -2201,7 +2209,8 @@ public class Controller {
 
         // Calcolo delle ore offerte basate sul fattore di conversione
         double oreOfferteOriginali = oreRichieste * fattoreConversione;
-        int oreOfferte = (int) Math.max(1, Math.round(oreOfferteOriginali));
+        int oreOfferte = (int) Math.max(1,
+                Math.floor(oreOfferteOriginali + (oreOfferteOriginali % 1 > 0.5 ? 1 : 0))); // Arrotonda per eccesso
 
         // FASE 5: Presentazione del risultato e conferma
         view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
@@ -2224,7 +2233,7 @@ public class Controller {
 
         if (accetta) {
             view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
-            view.showMessage("\n" + proposta.toString());
+            view.showMessage("\n" + proposta);
 
             // Salva gli utenti per persistere le proposte
             salvaUtenti();
@@ -2235,25 +2244,357 @@ public class Controller {
         return false;
     }
 
-    private boolean valutaProposteScambio(Fruitore fruitore) {
+    /**
+     * Valuta le proposte di scambio compatibili con l'ultima proposta del fruitore.
+     * <p>
+     * Analizza tutte le proposte attive degli altri fruitori appartenenti allo stesso comprensorio
+     * del fruitore specificato, cercando possibili corrispondenze con la sua ultima proposta.
+     * Il processo include:
+     * <ol>
+     * <li>Verifica della presenza di almeno una proposta per il fruitore</li>
+     * <li>Identificazione degli altri fruitori nello stesso comprensorio geografico</li>
+     * <li>Analisi delle proposte per trovare possibili corrispondenze di categoria</li>
+     * <li>Presentazione delle proposte compatibili all'utente</li>
+     * <li>Possibilità di accettare una delle proposte compatibili</li>
+     * </ol>
+     * <p>
+     * Una proposta è considerata compatibile quando la categoria richiesta da un fruitore
+     * corrisponde alla categoria offerta dall'altro e viceversa.
+     *
+     * @param fruitore il fruitore di cui valutare l'ultima proposta
+     * @pre fruitore != null
+     * @pre this.view != null
+     * @pre this.database != null
+     * @post Se restituisce true, almeno una proposta è stata accettata e il suo stato è stato aggiornato
+     * @post Se non ci sono proposte compatibili o l'utente non ne accetta nessuna, restituisce false
+     * @post Se il fruitore non ha proposte o la sua ultima proposta non è aperta, restituisce false
+     * @post Se non ci sono altri fruitori nello stesso comprensorio, restituisce false
+     */
+    private void valutaProposteScambio(Fruitore fruitore) {
         if (fruitore == null) {
-            return false;
+            return;
         }
 
         List<Proposta> proposteFruitore = this.database.getPropostePerFruitore(fruitore);
 
         // Verifica se il fruitore ha proposte di scambio
-        if (proposteFruitore.isEmpty())
-            return false;
+        if (proposteFruitore.isEmpty()) {
+            return;
+        }
 
-        // Ottiene l'ultima proposta del fruitore
+        // Ottiene l'ultima proposta del fruitore (quella appena creata)
         Proposta propostaCorrente = proposteFruitore.getLast();
-        // Ottiene le proposte del comprensorio
+
+        // Verifica che la proposta sia aperta
+        if (propostaCorrente.getStato() != StatoProposta.APERTA) {
+            return;
+        }
+
+        // Ottiene le proposte aperte nel comprensorio (escluso il fruitore corrente)
         List<Proposta> proposte = this.database.getProposteAperteStessoComprensorio(fruitore, false);
 
-        // TODO: completare implementazione
+        if (proposte.isEmpty()) {
+            return;
+        }
 
-        return true;
+        // Costruisce il grafo degli scambi
+        Map<Fruitore, List<ArcoScambio>> grafo = costruisciGrafoScambi(fruitore, propostaCorrente, proposte);
+
+        // Cerca cicli nel grafo
+        InsiemeChiuso insiemeChiuso = trovaCicloScambio(fruitore, grafo);
+
+        // Se viene trovato un ciclo valido
+        if (insiemeChiuso != null) {
+            // Informa l'utente del ciclo trovato
+            view.showSuccessMessage("È stato trovato un ciclo di scambio valido!");
+            view.showMessage("Le seguenti proposte formano un insieme chiuso:");
+
+            // Chiudi tutte le proposte nell'insieme e mostra dettagli
+            for (Proposta proposta : insiemeChiuso.getProposte()) {
+                proposta.chiudiProposta();
+                view.showMessage("- " + proposta);
+            }
+
+            // Mostra gli scambi che formano il ciclo
+            view.showMessage("\nDettagli degli scambi:");
+            for (Scambio scambio : insiemeChiuso.getScambi()) {
+                view.showMessage("- " + scambio.toString());
+            }
+
+            // Salva le modifiche e notifica i configuratori
+            salvaUtenti();
+            this.database.aggiungiInsiemeChiuso(insiemeChiuso);
+            salvaTutti();
+
+        }
+
+    }
+
+    /**
+     * Classe interna privata che rappresenta un arco nel grafo degli scambi.
+     * Un arco rappresenta una relazione "fornisce a" tra due fruitori,
+     * basata su una proposta esistente.
+     */
+    private static class ArcoScambio {
+        private final Fruitore fornitore;
+        private final Fruitore ricevente;
+        private final Proposta proposta;
+
+        public ArcoScambio(Fruitore fornitore, Fruitore ricevente, Proposta proposta) {
+            this.fornitore = fornitore;
+            this.ricevente = ricevente;
+            this.proposta = proposta;
+        }
+
+        public Fruitore getFornitore() {
+            return fornitore;
+        }
+
+        public Fruitore getRicevente() {
+            return ricevente;
+        }
+
+        public Proposta getProposta() {
+            return proposta;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s → %s: %s",
+                    fornitore.getUsername(),
+                    ricevente.getUsername(),
+                    proposta.getOfferta().toString());
+        }
+    }
+
+    /**
+     * Costruisce un grafo orientato che rappresenta le possibili connessioni
+     * tra fruitori basate sulle loro proposte di scambio.
+     * <p>
+     * Nel grafo, ogni nodo è un fruitore e ogni arco rappresenta una possibile
+     * relazione di scambio dove un fruitore (origine) può fornire ciò che
+     * un altro fruitore (destinazione) richiede.
+     *
+     * @param fruitoreCorrente il fruitore che ha appena creato una proposta
+     * @param propostaCorrente la proposta appena creata
+     * @param proposteAltri    le altre proposte aperte nel comprensorio
+     * @return una mappa che rappresenta il grafo degli scambi potenziali
+     */
+    private Map<Fruitore, List<ArcoScambio>> costruisciGrafoScambi(
+            Fruitore fruitoreCorrente,
+            Proposta propostaCorrente,
+            List<Proposta> proposteAltri) {
+
+        Map<Fruitore, List<ArcoScambio>> grafo = new HashMap<>();
+
+        // Esamina la proposta corrente e verifica se può soddisfare altre proposte
+        for (Proposta altraProposta : proposteAltri) {
+            // Trova il fruitore associato all'altra proposta
+            Fruitore altroFruitore = trovaFruitore(altraProposta);
+            if (altroFruitore == null)
+                continue;
+
+            // Se ciò che il fruitore corrente offre corrisponde a ciò che l'altro fruitore
+            // richiede
+            if (matchCategorie(propostaCorrente.getOfferta(), altraProposta.getRichiesta())) {
+                ArcoScambio arco = new ArcoScambio(fruitoreCorrente, altroFruitore, propostaCorrente);
+                grafo.computeIfAbsent(fruitoreCorrente, k -> new ArrayList<>()).add(arco);
+            }
+
+            // Se ciò che l'altro fruitore offre corrisponde a ciò che il fruitore corrente
+            // richiede
+            if (matchCategorie(altraProposta.getOfferta(), propostaCorrente.getRichiesta())) {
+                ArcoScambio arco = new ArcoScambio(altroFruitore, fruitoreCorrente, altraProposta);
+                grafo.computeIfAbsent(altroFruitore, k -> new ArrayList<>()).add(arco);
+            }
+        }
+
+        // Esamina tutte le relazioni tra le altre proposte per completare il grafo
+        for (int i = 0; i < proposteAltri.size(); i++) {
+            Proposta proposta1 = proposteAltri.get(i);
+            Fruitore fruitore1 = trovaFruitore(proposta1);
+            if (fruitore1 == null)
+                continue;
+
+            for (int j = 0; j < proposteAltri.size(); j++) {
+                if (i == j)
+                    continue;
+
+                Proposta proposta2 = proposteAltri.get(j);
+                Fruitore fruitore2 = trovaFruitore(proposta2);
+                if (fruitore2 == null)
+                    continue;
+
+                // Se ciò che il fruitore1 offre corrisponde a ciò che il fruitore2 richiede
+                if (matchCategorie(proposta1.getOfferta(), proposta2.getRichiesta())) {
+                    ArcoScambio arco = new ArcoScambio(fruitore1, fruitore2, proposta1);
+                    grafo.computeIfAbsent(fruitore1, k -> new ArrayList<>()).add(arco);
+                }
+            }
+        }
+
+        return grafo;
+    }
+
+    /**
+     * Verifica se due prestazioni hanno categorie corrispondenti.
+     * Per formare un ciclo valido, le categorie devono corrispondere esattamente.
+     */
+    private boolean matchCategorie(Prestazione offerta, Prestazione richiesta) {
+        // Confronta le categorie delle due prestazioni
+        Categoria categoriaOfferta = offerta.getCategoria().data();
+        Categoria categoriaRichiesta = richiesta.getCategoria().data();
+
+        return categoriaOfferta.equals(categoriaRichiesta) &&
+                offerta.getOre() >= richiesta.getOre();
+    }
+
+    /**
+     * Trova il fruitore che ha creato una proposta.
+     * 
+     * @param proposta la proposta di cui trovare il fruitore
+     * @return il fruitore che ha creato la proposta, o null se non trovato
+     */
+    private Fruitore trovaFruitore(Proposta proposta) {
+        return proposta.getPropostitore();
+    }
+
+    /**
+     * Cerca un ciclo di scambio nel grafo partendo dal fruitore specificato.
+     * 
+     * @param fruitoreIniziale il fruitore da cui iniziare la ricerca
+     * @param grafo            il grafo degli scambi potenziali
+     * @return un InsiemeChiuso se viene trovato un ciclo valido, altrimenti null
+     */
+    private InsiemeChiuso trovaCicloScambio(Fruitore fruitoreIniziale, Map<Fruitore, List<ArcoScambio>> grafo) {
+        // Strutture dati per il tracciamento del percorso
+        Set<Fruitore> visitati = new HashSet<>();
+        List<ArcoScambio> percorsoCorrente = new ArrayList<>();
+        Map<Fruitore, ArcoScambio> archiEntranti = new HashMap<>();
+        Set<Fruitore> inPercorso = new HashSet<>();
+
+        // Esegui la ricerca DFS
+        boolean trovato = dfs(fruitoreIniziale, fruitoreIniziale, grafo, visitati, percorsoCorrente, archiEntranti,
+                inPercorso);
+
+        // Se non è stato trovato un ciclo
+        if (!trovato) {
+            return null;
+        }
+
+        // Crea un insieme chiuso con gli archi del ciclo trovato
+        InsiemeChiuso insiemeChiuso = new InsiemeChiuso(fruitoreIniziale.getComprensorio());
+
+        // Ricostruisci il ciclo dagli archi entranti
+        Fruitore nodoCorrente = fruitoreIniziale;
+        do {
+            ArcoScambio arco = archiEntranti.get(nodoCorrente);
+            if (arco == null)
+                break;
+
+            // Aggiungi proposta e scambio all'insieme chiuso
+            Proposta proposta = arco.getProposta();
+            insiemeChiuso.aggiungiProposta(proposta);
+
+            Scambio scambio = new Scambio(
+                    arco.getFornitore(),
+                    arco.getRicevente(),
+                    proposta.getOfferta(),
+                    proposta);
+            insiemeChiuso.aggiungiScambio(scambio);
+
+            // Passa al nodo precedente
+            nodoCorrente = arco.getFornitore();
+
+        } while (!nodoCorrente.equals(fruitoreIniziale));
+
+        return insiemeChiuso;
+    }
+
+    /**
+     * Esegue una ricerca in profondità (DFS) nel grafo per trovare cicli.
+     * 
+     * @return true se viene trovato un ciclo, false altrimenti
+     */
+    private boolean dfs(Fruitore nodoIniziale, Fruitore nodoCorrente,
+            Map<Fruitore, List<ArcoScambio>> grafo,
+            Set<Fruitore> visitati, List<ArcoScambio> percorsoCorrente,
+            Map<Fruitore, ArcoScambio> archiEntranti, Set<Fruitore> inPercorso) {
+
+        visitati.add(nodoCorrente);
+        inPercorso.add(nodoCorrente);
+
+        // Esplora tutti gli archi uscenti dal nodo corrente
+        List<ArcoScambio> archiUscenti = grafo.getOrDefault(nodoCorrente, Collections.emptyList());
+        for (ArcoScambio arco : archiUscenti) {
+            Fruitore prossimo = arco.getRicevente();
+
+            // Ciclo trovato? Verifica che sia un ciclo che torna al nodo iniziale
+            if (prossimo.equals(nodoIniziale) && !percorsoCorrente.isEmpty()) {
+                // Registra l'ultimo arco che chiude il ciclo
+                archiEntranti.put(prossimo, arco);
+                return true;
+            }
+
+            // Se non abbiamo già visitato questo nodo nel percorso corrente
+            if (!inPercorso.contains(prossimo)) {
+                // Aggiungi l'arco al percorso corrente
+                percorsoCorrente.add(arco);
+                // Registra l'arco entrante per questo nodo
+                archiEntranti.put(prossimo, arco);
+
+                // Prosegui la ricerca DFS
+                if (dfs(nodoIniziale, prossimo, grafo, visitati, percorsoCorrente, archiEntranti, inPercorso)) {
+                    return true; // Ciclo trovato
+                }
+
+                // Backtracking: rimuovi l'arco dal percorso corrente
+                percorsoCorrente.removeLast();
+                archiEntranti.remove(prossimo);
+            }
+        }
+
+        // Backtracking: rimuovi il nodo dal percorso corrente
+        inPercorso.remove(nodoCorrente);
+        return false; // Nessun ciclo trovato
+    }
+
+    /**
+     * Visualizza gli insiemi chiusi per il configuratore.
+     * Permette al configuratore di esaminare e notificare i fruitori coinvolti.
+     */
+    private void visualizzaInsiemiChiusi() {
+        List<InsiemeChiuso> insiemi = database.getInsiemiChiusi();
+
+        if (insiemi.isEmpty()) {
+            view.showMessage("Non sono presenti insiemi chiusi nel sistema.");
+            return;
+        }
+
+        view.showMessage("\n=== INSIEMI CHIUSI ===");
+        for (int i = 0; i < insiemi.size(); i++) {
+            InsiemeChiuso insieme = insiemi.get(i);
+            view.showMessage((i + 1) + ") " + (insieme.isNotificato() ? "[✓] " : "[!] ") +
+                    "Insieme chiuso con " + insieme.getNumeroScambi() + " scambi");
+        }
+
+        int scelta = richiediIndiceDaUtente("Seleziona un insieme chiuso da visualizzare (0 per tornare indietro): ",
+                insiemi.size());
+
+        if (scelta == 0)
+            return;
+
+        InsiemeChiuso selezionato = insiemi.get(scelta - 1);
+        view.showMessage("\n" + selezionato.getDettagli());
+
+        if (!selezionato.isNotificato()) {
+            boolean conferma = view.getConfirmation("Vuoi contrassegnare questo insieme chiuso come notificato?");
+            if (conferma) {
+                selezionato.setNotificato(true);
+                salvaTutti();
+                view.showSuccessMessage("Insieme chiuso contrassegnato come notificato.");
+            }
+        }
     }
 
     /**
@@ -2305,7 +2646,7 @@ public class Controller {
         return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
     }
 
-    public void visualizzaProposteFruitore (Fruitore fruitore) {
+    public void visualizzaProposteFruitore(Fruitore fruitore) {
         List<Proposta> proposte = this.database.getPropostePerFruitore(fruitore);
 
         if (proposte.isEmpty()) {
@@ -2387,10 +2728,13 @@ public class Controller {
     }
 
     /**
-     * Visualizza tutte le proposte di scambio relative a una specifica categoria foglia.
+     * Visualizza tutte le proposte di scambio relative a una specifica categoria
+     * foglia.
      * <p>
-     * Il metodo permette all'utente di selezionare una gerarchia e una categoria foglia,
-     * per poi visualizzare tutte le proposte di scambio (sia in richiesta che in offerta)
+     * Il metodo permette all'utente di selezionare una gerarchia e una categoria
+     * foglia,
+     * per poi visualizzare tutte le proposte di scambio (sia in richiesta che in
+     * offerta)
      * che coinvolgono quella categoria.
      * <p>
      * Il processo include:
@@ -2402,9 +2746,11 @@ public class Controller {
      *
      * @pre database != null
      * @pre view != null
-     * @post Se ci sono gerarchie e proposte, vengono visualizzate tutte quelle che coinvolgono
+     * @post Se ci sono gerarchie e proposte, vengono visualizzate tutte quelle che
+     *       coinvolgono
      *       la categoria selezionata
-     * @post Lo stato delle proposte non viene modificato (operazione di sola lettura)
+     * @post Lo stato delle proposte non viene modificato (operazione di sola
+     *       lettura)
      */
     private void visualizzaProposteTotali() {
         // Mostra il titolo dell'operazione
@@ -2458,7 +2804,8 @@ public class Controller {
 
         // Se non sono state trovate proposte, mostra un messaggio appropriato
         if (!proposteFound) {
-            this.view.showMessage(String.format(ControllerConstants.MSG_NESSUNA_PROPOSTA_CATEGORIA, foglia.data().getNome()));
+            this.view.showMessage(
+                    String.format(ControllerConstants.MSG_NESSUNA_PROPOSTA_CATEGORIA, foglia.data().getNome()));
         }
     }
 
