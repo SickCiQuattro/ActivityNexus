@@ -34,6 +34,9 @@ public class Proposta implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /** Fruitore che ha inviato la proposta */
+    private final Fruitore propostitore;
+
     /** Prestazione richiesta */
     private final Prestazione richiesta;
 
@@ -52,6 +55,7 @@ public class Proposta implements Serializable {
     /**
      * Crea una nuova proposta di scambio con i dettagli specificati.
      *
+     * @param propostitore  il fruitore che ha inviato la proposta (non può essere null)
      * @param richiesta la prestazione richiesta (non può essere null)
      * @param offerta   la prestazione offerta in cambio (non può essere null)
      * @param stato     lo stato iniziale della proposta (non può essere null)
@@ -64,7 +68,8 @@ public class Proposta implements Serializable {
      * @post getOfferta() == offerta
      * @post getStato() == stato
      */
-    public Proposta(Prestazione richiesta, Prestazione offerta, StatoProposta stato) {
+    public Proposta(Fruitore propostitore, Prestazione richiesta, Prestazione offerta, StatoProposta stato) {
+        this.propostitore = Objects.requireNonNull(propostitore, "Il fruitore non può essere null");
         this.richiesta = Objects.requireNonNull(richiesta, "La prestazione richiesta non può essere null");
         this.offerta = Objects.requireNonNull(offerta, "La prestazione offerta non può essere null");
         this.stato = Objects.requireNonNull(stato, "Lo stato della proposta non può essere null");
@@ -72,6 +77,18 @@ public class Proposta implements Serializable {
         this.dataModifica = null;
     }
 
+    /**
+     * Restituisce il fruitore che ha inviato la proposta.
+     *
+     * @return il fruitore che ha inviato la proposta (mai null)
+     *
+     * @pre true
+     * @post risultato != null
+     * @post risultato == this.fruitore
+     */
+    public Fruitore getPropostitore() {
+        return this.propostitore;
+    }
 
     /**
      * Tenta di chiudere questa proposta.
@@ -181,7 +198,8 @@ public class Proposta implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("PROPOSTA:\n" +
-                "Richiesta: " + richiesta.toString() +
+                "Propositore: " + propostitore.getMail() +
+                "\nRichiesta: " + richiesta.toString() +
                 "\nOfferta: " + offerta.toString() +
                 "\nStato: " + stato.toString() +
                 "\nData creazione: "
@@ -217,7 +235,8 @@ public class Proposta implements Serializable {
             return false;
 
         Proposta other = (Proposta) obj;
-        return Objects.equals(richiesta, other.richiesta) &&
+        return Objects.equals(propostitore, other.propostitore) &&
+                Objects.equals(richiesta, other.richiesta) &&
                 Objects.equals(offerta, other.offerta) &&
                 stato == other.stato;
     }
@@ -233,6 +252,7 @@ public class Proposta implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(richiesta, offerta, stato);
+        return Objects.hash(propostitore, richiesta, offerta, stato);
     }
 }
+
