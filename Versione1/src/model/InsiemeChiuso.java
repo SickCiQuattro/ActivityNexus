@@ -1,47 +1,66 @@
 package model;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Rappresenta un insieme chiuso di proposte che formano un ciclo di scambio
  * valido.
  * <p>
- * Un insieme chiuso contiene tutte le proposte coinvolte in un ciclo di scambio
- * e
- * traccia gli scambi specifici che devono avvenire tra i fruitori.
+ * Un insieme chiuso si crea quando il sistema individua un gruppo di proposte
+ * aperte
+ * che possono soddisfarsi reciprocamente, formando un ciclo di scambi dove ogni
+ * fruitore
+ * offre una prestazione e riceve un'altra prestazione di valore equivalente.
+ * <p>
+ * Le proposte appartenenti all'insieme chiuso vengono automaticamente chiuse e
+ * il sistema notifica i configuratori che possono contattare i fruitori
+ * coinvolti.
  */
 public class InsiemeChiuso implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
+    // Proposte appartenenti all'insieme chiuso
     private final List<Proposta> proposte;
+
+    // Scambi che devono avvenire (chi fornisce cosa a chi)
     private final List<Scambio> scambi;
-    private final LocalDateTime dataCreazione;
+
+    // Flag per indicare se l'insieme chiuso è già stato notificato ai configuratori
     private boolean notificato;
 
     /**
-     * Crea un nuovo insieme chiuso.
+     * Crea un nuovo insieme chiuso per un comprensorio specifico.
+     * 
+     * @param comprensorio il comprensorio a cui appartengono i fruitori coinvolti
      */
-    public InsiemeChiuso() {
+    public InsiemeChiuso(Comprensorio comprensorio) {
         this.proposte = new ArrayList<>();
         this.scambi = new ArrayList<>();
-        this.dataCreazione = LocalDateTime.now();
         this.notificato = false;
     }
 
     /**
-     * Aggiunge una proposta all'insieme chiuso.
+     * Aggiunge una proposta all'insieme chiuso e imposta il riferimento
+     * bidirezionale.
      * 
      * @param proposta la proposta da aggiungere
+     * @return true se la proposta è stata aggiunta, false se era già presente
      */
-    public void aggiungiProposta(Proposta proposta) {
-        if (!proposte.contains(proposta)) {
-            proposte.add(proposta);
-            proposta.setInsiemeChiuso(this);
+    public boolean aggiungiProposta(Proposta proposta) {
+        if (proposte.contains(proposta)) {
+            return false;
         }
+
+        proposte.add(proposta);
+        proposta.chiudiProposta();
+        return true;
     }
 
     /**
@@ -51,6 +70,22 @@ public class InsiemeChiuso implements Serializable {
      */
     public void aggiungiScambio(Scambio scambio) {
         scambi.add(scambio);
+    }
+
+    /**
+     * Restituisce tutti i fruitori coinvolti nell'insieme chiuso.
+     * 
+     * @return set di fruitori coinvolti nell'insieme chiuso
+     */
+    public Set<Fruitore> getFruitori() {
+        Set<Fruitore> fruitori = new HashSet<>();
+
+        for (Scambio scambio : scambi) {
+            fruitori.add(scambio.getFornitore());
+            fruitori.add(scambio.getRicevente());
+        }
+
+        return Collections.unmodifiableSet(fruitori);
     }
 
     /**
@@ -72,15 +107,6 @@ public class InsiemeChiuso implements Serializable {
     }
 
     /**
-     * Restituisce la data di creazione dell'insieme chiuso.
-     * 
-     * @return la data di creazione
-     */
-    public LocalDateTime getDataCreazione() {
-        return dataCreazione;
-    }
-
-    /**
      * Imposta lo stato di notifica dell'insieme chiuso.
      * 
      * @param notificato se l'insieme è stato notificato
@@ -98,4 +124,143 @@ public class InsiemeChiuso implements Serializable {
         return notificato;
     }
 
+    /**
+     * Verifica se l'insieme contiene una specifica proposta.
+     * 
+     * @param proposta la proposta da verificare
+     * @return true se la proposta è contenuta nell'insieme
+     */
+    public boolean contieneProposta(Proposta proposta) {
+        return proposte.contains(proposta);
+    }
+
+    /**
+     * Restituisce il numero di proposte nell'insieme chiuso.
+     * 
+     * @return il numero di proposte
+     */
+    public int getNumeroProposte() {
+        return proposte.size();
+    }
+
+    /**
+     * Restituisce il numero di scambi nell'insieme chiuso.
+     * 
+     * @return il numero di scambi
+     */
+    public int getNumeroScambi() {
+        return scambi.size();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("┌───────────────────────────────────┐\n");
+        sb.append("│        INSIEME CHIUSO             │\n");
+        sb.append("├───────────────────────────────────┤\n");
+        sb.append(String.format("│ Proposte: %-23d │\n", proposte.size()));
+        sb.append(String.format("│ Scambi: %-25d │\n", scambi.size()));
+        sb.append(String.format("│ Stato: %-26s │\n", notificato ? "Notificato" : "Non notificato"));
+        sb.append("└───────────────────────────────────┘");
+
+        return sb.toString();
+    }
+
+    /**
+     * Restituisce una rappresentazione dettagliata dell'insieme chiuso.
+     * 
+     * @return la rappresentazione dettagliata
+     */
+    public String getDettagli() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("╔═════════════════════════════════════════════╗\n");
+        sb.append("║           DETTAGLI INSIEME CHIUSO           ║\n");
+        sb.append("╠═════════════════════════════════════════════╣\n");
+        sb.append(String.format("║ Proposte coinvolte: %-22d ║\n", proposte.size()));
+        sb.append(String.format("║ Scambi da effettuare: %-19d ║\n", scambi.size()));
+        sb.append(String.format("║ Stato: %-32s ║\n", notificato ? "Notificato" : "In attesa di notifica"));
+        sb.append("╠═════════════════════════════════════════════╣\n");
+        sb.append("║ SCAMBI DA EFFETTUARE                        ║\n");
+        sb.append("╠═════════════════════════════════════════════╣\n");
+
+        if (scambi.isEmpty()) {
+            sb.append("║ Nessuno scambio da effettuare              ║\n");
+        } else {
+            for (int i = 0; i < scambi.size(); i++) {
+                Scambio scambio = scambi.get(i);
+                sb.append(String.format("║ %d. %s fornisce a %s:\n",
+                        (i + 1),
+                        scambio.getFornitore().getUsername(),
+                        scambio.getRicevente().getUsername()));
+                sb.append(String.format("║    %s\n", scambio.getPrestazione().toString()));
+            }
+        }
+
+        sb.append("╠═════════════════════════════════════════════╣\n");
+        sb.append("║ FRUITORI COINVOLTI                          ║\n");
+        sb.append("╠═════════════════════════════════════════════╣\n");
+
+        Set<Fruitore> fruitori = getFruitori();
+        if (fruitori.isEmpty()) {
+            sb.append("║ Nessun fruitore coinvolto                  ║\n");
+        } else {
+            for (Fruitore fruitore : fruitori) {
+                sb.append(String.format("║ • %s\n", fruitore.getUsername()));
+                sb.append(String.format("║   Email: %s\n", fruitore.getMail()));
+            }
+        }
+
+        sb.append("╚═════════════════════════════════════════════╝");
+        return sb.toString();
+    }
+
+    /**
+     * Genera un report compatto per le notifiche in console.
+     * 
+     * @return il report compatto
+     */
+    public String getReportCompatto() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SCAMBI DA EFFETTUARE:\n");
+
+        if (scambi.isEmpty()) {
+            sb.append("Nessuno scambio da effettuare\n");
+        } else {
+            for (int i = 0; i < scambi.size(); i++) {
+                Scambio scambio = scambi.get(i);
+                sb.append(String.format("%d) %s → %s: %s\n",
+                        (i + 1),
+                        scambio.getFornitore().getUsername(),
+                        scambio.getRicevente().getUsername(),
+                        scambio.getPrestazione().toString()));
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Genera un elenco di contatti email dei fruitori coinvolti.
+     * 
+     * @return l'elenco di contatti email
+     */
+    public String getContattiEmail() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CONTATTI EMAIL PER NOTIFICHE:\n");
+
+        Set<Fruitore> fruitori = getFruitori();
+        if (fruitori.isEmpty()) {
+            sb.append("Nessun fruitore coinvolto\n");
+        } else {
+            int i = 1;
+            for (Fruitore fruitore : fruitori) {
+                sb.append(String.format("%d) %s <%s>\n",
+                        i++,
+                        fruitore.getUsername(),
+                        fruitore.getMail()));
+            }
+        }
+
+        return sb.toString();
+    }
 }
