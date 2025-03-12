@@ -39,9 +39,6 @@ public class Fruitore extends Utente implements Serializable {
     /** Comprensorio geografico di appartenenza del fruitore */
     private Comprensorio comprensorio;
 
-    /** Proposte di attività inviate dal fruitore */
-    private ArrayList<Proposta> proposte;
-
     /**
      * Costruisce un nuovo fruitore con credenziali e dati personali specificati.
      *
@@ -63,7 +60,6 @@ public class Fruitore extends Utente implements Serializable {
         super(username, password, false);
         this.mail = Objects.requireNonNull(mail, MAIL_NON_NULL);
         this.comprensorio = comprensorio; // può essere null se non specificato
-        this.proposte = new ArrayList<>();
     }
 
     /**
@@ -121,44 +117,6 @@ public class Fruitore extends Utente implements Serializable {
      */
     public boolean haComprensorio() {
         return this.comprensorio != null;
-    }
-
-    /**
-     * Restituisce la lista delle proposte di attività inviate dal fruitore.
-     *
-     * @return lista delle proposte inviate
-     *
-     * @pre true (non ci sono precondizioni particolari per questo getter)
-     * @post risultato != null
-     * @post risultato contiene esattamente le stesse proposte presenti in this.proposte
-     * @post lo stato dell'oggetto Fruitore non viene modificato
-     */
-    public ArrayList<Proposta> getProposte() {
-        return proposte;
-    }
-
-    public ArrayList<Proposta> getProposteAperte() {
-        ArrayList<Proposta> proposteAperte = new ArrayList<>();
-        for (Proposta proposta : proposte) {
-            if(proposta.getStato() == StatoProposta.APERTA){
-                proposteAperte.add(proposta);
-            }
-        }
-        return proposteAperte;
-    }
-
-    /**
-     * Aggiunge una proposta di attività alla lista del fruitore.
-     *
-     * @param proposta la proposta da aggiungere
-     *
-     * @pre proposta != null
-     * @post getProposte().contains(proposta) == true
-     * @post getProposte().size() == old(getProposte().size()) + 1
-     * @post la proposta è stata aggiunta alla fine della lista
-     */
-    public void aggiungiProposta (Proposta proposta) {
-        proposte.add(proposta);
     }
 
     /**
