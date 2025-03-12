@@ -1,7 +1,6 @@
 package model;
 
 import com.scalified.tree.TreeNode;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
