@@ -22,9 +22,9 @@ import java.time.format.DateTimeFormatter;
  *
  * <p><b>Invarianti:</b>
  * <ul>
- * <li>richiesta != null</li>
+ * <li>Richiesta != null</li>
  * <li>offerta != null</li>
- * <li>stato != null</li>
+ * <li>Stato != null</li>
  * </ul>
  *
  * @see Prestazione
@@ -47,7 +47,7 @@ public class Proposta implements Serializable {
     private StatoProposta stato;
 
     /** Data di creazione della proposta */
-    private LocalDateTime dataCreazione;
+    private final LocalDateTime dataCreazione;
 
     private LocalDateTime dataModifica;
 
