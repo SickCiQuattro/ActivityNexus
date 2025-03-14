@@ -2984,7 +2984,7 @@ public class Controller {
                 fogliaOfferta.level());
 
         // Calcolo del fattore combinato
-        return fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest;
+        return Math.clamp(fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest, 0.5, 2);
     }
 
     public void visualizzaProposteFruitore(Fruitore fruitore) {
