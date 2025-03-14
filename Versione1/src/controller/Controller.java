@@ -2368,9 +2368,19 @@ public class Controller {
 
         // Calcolo delle ore offerte basate sul fattore di conversione
         double oreOfferteOriginali = oreRichieste * fattoreConversione;
-        int oreOfferte = (int) Math.max(1,
-                Math.floor(oreOfferteOriginali + (oreOfferteOriginali % 1 > 0.5 ? 1 : 0))); // Arrotonda per eccesso
-
+        int oreOfferte;
+        // Se il fattore è < 1, tende ad arrotondare per difetto
+        // Se il fattore è > 1, tende ad arrotondare per eccesso
+        if (fattoreConversione < 1) {
+            // Per fattori < 1, arrotonda per difetto se la parte decimale è <= 0.5
+            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
+                    (oreOfferteOriginali % 1 > 0.5 ? 1 : 0)));
+        } else {
+            // Per fattori > 1, arrotonda per difetto anche se la parte decimale è > 0.5
+            // ma < 0.7 per compensare l'asimmetria
+            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
+                    (oreOfferteOriginali % 1 > 0.7 ? 1 : 0)));
+        }
         // FASE 5: Presentazione del risultato e conferma
         view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
         view.showMessage(String.format(ControllerConstants.INFO_RIEPILOGO_PROPOSTA,
