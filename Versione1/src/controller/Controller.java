@@ -2647,27 +2647,32 @@ public class Controller {
     }
 
     /**
-     * Verifica se una prestazione offerta corrisponde a una prestazione richiesta.
+     * Verifica se una prestazione offerta corrisponde a una prestazione richiesta,
+     * con una tolleranza di ±1 ora per gestire arrotondamenti nelle conversioni.
      * <p>
      * Due prestazioni sono considerate corrispondenti quando:
      * <ul>
      * <li>Appartengono esattamente alla stessa categoria (no sottocategorie)</li>
-     * <li>Le ore offerte sono sufficienti a coprire le ore richieste</li>
+     * <li>Le ore offerte sono sufficienti a coprire le ore richieste (con
+     * tolleranza)</li>
      * </ul>
      * <p>
-     * Questa corrispondenza è fondamentale per stabilire potenziali scambi
-     * tra fruitori del sistema.
+     * La tolleranza permette di gestire piccole discrepanze dovute agli
+     * arrotondamenti
+     * nei calcoli dei fattori di conversione, facilitando la formazione di insiemi
+     * chiusi.
      *
      * @param offerta   la prestazione offerta da un fruitore
      * @param richiesta la prestazione richiesta da un altro fruitore
-     * @return true se le prestazioni corrispondono, false altrimenti
+     * @return true se le prestazioni corrispondono (con tolleranza), false
+     *         altrimenti
      *
      * @pre offerta != null
      * @pre richiesta != null
      * @pre offerta.getCategoria() != null
      * @pre richiesta.getCategoria() != null
-     * @post Il risultato è true se e solo se le categorie sono uguali e le ore
-     *       offerte >= ore richieste
+     * @post Il risultato è true se le categorie sono uguali e le ore offerte ≥ ore
+     *       richieste - 1
      * @post Lo stato delle prestazioni rimane invariato
      */
     private boolean matchCategorie(Prestazione offerta, Prestazione richiesta) {
@@ -2675,8 +2680,10 @@ public class Controller {
         Categoria categoriaOfferta = offerta.getCategoria().data();
         Categoria categoriaRichiesta = richiesta.getCategoria().data();
 
+        // Verifica che siano della stessa categoria e che le ore siano compatibili
+        // aggiungendo una tolleranza di ±1 ora per compensare gli arrotondamenti
         return categoriaOfferta.equals(categoriaRichiesta) &&
-                offerta.getOre() >= richiesta.getOre();
+                offerta.getOre() >= (richiesta.getOre() - 1);
     }
 
     /**
