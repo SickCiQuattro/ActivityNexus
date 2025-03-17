@@ -6,37 +6,46 @@ import java.util.*;
 /**
  * Rappresenta un comprensorio geografico che raggruppa più comuni.
  * <p>
- * Caratteristiche principali:
+ * Un comprensorio è un'entità territoriale che identifica un'area geografica
+ * composta
+ * da più comuni, utilizzata nel sistema per organizzare e classificare le
+ * attività
+ * di scambio in base alla collocazione geografica.
+ * <p>
+ * <b>Caratteristiche principali:</b>
  * <ul>
  * <li>Identificato da un nome univoco (case-insensitive)</li>
- * <li>Contiene una lista gestita internamente di comuni</li>
- * <li>Impedisce duplicazioni di comuni (case-insensitive)</li>
- * <li>Implementa {@link Serializable} per la persistenza</li>
+ * <li>Contiene una lista ordinata di comuni appartenenti al comprensorio</li>
+ * <li>Implementa meccanismi per prevenire duplicazioni di comuni</li>
+ * <li>Supporta la serializzazione per persistenza dei dati</li>
  * </ul>
- * <p>
- * Due comprensori sono considerati uguali se hanno lo stesso nome,
- * indipendentemente dai comuni contenuti.
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti della classe:</b>
  * <ul>
- *   <li>La lista dei comuni non è mai null (può essere vuota)</li>
- *   <li>La lista dei comuni non contiene mai valori null</li>
- *   <li>La lista dei comuni non contiene mai duplicati (case-insensitive)</li>
+ * <li>Il nome del comprensorio può essere null, ma è sconsigliato</li>
+ * <li>La lista dei comuni non è mai null (può essere vuota)</li>
+ * <li>La lista dei comuni non contiene mai valori null</li>
+ * <li>La lista dei comuni non contiene mai duplicati (case-insensitive)</li>
+ * <li>Due comprensori sono considerati uguali se hanno lo stesso nome
+ * (case-insensitive)</li>
  * </ul>
  *
  * @see java.io.Serializable
  */
 public class Comprensorio implements Serializable {
-    // Identificatore di versione per la serializzazione
+    // -----------------------------------------------------------------------------------
+    // FIELDS E COSTANTI
+    // -----------------------------------------------------------------------------------
+
+    /** Versione per la serializzazione */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Nome del comprensorio, utilizzato come identificatore univoco
+    /** Nome del comprensorio, identificativo univoco */
     private String nome;
 
-    // Lista dei comuni appartenenti al comprensorio
-    // Dichiarata final per garantire che il riferimento non cambi,
-    // ma i contenuti possono essere modificati
+    /** Lista dei comuni appartenenti al comprensorio */
     private final List<String> comuni;
 
     // -----------------------------------------------------------------------------------
@@ -48,12 +57,16 @@ public class Comprensorio implements Serializable {
      *
      * @param nome il nome del comprensorio
      *
-     * @post getNome() restituisce il nome fornito
-     * @post getComuni() restituisce una lista vuota
+     * @pre true (nessuna precondizione particolare)
+     * @post getNome() == nome
+     * @post getComuni().isEmpty() == true
      */
     public Comprensorio(String nome) {
-        this.nome = nome; // Accetta anche null, anche se non consigliato
-        this.comuni = new ArrayList<>(); // Inizializza una lista vuota
+        // Accetta anche nome null, anche se sconsigliato per la logica applicativa
+        this.nome = nome;
+
+        // Inizializza una lista vuota di comuni
+        this.comuni = new ArrayList<>();
     }
 
     // -----------------------------------------------------------------------------------
@@ -63,9 +76,9 @@ public class Comprensorio implements Serializable {
     /**
      * Restituisce il nome del comprensorio.
      *
-     * @return il nome del comprensorio
+     * @return il nome del comprensorio (può essere null)
      *
-     * @post il valore restituito è uguale al nome assegnato al comprensorio
+     * @post result == nome
      */
     public String getNome() {
         return this.nome;
@@ -74,12 +87,13 @@ public class Comprensorio implements Serializable {
     /**
      * Imposta il nome del comprensorio.
      * <p>
-     * Attenzione: modificare il nome di un comprensorio già in una collezione
-     * potrebbe causare inconsistenze (hashCode cambierà).
+     * <b>Attenzione:</b> Modificare il nome di un comprensorio già in una
+     * collezione
+     * potrebbe causare inconsistenze nell'hashCode e nell'uguaglianza.
      *
-     * @param nome il nuovo nome del comprensorio
+     * @param nome il nuovo nome del comprensorio (può essere null)
      *
-     * @post getNome() restituisce il valore fornito
+     * @post getNome() == nome
      */
     public void setNome(String nome) {
         this.nome = nome;
@@ -88,15 +102,14 @@ public class Comprensorio implements Serializable {
     /**
      * Restituisce una copia non modificabile della lista dei comuni.
      * <p>
-     * Per modificare la lista, usare i metodi dedicati.
+     * Per modificare la lista, usare i metodi dedicati come
+     * {@link #addComune(String)}.
      *
      * @return una lista non modificabile dei comuni
-     * @see #addComune(String)
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito non contiene elementi null
-     * @post il valore restituito non contiene duplicati (case-insensitive)
-     * @post il valore restituito è una vista non modificabile della lista interna
+     * @post result != null
+     * @post !result.contains(null)
+     * @post result non è modificabile direttamente
      */
     public List<String> getComuni() {
         // Restituisce una vista non modificabile della lista interna
@@ -109,7 +122,7 @@ public class Comprensorio implements Serializable {
      *
      * @return true se il comprensorio è vuoto, false altrimenti
      *
-     * @post il valore restituito è true se e solo se getNumeroComuniCount() == 0
+     * @post result == getComuni().isEmpty()
      */
     public boolean isEmpty() {
         return this.comuni.isEmpty();
@@ -128,16 +141,20 @@ public class Comprensorio implements Serializable {
      * @param comune il nome del comune da aggiungere
      * @return true se il comune è stato aggiunto, false se era null o già presente
      *
-     * @post se restituisce true, hasComune(comune) == true
-     * @post se restituisce true, getNumeroComuniCount() è aumentato di 1
-     * @post se comune == null o hasComune(comune) == true, restituisce false e lo stato non è modificato
+     * @post se comune == null, result == false
+     * @post se hasComune(comune) era true prima dell'invocazione, result == false e
+     *       lo stato non è cambiato
+     * @post se result == true, hasComune(comune) == true e getNumeroComuniCount() è
+     *       aumentato di 1
      */
     public boolean addComune(String comune) {
-        // Verifica se il comune è null o già presente (case-insensitive)
+        // Verifica che il comune non sia null e non sia già presente (case-insensitive)
         if (comune == null || hasComune(comune)) {
             return false;
         }
-        // Aggiunge il comune alla lista interna
+
+        // Aggiunge il comune alla lista interna e restituisce il risultato
+        // dell'operazione
         return this.comuni.add(comune);
     }
 
@@ -149,8 +166,9 @@ public class Comprensorio implements Serializable {
      * @param comune il nome del comune da verificare
      * @return true se presente, false altrimenti o se null
      *
-     * @post se comune == null, restituisce false
-     * @post il valore restituito riflette correttamente la presenza o assenza del comune nel comprensorio
+     * @post se comune == null, result == false
+     * @post se comune != null, result == true se e solo se esiste un comune c in
+     *       getComuni() tale che c.equalsIgnoreCase(comune)
      */
     public boolean hasComune(String comune) {
         // Se il comune è null, non può essere presente nel comprensorio
@@ -176,13 +194,13 @@ public class Comprensorio implements Serializable {
     /**
      * Restituisce una rappresentazione in stringa del comprensorio.
      * <p>
-     * Include il nome e l'elenco dei comuni con formattazione.
+     * Include il nome e l'elenco dei comuni con formattazione gerarchica.
      *
-     * @return rappresentazione in stringa del comprensorio
+     * @return rappresentazione testuale del comprensorio
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito contiene il nome del comprensorio
-     * @post il valore restituito contiene una rappresentazione di tutti i comuni
+     * @post result != null
+     * @post result contiene il nome del comprensorio
+     * @post result contiene la rappresentazione di tutti i comuni
      */
     @Override
     public String toString() {
@@ -213,10 +231,11 @@ public class Comprensorio implements Serializable {
      * @return true se l'oggetto è un Comprensorio con lo stesso nome, false
      *         altrimenti
      *
-     * @post se this e obj sono lo stesso oggetto (riferimento identico), restituisce true
-     * @post se obj è null o non è un'istanza di Comprensorio, restituisce false
-     * @post se il nome di questo comprensorio è null, restituisce false
-     * @post se obj è un Comprensorio e entrambi i nomi non sono null, restituisce true se e solo se i nomi sono uguali ignorando case
+     * @post se this == obj, result == true
+     * @post se obj == null o obj non è un Comprensorio, result == false
+     * @post se getNome() == null, result == false
+     * @post se obj è un Comprensorio con nome non null, result == true se e solo se
+     *       getNome().equalsIgnoreCase(((Comprensorio)obj).getNome())
      */
     @Override
     public boolean equals(Object obj) {
@@ -243,14 +262,14 @@ public class Comprensorio implements Serializable {
      * <p>
      * Basato sul nome convertito in minuscolo per coerenza con equals().
      *
-     * @return hash code del nome in minuscolo, o 0 se nome è null
+     * @return hash code del comprensorio
      *
-     * @post se this.nome == null, restituisce 0
-     * @post se due comprensori sono uguali secondo equals(), hanno lo stesso hashCode()
+     * @post se getNome() == null, result == 0
+     * @post se equals(altro) == true, allora hashCode() == altro.hashCode()
      */
     @Override
     public int hashCode() {
-        // Calcola l'hash code basato sul nome convertito in minuscolo, o 0 se nome è
+        // Calcola l'hash code basato sul nome convertito in minuscolo, o 0 se il nome è
         // null
         return nome != null ? nome.toLowerCase().hashCode() : 0;
     }
