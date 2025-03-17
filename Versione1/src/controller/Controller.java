@@ -433,7 +433,6 @@ public class Controller {
                 view.showSuccessMessage(ControllerConstants.REGISTRATION_SUCCESS);
                 // Salva i dati utente dopo registrazione riuscita
                 salvaUtenti();
-                view.showSuccessMessage(ControllerConstants.SAVING_USERS_SUCCESS);
             } else {
                 view.showErrorMessage(ControllerConstants.REGISTRATION_CANCELLED);
             }
@@ -764,7 +763,9 @@ public class Controller {
                     case "2": // Proposta scambio d'opera
                         if (propostaScambioOpera(fruitore))
                             valutaProposteScambio(fruitore);
-                        // TODO: salvataggio proposte
+
+                        // Salvataggio delle proposte
+                        this.database.serializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
                         break;
 
                     case "3": // Visualizza proposte di scambio
@@ -773,7 +774,6 @@ public class Controller {
 
                     case "4":
                         modificaStatoProposta(fruitore);
-                        // TODO: salvataggio proposte
                         break;
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
@@ -1054,7 +1054,7 @@ public class Controller {
             // Richiede l'inserimento delle credenziali
             String username = view.getInput(ControllerConstants.PROMPT_USERNAME);
             String password = view.getInput(ControllerConstants.PROMPT_PASSWORD);
-
+            this.view.showMessage("\n");
             // Verifica se le credenziali inserite corrispondono a quelle generate
             if (usernameDefault.equals(username) && passwordDefault.equals(password))
                 return true; // Autenticazione preliminare riuscita
@@ -1778,7 +1778,7 @@ public class Controller {
         // FASE 3: Selezione della gerarchia di destinazione per cui visualizzare i
         // fattori
         this.view.showMessage(
-                String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE, fogliaScelta.data().getNome()));
+                String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE_FATTORI, fogliaScelta.data().getNome()));
         Gerarchia gerarchiaDestinazione = selezionaGerarchia();
 
         // CALCOLO CONVERSIONE: Il processo coinvolge due fattori:
@@ -2332,7 +2332,7 @@ public class Controller {
         view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_OFFERTA);
 
         // Selezione della gerarchia di destinazione
-        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE,
+        view.showMessage(String.format(ControllerConstants.INFO_SELEZIONA_DESTINAZIONE_PRESTAZIONI,
                 fogliaRichiesta.data().getNome()));
         Gerarchia gerarchiaDestinazione = selezionaGerarchia();
         if (gerarchiaDestinazione == null) {
@@ -2403,9 +2403,6 @@ public class Controller {
         if (accetta) {
             view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_CREATA);
             view.showMessage("\n" + proposta);
-
-            // Salva gli utenti per persistere le proposte
-            salvaUtenti();
             return true;
         } else {
             view.showMessage(ControllerConstants.INFO_PROPOSTA_RITIRATA);
@@ -2501,12 +2498,9 @@ public class Controller {
             for (Scambio scambio : insiemeChiuso.getScambi()) {
                 view.showMessage("- " + scambio.toString());
             }
-
-            // Salva le modifiche e notifica i configuratori
-            salvaUtenti();
             this.database.aggiungiInsiemeChiuso(insiemeChiuso);
-            salvaTutti();
 
+            this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
         }
 
     }
@@ -3012,7 +3006,7 @@ public class Controller {
             return;
         }
 
-        this.view.showMessage("Ecco le tue proposte di scambio d'opera:");
+        this.view.showMessage("Ecco le tue proposte di scambio d'opera:\n");
         for (Proposta proposta : proposte) {
             this.view.showMessage(proposta.toString());
         }
@@ -3076,7 +3070,8 @@ public class Controller {
 
             if (risultato) {
                 this.view.showSuccessMessage(ControllerConstants.SUCCESS_PROPOSTA_RITIRATA);
-                salvaUtenti(); // Persisti le modifiche
+                // Salvataggio delle proposte
+                this.database.serializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
             } else {
                 this.view.showErrorMessage(ControllerConstants.ERROR_MODIFICA_PROPOSTA);
             }
