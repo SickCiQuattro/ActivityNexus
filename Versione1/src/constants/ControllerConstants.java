@@ -2,15 +2,16 @@ package constants;
 
 public class ControllerConstants {
 
-    // 1. AppConstants.java
-    // Costanti per messaggi di interfaccia generale
+    // ==============================================================================
+    // 1. COSTANTI GENERALI E INTERFACCIA
+    // ==============================================================================
     public static final String INVALID_OPTION = "Opzione non valida. Riprova";
     public static final String EXIT_MESSAGE = "Grazie per aver utilizzato il programma. Arrivederci!";
-    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo";
     public static final String OPERATION_CANCELLED = "Operazione annullata";
     public static final String ERROR_GENERIC = "Si è verificato un errore: %s";
     public static final String PROMPT_CHOICE = "Cosa vuoi fare? ";
-    public static final String ERROR_INVALID_INPUT = "Input non valido. Riprova";
+    public static final String SEPARATORE = "\n----------------------------------------------------------";
+
     // Costanti per percorsi file
     public static final String USERS_FILE_PATH = "src/data/utenti.ser";
     public static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
@@ -18,6 +19,7 @@ public class ControllerConstants {
     public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
     public static final String PROPOSTE_FILE_PATH = "src/data/proposte.ser";
     public static final String INSIEMECHIUSO_FILE_PATH = "src/data/insiemechiuso.ser";
+
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
     public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
@@ -28,13 +30,21 @@ public class ControllerConstants {
     public static final String SAVING_DATA = "Salvataggio dati in corso...";
     public static final String SAVING_SUCCESS = "Dati salvati con successo";
     public static final String SAVING_ERROR = "Errore durante il salvataggio dei dati: %s";
-    // 2. UserConstants.java
+
+    // ==============================================================================
+    // 2. COSTANTI PER MENU E SESSIONE
+    // ==============================================================================
+    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo";
+
+    // ==============================================================================
+    // 3. COSTANTI PER AUTENTICAZIONE E REGISTRAZIONE
+    // ==============================================================================
     public static final String NO_USERS_REGISTERED = "Nessun utente registrato. Effettua la registrazione";
     public static final String LOGIN_SUCCESS = "Login effettuato con successo! Bentornato, ";
     public static final String LOGIN_FAILED = "Credenziali non valide. Riprova";
     public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo! Ora puoi loggare nel sistema!";
-    public static final String SAVING_USERS_SUCCESS = "Dati utente salvati con successo";
-    // Costanti per autenticazione e registrazione
+
+    // Costanti per autenticazione
     public static final String TITLE_REGISTRATION = "\n===== REGISTRAZIONE NUOVO ACCOUNT =====";
     public static final String PROMPT_USERNAME = "Inserisci username: ";
     public static final String PROMPT_PASSWORD = "Inserisci password: ";
@@ -54,33 +64,43 @@ public class ControllerConstants {
     public static final String ERROR_NO_COMPRENSORI_REGISTRATION = "Non è possibile registrarsi come fruitore senza comprensori presenti";
     public static final String SECURITY_CHECK_FAILED = "Credenziali di default errate";
     public static final String EMAIL_ACQUISITION_FAILED = "Impossibile acquisire un'email valida";
+
     // Registrazione
     public static final String TITLE_REGISTRA_CONFIGURATORE = "\n=== Registrazione Nuovo Configuratore ===";
     public static final String TITLE_REGISTRA_FRUITORE = "\n=== Registrazione Nuovo Fruitore ===";
     public static final String REGISTRATION_CANCELLED = "Registrazione annullata";
     public static final String ERROR_REGISTRATION = "Errore durante la registrazione: %s";
     public static final String ERROR_USERNAME_ALREADY_EXISTS = "Username già in uso. Scegline un altro";
-    // 3. ComprensoriConstants.java
-    // Costanti per titoli e sezioni
+    public static final String PROMPT_MAIL = "Inserisci la tua mail: ";
+
+    // ==============================================================================
+    // 4. COSTANTI PER COMPRENSORI
+    // ==============================================================================
+    // Titoli e sezioni
     public static final String TITLE_COMPRENSORI = "\n=== COMPRENSORI DISPONIBILI ===";
     public static final String TITLE_NEW_COMPRENSORIO = "\n=== CREAZIONE NUOVO COMPRENSORIO ===";
-    // Costanti per messaggi informativi
+
+    // Messaggi informativi
     public static final String INFO_COMPRENSORIO_DESC = "Un comprensorio è un'area geografica che contiene più comuni";
     public static final String INFO_COMPRENSORIO_NEXT = "Dopo aver definito il nome del comprensorio, potrai aggiungere i comuni appartenenti ad esso";
     public static final String NO_COMPRENSORI = "Nessun comprensorio presente";
     public static final String COMPRENSORIO_CREATED = "Comprensorio creato con successo!";
-    // Costanti per comprensori - passi
+
+    // Passi
     public static final String STEP_NOME_COMPRENSORIO = "\n➤ PASSO 1: DEFINIZIONE DEL NOME DEL COMPRENSORIO";
     public static final String STEP_COMUNI_COMPRENSORIO = "\n➤ PASSO 2: AGGIUNTA DEI COMUNI";
-    // Costanti per comprensori - prompts
+
+    // Prompts
     public static final String PROMPT_NOME_COMPRENSORIO = "Inserisci il nome del comprensorio: ";
     public static final String PROMPT_NOME_COMUNE = "Inserisci il nome del comune: ";
     public static final String PROMPT_ADD_ALTRO_COMUNE = "Vuoi aggiungere un altro comune?";
-    // Costanti per comprensori - messaggi informativi
+
+    // Messaggi informativi
     public static final String INFO_AGGIUNGI_COMUNI = "Ora puoi aggiungere i comuni che fanno parte del comprensorio '%s'";
     public static final String INFO_MINIMO_UN_COMUNE = "Ogni comprensorio deve contenere almeno un comune";
     public static final String INFO_COMUNI_AGGIUNTI = "Comuni aggiunti finora: %d";
-    // Costanti per comprensori - messaggi di errore
+
+    // Messaggi di errore
     public static final String ERROR_NOME_VUOTO = "✗ Il nome del comprensorio non può essere vuoto";
     public static final String ERROR_NOME_CORTO = "✗ Il nome del comprensorio deve contenere almeno 3 caratteri";
     public static final String ERROR_NOME_DUPLICATO = "✗ Esiste già un comprensorio con questo nome";
@@ -89,19 +109,24 @@ public class ControllerConstants {
     public static final String ERROR_COMUNE_DUPLICATO = "✗ Il comune '%s' è già presente in questo comprensorio";
     public static final String ERROR_NESSUN_COMUNE = "✗ Il comprensorio deve contenere almeno un comune";
     public static final String ERROR_CREAZIONE_ANNULLATA = "✗ Creazione comprensorio annullata: nessun comune aggiunto";
-    // Costanti per comprensori - messaggi di successo
+    public static final String ERROR_NO_COMPRENSORI = "Non ci sono comprensori registrati nel sistema";
+
+    // Messaggi di successo
     public static final String SUCCESS_COMPRENSORIO_AGGIUNTO = "✓ Comprensorio '%s' aggiunto con successo!";
     public static final String SUCCESS_COMUNE_AGGIUNTO = "✓ Comune '%s' aggiunto al comprensorio '%s'";
 
-    // Costanti per la selezione dei comprensori
-    public static final String ERROR_NO_COMPRENSORI = "Non ci sono comprensori registrati nel sistema";
+    // Selezione comprensori
     public static final String TITLE_SELEZIONA_COMPRENSORIO = "\n=== Selezione Comprensorio ===";
     public static final String INFO_SELEZIONE_COMPRENSORIO = "Seleziona il tuo comprensorio di appartenenza: ";
     public static final String FORMATO_COMPRENSORIO_LISTA = "[%d] %s (%d comuni)";
     public static final String INFO_ANNULLA_SELEZIONE = "\nInserisci 0 per annullare la selezione";
     public static final String SUCCESS_COMPRENSORIO_SELEZIONATO = "Hai selezionato il comprensorio: %s";
-    // 4. GerarchieConstants.java
-    // Costanti per titoli e sezioni
+    public static final String PROMPT_COMPRENSORIO_INDEX = "Inserisci il numero corrispondente al comprensorio scelto: ";
+
+    // ==============================================================================
+    // 5. COSTANTI PER GERARCHIE
+    // ==============================================================================
+    // Titoli e sezioni
     public static final String TITLE_GERARCHIE = "\n=== GERARCHIE DISPONIBILI ===";
     public static final String TITLE_NEW_GERARCHIA = "\n=== CREAZIONE NUOVA GERARCHIA ===";
     public static final String TITLE_CREATE_GERARCHIA = "\n=== CREAZIONE GERARCHIA ===";
@@ -110,7 +135,8 @@ public class ControllerConstants {
     public static final String STEP_COMPLETAMENTO_GERARCHIA = "\n➤ PASSO 3: COMPLETAMENTO";
     public static final String TITLE_CAMPO_CARATTERISTICO = "\n== CREAZIONE CAMPO CARATTERISTICO ==";
     public static final String TITLE_VALORI_DOMINIO = "\n== CREAZIONE VALORI DI DOMINIO ==";
-    // Costanti per messaggi informativi
+
+    // Messaggi informativi
     public static final String NO_GERARCHIE = "Nessuna gerarchia presente nel sistema";
     public static final String NO_GERARCHIE_CONV = "Nessuna gerarchia presente nel sistema. Impossibile visualizzare fattori di conversione";
     public static final String INFO_GERARCHIA_DESC = "Una gerarchia è una struttura ad albero di categorie che rappresentano attività";
@@ -127,8 +153,8 @@ public class ControllerConstants {
     public static final String INFO_CREAZIONE_SOTTOCATEGORIA = "\n-- Creazione sottocategoria %d/%d per '%s' --";
     public static final String GERARCHIA_CREATED = "Gerarchia creata con successo!";
     public static final String GERARCHIA_ADDED = "Gerarchia aggiunta al database con successo!";
-    public static final String CONVERSIONE_TITLE = "Generazione dei fattori di conversione...";
-    // Costanti per gerarchie - prompt
+
+    // Prompts
     public static final String MSG_LISTA_GERARCHIE = "\nEcco una lista delle categorie radice delle gerarchie presenti. Le radici sono contrassegnate da un numero: ";
     public static final String MSG_SCELTA_GERARCHIA = "Inserisci il numero corrispondente alla gerarchia scelta: ";
     public static final String MSG_LISTA_FOGLIE = "\nEcco la gerarchia scelta. Le foglie sono contrassegnate da un numero: ";
@@ -140,10 +166,9 @@ public class ControllerConstants {
     public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore numero %d: ";
     public static final String PROMPT_DESCRIZIONE_VALORE = "Inserisci una descrizione per '%s' (facoltativa, premi INVIO per saltare): ";
     public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio?";
-    public static final String PROMPT_MAIL = "Inserisci la tua mail: ";
-    public static final String PROMPT_COMPRENSORIO_INDEX = "Inserisci il numero corrispondente al comprensorio scelto: ";
+    public static final String PROMPT_VALORI_CAMPO = "Inserisci i valori possibili per il campo '%s':";
 
-    // Costanti per gerarchie - messaggi di errore
+    // Messaggi di errore
     public static final String ERROR_NOME_CATEGORIA_VUOTO = "✗ Nome non valido. Il nome non può essere vuoto";
     public static final String ERROR_NOME_GERARCHIA_DUPLICATO = "✗ Esiste già una gerarchia con questo nome";
     public static final String ERROR_NOME_CATEGORIA_DUPLICATO = "✗ Esiste già una categoria con questo nome in questa gerarchia";
@@ -153,24 +178,31 @@ public class ControllerConstants {
     public static final String ERROR_VALORE_DUPLICATO = "✗ Valore '%s' già esistente nel dominio";
     public static final String ERROR_RADICE_SENZA_CAMPO = "ERRORE: La categoria radice deve avere un campo caratteristico!";
     public static final String ERROR_MINIMO_VALORE = "Devi inserire almeno un valore di dominio";
-    // Costanti per gerarchie - messaggi di successo
+
+    // Messaggi di successo
     public static final String SUCCESS_GERARCHIA_COMPLETATA = "Gerarchia completata con successo!";
     public static final String SUCCESS_CATEGORIA_CON_CAMPO = "✓ Categoria '%s' creata con campo caratteristico '%s'";
     public static final String SUCCESS_CATEGORIA_FOGLIA = "✓ Categoria foglia '%s' creata";
     public static final String SUCCESS_CAMPO_CREATO = "✓ Campo '%s' creato con %d valori di dominio";
     public static final String SUCCESS_VALORE_AGGIUNTO = "✓ Valore '%s' aggiunto al dominio";
-    // Costanti per gerarchie - messaggi di riepilogo
+
+    // Messaggi di riepilogo
     public static final String RIEPILOGO_PROFONDITA = "La gerarchia ha una profondità di %d livelli";
     public static final String RIEPILOGO_FOGLIE = "Contiene %d categorie foglia";
     public static final String RIEPILOGO_DOMINIO = "\nRiepilogo valori del dominio per il campo '%s': ";
     public static final String FORMATO_VALORE_DOMINIO = " %d. %s - %s";
     public static final String NESSUNA_DESCRIZIONE = "(nessuna descrizione)";
-    // 5. ConversioneConstants.java
-    // Costanti per fattori di conversione - titoli e passi
+
+    // ==============================================================================
+    // 6. COSTANTI PER FATTORI DI CONVERSIONE
+    // ==============================================================================
+    // Titoli e passi
     public static final String TITLE_FATTORI_CONVERSIONE = "\n=== FATTORI DI CONVERSIONE ===";
     public static final String TITLE_CONVERSIONI_TRA_GERARCHIE = "\n=== CONVERSIONI TRA GERARCHIE ===";
     public static final String TITLE_CONVERSIONE_GERARCHIE = "\n=== CREAZIONE FATTORI DI CONVERSIONE TRA GERARCHIE ===";
-    // Costanti per fattori di conversione - descrizioni informative
+    public static final String CONVERSIONE_TITLE = "Generazione dei fattori di conversione...";
+
+    // Descrizioni informative
     public static final String INFO_CONVERSIONE_INTRO = "Per rendere confrontabili attività di gerarchie diverse, è necessario definire fattori di conversione";
     public static final String INFO_CONVERSIONE_PONTE = "Il processo utilizza categorie di riferimento (una per ogni gerarchia) come 'ponte' tra le gerarchie";
     public static final String INFO_CONVERSIONE_GT1 = "Un fattore > 1 significa che un'ora dell'attività di destinazione vale più di un'ora dell'attività di origine";
@@ -185,20 +217,25 @@ public class ControllerConstants {
     public static final String INFO_SELEZIONA_DESTINAZIONE_PRESTAZIONI = "\nOra seleziona la gerarchia di cui vuoi visualizzare le prestazioni che vuoi offrire rispetto alla categoria \"%s\":\n";
     public static final String INFO_SELEZIONA_DESTINAZIONE_FATTORI = "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n";
 
-    // Costanti per fattori di conversione - prompts
+    // Prompts
     public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ";
-    // Costanti per fattori di conversione - messaggi di errore
+
+    // Messaggi di errore
     public static final String ERROR_FATTORE_SPECIALIZZATO = "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate";
     public static final String ERROR_FATTORE_NON_SPECIALIZZATO = "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate";
     public static final String ERROR_FATTORE_FORMATO = "Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2";
     public static final String ERROR_FATTORE_RANGE = "Il fattore di conversione tra gerarchie deve essere un valore decimale compreso tra 0.5 e 2";
-    // Costanti per fattori di conversione - messaggi di successo
+
+    // Messaggi di successo
     public static final String SUCCESS_FATTORE_AGGIUNTO = "✓ Fattore di conversione aggiunto: %s";
     public static final String SUCCESS_FATTORI_CREATI = "\nSono stati creati %d fattori di conversione tra gerarchie";
     public static final String SUCCESS_FATTORE_SEMPLICE = "Fattore di conversione aggiunto";
     public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato";
 
-    // Proposta di scambio
+    // ==============================================================================
+    // 7. COSTANTI PER SCAMBI D'OPERA
+    // ==============================================================================
+    // Proposta di scambio - Titoli e fasi
     public static final String TITLE_PROPOSTA_SCAMBIO = "=== PROPOSTA DI SCAMBIO D'OPERA ===";
     public static final String INFO_PROPOSTA_DESCRIZIONE = "Questo processo ti guiderà nella creazione di una proposta di scambio di prestazioni d'opera";
     public static final String STEP_SELEZIONE_RICHIESTA = "FASE 1: Seleziona la prestazione che desideri ricevere";
@@ -207,36 +244,45 @@ public class ControllerConstants {
     public static final String STEP_CALCOLO_CONVERSIONE = "FASE 4: Calcolo del fattore di conversione";
     public static final String STEP_FATTORE_CONV = "\nFattore di conversione: %.2f";
     public static final String STEP_RIEPILOGO_PROPOSTA = "FASE 5: Riepilogo e conferma della proposta";
+
+    // Prompts per inserimento dati
     public static final String PROMPT_ORE_RICHIESTE = "Quante ore di %s desideri ricevere?";
+    public static final String PROMPT_CONFERMA_PROPOSTA = "Confermi questa proposta di scambio?";
+
+    // Messaggi informativi per proposte
+    public static final String INFO_RIEPILOGO_PROPOSTA = "Richiedendo %d ore per \"%s\", dovrai offrire %d ore per \"%s\"";
+    public static final String INFO_PROPOSTA_AVVERTENZA = "\nIl sistema ammette una tolleranza di 1 ora rispetto alla proposta";
+    public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata";
+    public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
+
+    // Messaggi di errore per proposte
     public static final String ERROR_STESSA_CATEGORIA = "Non puoi offrire la stessa categoria che stai richiedendo";
     public static final String INFO_OPERAZIONE_ANNULLATA = "Operazione annullata";
-    public static final String INFO_RIEPILOGO_PROPOSTA = "Richiedendo %d ore per \"%s\", dovrai offrire %d ore per \"%s\"";
-    public static final String PROMPT_CONFERMA_PROPOSTA = "Confermi questa proposta di scambio?";
-    public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
-    public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata";
-    public static final String INFO_PROPOSTA_AVVERTENZA = "\nIl sistema ammette una tolleranza di 1 ora rispetto alla proposta";
-    // Messaggi per la gestione delle proposte
-    public static final String MSG_NESSUNA_PROPOSTA_APERTA = "Non hai proposte aperte da modificare";
+
+    // Costanti per visualizzazione proposte
+    public static final String TITLE_PROPOSTE_FRUITORE = "Ecco le tue proposte di scambio d'opera:\n";
+    public static final String MSG_NESSUNA_PROPOSTA = "Non hai alcuna proposta di scambo d'opera";
+    public static final String TITLE_PROPOSTE_CATEGORIA = "=== PROPOSTE PER CATEGORIA ===";
+    public static final String INFO_PROPOSTE_PER_CATEGORIA = "Proposte che coinvolgono la categoria \"%s\":\n";
+    public static final String MSG_NESSUNA_PROPOSTA_CATEGORIA = "Non ci sono proposte che coinvolgono la categoria \"%s\"";
+
+    // Costanti per modifica stato proposte
     public static final String TITLE_MODIFICA_PROPOSTA = "=== MODIFICA STATO PROPOSTA ===";
     public static final String INFO_SELEZIONE_PROPOSTA = "Seleziona la proposta da modificare:";
     public static final String PROMPT_SELEZIONA_PROPOSTA = "Inserisci il numero della proposta da modificare (0 per annullare): ";
+    public static final String MSG_NESSUNA_PROPOSTA_APERTA = "Non hai proposte aperte da modificare";
     public static final String ERROR_INDICE_NON_VALIDO = "Indice non valido. Riprova";
     public static final String MSG_OPERAZIONE_ANNULLATA = "Operazione annullata.";
     public static final String PROMPT_CONFERMA_RITIRO = "Sei sicuro di voler ritirare questa proposta? ";
     public static final String SUCCESS_PROPOSTA_RITIRATA = "Proposta ritirata con successo!";
     public static final String ERROR_MODIFICA_PROPOSTA = "Impossibile modificare la proposta. Potrebbe essere già chiusa o ritirata";
-    public static final String TITLE_PROPOSTE_CATEGORIA = "=== PROPOSTE PER CATEGORIA ===";
-    public static final String INFO_PROPOSTE_PER_CATEGORIA = "Proposte che coinvolgono la categoria \"%s\":\n";
-    public static final String MSG_NESSUNA_PROPOSTA_CATEGORIA = "Non ci sono proposte che coinvolgono la categoria \"%s\"";
 
-    // Costanti per InsiemeChiuso e Scambi
+    // Costanti per insiemi chiusi
+    public static final String TITLE_INSIEMI_CHIUSI = "\n=== INSIEMI CHIUSI ===";
     public static final String TITLE_INSIEME_CHIUSO_TROVATO = "È stato trovato un ciclo di scambio valido!";
     public static final String INFO_PROPOSTE_INSIEME_CHIUSO = "Le seguenti proposte formano un insieme chiuso:";
     public static final String INFO_DETTAGLI_SCAMBI = "\nDettagli degli scambi:";
     public static final String FORMATO_LISTA_SCAMBI = "- %s";
-
-    // Costanti per valutaProposteScambio
-    public static final String TITLE_INSIEMI_CHIUSI = "\n=== INSIEMI CHIUSI ===";
     public static final String INFO_NOTIFICA_SIMBOLO = "Il simbolo [✓] indica che i fruitori sono stati notificati";
     public static final String INFO_NON_NOTIFICA_SIMBOLO = "Il simbolo [!] indica che i fruitori NON sono stati ancora notificati";
     public static final String FORMATO_INSIEME_CHIUSO = "%d) %s Insieme chiuso con %d scambi";
@@ -246,14 +292,4 @@ public class ControllerConstants {
     public static final String PROMPT_NOTIFICA_INSIEME = "Vuoi contrassegnare questo insieme chiuso come notificato?";
     public static final String SUCCESS_INSIEME_NOTIFICATO = "Insieme chiuso contrassegnato come notificato.";
     public static final String MSG_NESSUN_INSIEME_CHIUSO = "Non sono presenti insiemi chiusi nel sistema.";
-
-    public static final String PROMPT_VALORI_CAMPO = "Inserisci i valori possibili per il campo '%s':";
-
-    public static final String MSG_NESSUNA_PROPOSTA = "Non hai alcuna proposta di scambo d'opera";
-
-    public static final String TITLE_PROPOSTE_FRUITORE = "Ecco le tue proposte di scambio d'opera:\n";
-
-    // Costanti per separatori visivi
-    public static final String SEPARATORE = "\n----------------------------------------------------------";
-
 }
