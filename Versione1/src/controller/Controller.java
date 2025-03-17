@@ -44,9 +44,12 @@ import java.util.*;
  * @see view.ConsoleView
  */
 public class Controller {
-    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le
-    // funzionalità
+    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le funzionalità
     // da monilitico a moduli più piccoli e coesi
+    // TODO: refactor Database
+    // TODO: refactor View
+    // TODO: refactor Controller
+    // TODO: refactor Gerarchia
 
     private Database database;
     private final ConsoleView view;
@@ -2788,7 +2791,7 @@ public class Controller {
         }
 
         // Crea un insieme chiuso con gli archi del ciclo trovato
-        InsiemeChiuso insiemeChiuso = new InsiemeChiuso(fruitoreIniziale.getComprensorio());
+        InsiemeChiuso insiemeChiuso = new InsiemeChiuso();
 
         // Ricostruisci il ciclo dagli archi entranti
         Fruitore nodoCorrente = fruitoreIniziale;
@@ -2804,8 +2807,8 @@ public class Controller {
             Scambio scambio = new Scambio(
                     arco.getFornitore(),
                     arco.getRicevente(),
-                    proposta.getOfferta(),
-                    proposta);
+                    proposta.getOfferta()
+            );
             insiemeChiuso.aggiungiScambio(scambio);
 
             // Passa al nodo precedente
