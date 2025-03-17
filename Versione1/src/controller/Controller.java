@@ -51,9 +51,9 @@ public class Controller {
     private Database database;
     private final ConsoleView view;
 
-    // -----------------------------------------------------------------------------------
-    // METODI PRINCIPALI
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 1. METODI CORE E INIZIALIZZAZIONE
+    // ==============================================================================
 
     /**
      * Costruisce un nuovo controller collegando il modello (database) alla vista.
@@ -331,9 +331,9 @@ public class Controller {
         }
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI DI GESTIONE MENU E SESSIONE
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 2. GESTIONE MENU E SESSIONE
+    // ==============================================================================
 
     /**
      * Gestisce il processo di autenticazione dell'utente.
@@ -531,190 +531,6 @@ public class Controller {
     }
 
     /**
-     * Visualizza i comprensori geografici registrati nel sistema.
-     * <p>
-     * Mostra un elenco formattato di tutti i comprensori disponibili con le
-     * seguenti informazioni:
-     * <ul>
-     * <li>Nome del comprensorio</li>
-     * <li>Elenco dei comuni appartenenti</li>
-     * </ul>
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Se non esistono comprensori, viene mostrato un messaggio informativo
-     * @post Se esistono comprensori, viene visualizzato l'elenco completo in
-     *       formato leggibile
-     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
-     */
-    private void visualizzaComprensori() {
-        // Verifica se ci sono comprensori da visualizzare
-        if (this.database.getComprensori().isEmpty()) {
-            // Se non ci sono comprensori, mostra un messaggio appropriato
-            view.showErrorMessage(ControllerConstants.NO_COMPRENSORI);
-        } else {
-            // Altrimenti, mostra il titolo e la lista dei comprensori
-            view.showMessage(ControllerConstants.TITLE_COMPRENSORI);
-            view.showMessage(database.toStringComprensori());
-        }
-    }
-
-    /**
-     * Visualizza le gerarchie di categorie registrate nel sistema.
-     * <p>
-     * Presenta una rappresentazione strutturata delle gerarchie, mostrando:
-     * <ul>
-     * <li>Relazioni gerarchiche tra categorie (struttura ad albero)</li>
-     * <li>Campi caratteristici di ciascuna categoria</li>
-     * <li>Valori di dominio per i campi caratteristici</li>
-     * </ul>
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Se non esistono gerarchie, viene mostrato un messaggio informativo
-     * @post Se esistono gerarchie, viene visualizzata la struttura completa in
-     *       formato leggibile
-     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
-     */
-    private void visualizzaGerarchie() {
-        // Verifica se ci sono gerarchie da visualizzare
-        if (this.database.getGerarchie().isEmpty()) {
-            // Se non ci sono gerarchie, mostra un messaggio appropriato
-            view.showErrorMessage(ControllerConstants.NO_GERARCHIE);
-        } else {
-            // Altrimenti, mostra il titolo e la lista delle gerarchie
-            view.showMessage(ControllerConstants.TITLE_GERARCHIE);
-            view.showMessage(this.database.toStringGerarchie());
-        }
-    }
-
-    /**
-     * Verifica la presenza di gerarchie nel sistema.
-     * <p>
-     * Controlla se esistono gerarchie configurate e mostra un messaggio
-     * appropriato in caso negativo.
-     *
-     * @return true se esistono gerarchie nel database, false altrimenti
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Se non esistono gerarchie, viene mostrato un messaggio specifico di
-     *       errore
-     * @post Il valore restituito è true se e solo se esiste almeno una gerarchia
-     *       nel database
-     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
-     */
-    private boolean verificaPresenzaGerarchie() {
-        // Verifica se ci sono gerarchie nel database
-        if (this.database.getGerarchie().isEmpty()) {
-            // Se non ci sono gerarchie, mostra un messaggio di errore specifico per la
-            // funzione di conversione
-            this.view.showErrorMessage(ControllerConstants.NO_GERARCHIE_CONV);
-            return false;
-        }
-        // Ci sono gerarchie, l'operazione può procedere
-        return true;
-    }
-
-    /**
-     * Avvia il processo di creazione di un nuovo comprensorio.
-     * <p>
-     * Guida l'utente attraverso un flusso interattivo che include:
-     * <ol>
-     * <li>Presentazione delle informazioni introduttive sul processo</li>
-     * <li>Raccolta del nome e dei comuni appartenenti al comprensorio</li>
-     * <li>Validazione dei dati inseriti</li>
-     * <li>Salvataggio del nuovo comprensorio nel database</li>
-     * <li>Persistenza dei dati su file</li>
-     * </ol>
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Se la creazione ha successo, un nuovo comprensorio viene aggiunto al
-     *       database
-     * @post Se la creazione ha successo, i dati vengono salvati su file (tramite
-     *       serializeComprensori())
-     * @post Se la creazione ha successo, viene mostrato un messaggio di conferma
-     * @post Se la creazione è annullata o fallisce, viene mostrato un messaggio
-     *       appropriato
-     * @post L'operazione non modifica i comprensori esistenti
-     */
-    private void creaComprensorio() {
-        // Mostra informazioni introduttive sul processo di creazione
-        view.showMessage(ControllerConstants.TITLE_NEW_COMPRENSORIO);
-        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_DESC);
-        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_NEXT);
-
-        // Avvia il processo di creazione del comprensorio
-        if (createComprensorio()) {
-            // Se la creazione ha successo, salva i dati su file
-            this.database.serializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
-            view.showSuccessMessage(ControllerConstants.COMPRENSORIO_CREATED);
-        } else {
-            // In caso di annullamento o errore
-            view.showMessage(ControllerConstants.OPERATION_CANCELLED);
-        }
-    }
-
-    /**
-     * Avvia il processo di creazione di una nuova gerarchia di categorie.
-     * <p>
-     * Orchestrazione completa del flusso di creazione che include:
-     * <ol>
-     * <li>Strutturazione della gerarchia con categorie e relazioni
-     * padre-figlio</li>
-     * <li>Definizione di campi caratteristici e domini di valori</li>
-     * <li>Configurazione dei fattori di conversione interni alla gerarchia</li>
-     * <li>Configurazione dei fattori di conversione con altre gerarchie
-     * esistenti</li>
-     * <li>Salvataggio della gerarchia completa nel database</li>
-     * <li>Persistenza dei dati su file</li>
-     * </ol>
-     *
-     * @pre this.database != null
-     * @pre this.view != null
-     * @post Una nuova gerarchia completa viene aggiunta al database
-     * @post I dati delle gerarchie vengono salvati su file (tramite
-     *       serializeGerarchie())
-     * @post I fattori di conversione vengono salvati su file (tramite
-     *       serializeConversioneGerarchie())
-     * @post Se esistono altre gerarchie, vengono configurati fattori di conversione
-     *       tra la nuova e le esistenti
-     * @post Viene mostrato un messaggio di conferma al completamento
-     *       dell'operazione
-     */
-    private void creaGerarchia() {
-        // Mostra informazioni introduttive sulla creazione della gerarchia
-        view.showMessage(ControllerConstants.TITLE_NEW_GERARCHIA);
-
-        // Creazione della struttura principale della gerarchia
-        Gerarchia gerarchia = createGerarchia();
-        view.showSuccessMessage(ControllerConstants.GERARCHIA_CREATED);
-
-        // Visualizzazione della struttura gerarchica creata
-        view.showMessage("\n" + gerarchia);
-
-        // Configurazione dei fattori di conversione interni alla gerarchia
-        view.showMessage("\n" + ControllerConstants.CONVERSIONE_TITLE);
-        creaFattoriConversione(gerarchia);
-
-        // Configurazione delle conversioni tra la nuova gerarchia e quelle esistenti
-        if (!database.getGerarchie().isEmpty()) {
-            view.showMessage(ControllerConstants.TITLE_CONVERSIONI_TRA_GERARCHIE);
-            creaConversioneGerarchie(gerarchia);
-        }
-
-        // Aggiunta della gerarchia al database
-        if (this.database.addGerarchia(gerarchia)) {
-            view.showSuccessMessage(ControllerConstants.GERARCHIA_ADDED);
-        }
-
-        // Salvataggio dei dati su file
-        this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
-        this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
-    }
-
-    /**
      * Gestisce l'interfaccia e le funzionalità dell'utente fruitore.
      * <p>
      * Implementa un sottomenu dedicato alle operazioni del fruitore, permettendo
@@ -796,9 +612,9 @@ public class Controller {
         }
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI DI AUTENTICAZIONE E REGISTRAZIONE
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 3. AUTENTICAZIONE E REGISTRAZIONE UTENTI
+    // ==============================================================================
 
     /**
      * Autentica un utente nel sistema.
@@ -1070,9 +886,78 @@ public class Controller {
         return false;
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI PER LA GESTIONE DEI COMPRENSORI
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 4. GESTIONE COMPRENSORI
+    // ==============================================================================
+
+    /**
+     * Visualizza i comprensori geografici registrati nel sistema.
+     * <p>
+     * Mostra un elenco formattato di tutti i comprensori disponibili con le
+     * seguenti informazioni:
+     * <ul>
+     * <li>Nome del comprensorio</li>
+     * <li>Elenco dei comuni appartenenti</li>
+     * </ul>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono comprensori, viene mostrato un messaggio informativo
+     * @post Se esistono comprensori, viene visualizzato l'elenco completo in
+     *       formato leggibile
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
+     */
+    private void visualizzaComprensori() {
+        // Verifica se ci sono comprensori da visualizzare
+        if (this.database.getComprensori().isEmpty()) {
+            // Se non ci sono comprensori, mostra un messaggio appropriato
+            view.showErrorMessage(ControllerConstants.NO_COMPRENSORI);
+        } else {
+            // Altrimenti, mostra il titolo e la lista dei comprensori
+            view.showMessage(ControllerConstants.TITLE_COMPRENSORI);
+            view.showMessage(database.toStringComprensori());
+        }
+    }
+
+    /**
+     * Avvia il processo di creazione di un nuovo comprensorio.
+     * <p>
+     * Guida l'utente attraverso un flusso interattivo che include:
+     * <ol>
+     * <li>Presentazione delle informazioni introduttive sul processo</li>
+     * <li>Raccolta del nome e dei comuni appartenenti al comprensorio</li>
+     * <li>Validazione dei dati inseriti</li>
+     * <li>Salvataggio del nuovo comprensorio nel database</li>
+     * <li>Persistenza dei dati su file</li>
+     * </ol>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se la creazione ha successo, un nuovo comprensorio viene aggiunto al
+     *       database
+     * @post Se la creazione ha successo, i dati vengono salvati su file (tramite
+     *       serializeComprensori())
+     * @post Se la creazione ha successo, viene mostrato un messaggio di conferma
+     * @post Se la creazione è annullata o fallisce, viene mostrato un messaggio
+     *       appropriato
+     * @post L'operazione non modifica i comprensori esistenti
+     */
+    private void creaComprensorio() {
+        // Mostra informazioni introduttive sul processo di creazione
+        view.showMessage(ControllerConstants.TITLE_NEW_COMPRENSORIO);
+        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_DESC);
+        view.showMessage(ControllerConstants.INFO_COMPRENSORIO_NEXT);
+
+        // Avvia il processo di creazione del comprensorio
+        if (createComprensorio()) {
+            // Se la creazione ha successo, salva i dati su file
+            this.database.serializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
+            view.showSuccessMessage(ControllerConstants.COMPRENSORIO_CREATED);
+        } else {
+            // In caso di annullamento o errore
+            view.showMessage(ControllerConstants.OPERATION_CANCELLED);
+        }
+    }
 
     /**
      * Crea un nuovo comprensorio con nome e comuni definiti dall'utente.
@@ -1326,9 +1211,124 @@ public class Controller {
         return selezionato;
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI PER LA GESTIONE DELLE GERARCHIE
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 5. GESTIONE GERARCHIE
+    // ==============================================================================
+
+    /**
+     * Visualizza le gerarchie di categorie registrate nel sistema.
+     * <p>
+     * Presenta una rappresentazione strutturata delle gerarchie, mostrando:
+     * <ul>
+     * <li>Relazioni gerarchiche tra categorie (struttura ad albero)</li>
+     * <li>Campi caratteristici di ciascuna categoria</li>
+     * <li>Valori di dominio per i campi caratteristici</li>
+     * </ul>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono gerarchie, viene mostrato un messaggio informativo
+     * @post Se esistono gerarchie, viene visualizzata la struttura completa in
+     *       formato leggibile
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
+     */
+    private void visualizzaGerarchie() {
+        // Verifica se ci sono gerarchie da visualizzare
+        if (this.database.getGerarchie().isEmpty()) {
+            // Se non ci sono gerarchie, mostra un messaggio appropriato
+            view.showErrorMessage(ControllerConstants.NO_GERARCHIE);
+        } else {
+            // Altrimenti, mostra il titolo e la lista delle gerarchie
+            view.showMessage(ControllerConstants.TITLE_GERARCHIE);
+            view.showMessage(this.database.toStringGerarchie());
+        }
+    }
+
+    /**
+     * Verifica la presenza di gerarchie nel sistema.
+     * <p>
+     * Controlla se esistono gerarchie configurate e mostra un messaggio
+     * appropriato in caso negativo.
+     *
+     * @return true se esistono gerarchie nel database, false altrimenti
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Se non esistono gerarchie, viene mostrato un messaggio specifico di
+     *       errore
+     * @post Il valore restituito è true se e solo se esiste almeno una gerarchia
+     *       nel database
+     * @post Lo stato del sistema rimane invariato (operazione di sola lettura)
+     */
+    private boolean verificaPresenzaGerarchie() {
+        // Verifica se ci sono gerarchie nel database
+        if (this.database.getGerarchie().isEmpty()) {
+            // Se non ci sono gerarchie, mostra un messaggio di errore specifico per la
+            // funzione di conversione
+            this.view.showErrorMessage(ControllerConstants.NO_GERARCHIE_CONV);
+            return false;
+        }
+        // Ci sono gerarchie, l'operazione può procedere
+        return true;
+    }
+
+    /**
+     * Avvia il processo di creazione di una nuova gerarchia di categorie.
+     * <p>
+     * Orchestrazione completa del flusso di creazione che include:
+     * <ol>
+     * <li>Strutturazione della gerarchia con categorie e relazioni
+     * padre-figlio</li>
+     * <li>Definizione di campi caratteristici e domini di valori</li>
+     * <li>Configurazione dei fattori di conversione interni alla gerarchia</li>
+     * <li>Configurazione dei fattori di conversione con altre gerarchie
+     * esistenti</li>
+     * <li>Salvataggio della gerarchia completa nel database</li>
+     * <li>Persistenza dei dati su file</li>
+     * </ol>
+     *
+     * @pre this.database != null
+     * @pre this.view != null
+     * @post Una nuova gerarchia completa viene aggiunta al database
+     * @post I dati delle gerarchie vengono salvati su file (tramite
+     *       serializeGerarchie())
+     * @post I fattori di conversione vengono salvati su file (tramite
+     *       serializeConversioneGerarchie())
+     * @post Se esistono altre gerarchie, vengono configurati fattori di conversione
+     *       tra la nuova e le esistenti
+     * @post Viene mostrato un messaggio di conferma al completamento
+     *       dell'operazione
+     */
+    private void creaGerarchia() {
+        // Mostra informazioni introduttive sulla creazione della gerarchia
+        view.showMessage(ControllerConstants.TITLE_NEW_GERARCHIA);
+
+        // Creazione della struttura principale della gerarchia
+        Gerarchia gerarchia = createGerarchia();
+        view.showSuccessMessage(ControllerConstants.GERARCHIA_CREATED);
+
+        // Visualizzazione della struttura gerarchica creata
+        view.showMessage("\n" + gerarchia);
+
+        // Configurazione dei fattori di conversione interni alla gerarchia
+        view.showMessage("\n" + ControllerConstants.CONVERSIONE_TITLE);
+        creaFattoriConversione(gerarchia);
+
+        // Configurazione delle conversioni tra la nuova gerarchia e quelle esistenti
+        if (!database.getGerarchie().isEmpty()) {
+            view.showMessage(ControllerConstants.TITLE_CONVERSIONI_TRA_GERARCHIE);
+            creaConversioneGerarchie(gerarchia);
+        }
+
+        // Aggiunta della gerarchia al database
+        if (this.database.addGerarchia(gerarchia)) {
+            view.showSuccessMessage(ControllerConstants.GERARCHIA_ADDED);
+        }
+
+        // Salvataggio dei dati su file
+        this.database.serializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
+        this.database.serializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
+    }
 
     /**
      * Crea una nuova gerarchia di categorie completa.
@@ -1712,9 +1712,9 @@ public class Controller {
         }
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI PER LA GESTIONE DEI FATTORI DI CONVERSIONE
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 6. GESTIONE FATTORI DI CONVERSIONE
+    // ==============================================================================
 
     /**
      * Visualizza i fattori di conversione tra categorie di gerarchie diverse.
@@ -2194,9 +2194,84 @@ public class Controller {
         }
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI DI GESTIONE DI SCAMBI D'OPERA
-    // -----------------------------------------------------------------------------------
+    /**
+     * Calcola il fattore di conversione tra due categorie foglia, potenzialmente in
+     * gerarchie diverse.
+     * <p>
+     * Questo metodo implementa l'algoritmo di conversione completo che permette di
+     * stabilire una relazione
+     * quantitativa tra categorie diverse, considerando tre componenti:
+     * <ol>
+     * <li>Fattore interno alla gerarchia di origine (dalla foglia richiesta al nodo
+     * di riferimento)</li>
+     * <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
+     * <li>Fattore interno alla gerarchia di destinazione (dal nodo di riferimento
+     * alla foglia offerta)</li>
+     * </ol>
+     * <p>
+     * Il risultato finale è il prodotto di questi tre fattori, che permette di
+     * determinare
+     * il rapporto di conversione tra ore di categorie diverse, consentendo scambi
+     * equi
+     * tra prestazioni di natura differente.
+     *
+     * @param gerarchiaOrigine      gerarchia della categoria richiesta
+     * @param fogliaRichiesta       nodo foglia della categoria richiesta
+     * @param gerarchiaDestinazione gerarchia della categoria offerta
+     * @param fogliaOfferta         nodo foglia della categoria offerta
+     * @return il fattore di conversione complessivo
+     *
+     * @pre gerarchiaOrigine != null
+     * @pre fogliaRichiesta != null
+     * @pre gerarchiaDestinazione != null
+     * @pre fogliaOfferta != null
+     * @pre gerarchiaOrigine.getFattoreConversione() != null
+     * @pre gerarchiaDestinazione.getFattoreConversione() != null
+     * @pre gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento() != null
+     * @pre gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento() !=
+     *      null
+     * @pre fogliaRichiesta appartiene a gerarchiaOrigine
+     * @pre fogliaOfferta appartiene a gerarchiaDestinazione
+     * @post Il valore restituito è un numero decimale positivo > 0
+     * @post Se le gerarchie sono identiche, il fattore inter-gerarchia è 1.0
+     * @post Il fattore risultante è il prodotto di: fattoreIntraOrigine *
+     *       fattoreInterGerarchia * fattoreIntraDestinazione
+     * @post Il fattore può essere usato per convertire quantitativamente ore tra le
+     *       categorie specificate
+     */
+    private double calcolaFattoreConversione(
+            Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
+            Gerarchia gerarchiaDestinazione, TreeNode<Categoria> fogliaOfferta) {
+
+        // 1. Fattore interno alla gerarchia di origine (dalla foglia al nodo di
+        // riferimento)
+        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
+                fogliaRichiesta.level(),
+                gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
+
+        // 2. Fattore tra gerarchie diverse (tra i nodi di riferimento)
+        double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
+        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
+            // Se le gerarchie sono diverse, ottiene il fattore tra i loro nodi di
+            // riferimento
+            fattoreInterGerarchia = database.getConversioneGerarchie().getFattoreConversione(
+                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
+                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
+        }
+
+        // 3. Fattore interno alla gerarchia di destinazione (dal nodo di riferimento
+        // alla foglia)
+        double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
+                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),
+                fogliaOfferta.level());
+
+        // Calcolo del fattore combinato
+        return Math.clamp(fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest, 0.5, 2);
+    }
+
+    // ==============================================================================
+    // 7. GESTIONE SCAMBI D'OPERA
+    // ==============================================================================
 
     /**
      * Gestisce il processo di creazione di una proposta di scambio d'opera.
@@ -2875,80 +2950,9 @@ public class Controller {
         }
     }
 
-    /**
-     * Calcola il fattore di conversione tra due categorie foglia, potenzialmente in
-     * gerarchie diverse.
-     * <p>
-     * Questo metodo implementa l'algoritmo di conversione completo che permette di
-     * stabilire una relazione
-     * quantitativa tra categorie diverse, considerando tre componenti:
-     * <ol>
-     * <li>Fattore interno alla gerarchia di origine (dalla foglia richiesta al nodo
-     * di riferimento)</li>
-     * <li>Fattore tra le gerarchie (tra i rispettivi nodi di riferimento)</li>
-     * <li>Fattore interno alla gerarchia di destinazione (dal nodo di riferimento
-     * alla foglia offerta)</li>
-     * </ol>
-     * <p>
-     * Il risultato finale è il prodotto di questi tre fattori, che permette di
-     * determinare
-     * il rapporto di conversione tra ore di categorie diverse, consentendo scambi
-     * equi
-     * tra prestazioni di natura differente.
-     *
-     * @param gerarchiaOrigine      gerarchia della categoria richiesta
-     * @param fogliaRichiesta       nodo foglia della categoria richiesta
-     * @param gerarchiaDestinazione gerarchia della categoria offerta
-     * @param fogliaOfferta         nodo foglia della categoria offerta
-     * @return il fattore di conversione complessivo
-     *
-     * @pre gerarchiaOrigine != null
-     * @pre fogliaRichiesta != null
-     * @pre gerarchiaDestinazione != null
-     * @pre fogliaOfferta != null
-     * @pre gerarchiaOrigine.getFattoreConversione() != null
-     * @pre gerarchiaDestinazione.getFattoreConversione() != null
-     * @pre gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento() != null
-     * @pre gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento() !=
-     *      null
-     * @pre fogliaRichiesta appartiene a gerarchiaOrigine
-     * @pre fogliaOfferta appartiene a gerarchiaDestinazione
-     * @post Il valore restituito è un numero decimale positivo > 0
-     * @post Se le gerarchie sono identiche, il fattore inter-gerarchia è 1.0
-     * @post Il fattore risultante è il prodotto di: fattoreIntraOrigine *
-     *       fattoreInterGerarchia * fattoreIntraDestinazione
-     * @post Il fattore può essere usato per convertire quantitativamente ore tra le
-     *       categorie specificate
-     */
-    private double calcolaFattoreConversione(
-            Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
-            Gerarchia gerarchiaDestinazione, TreeNode<Categoria> fogliaOfferta) {
-
-        // 1. Fattore interno alla gerarchia di origine (dalla foglia al nodo di
-        // riferimento)
-        double fattoreIntraGerarchia = gerarchiaOrigine.getFattoreConversione().getFattoreConversione(
-                fogliaRichiesta.level(),
-                gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().level());
-
-        // 2. Fattore tra gerarchie diverse (tra i nodi di riferimento)
-        double fattoreInterGerarchia = 1.0; // Default: stessa gerarchia, fattore 1
-        if (!gerarchiaOrigine.equals(gerarchiaDestinazione)) {
-            // Se le gerarchie sono diverse, ottiene il fattore tra i loro nodi di
-            // riferimento
-            fattoreInterGerarchia = database.getConversioneGerarchie().getFattoreConversione(
-                    gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento().data(),
-                    gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().data());
-        }
-
-        // 3. Fattore interno alla gerarchia di destinazione (dal nodo di riferimento
-        // alla foglia)
-        double fattoreIntraGerarchiaDest = gerarchiaDestinazione.getFattoreConversione().getFattoreConversione(
-                gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento().level(),
-                fogliaOfferta.level());
-
-        // Calcolo del fattore combinato
-        return Math.clamp(fattoreIntraGerarchia * fattoreInterGerarchia * fattoreIntraGerarchiaDest, 0.5, 2);
-    }
+    // ==============================================================================
+    // 8. GESTIONE PROPOSTE
+    // ==============================================================================
 
     public void visualizzaProposteFruitore(Fruitore fruitore) {
         List<Proposta> proposte = this.database.getPropostePerFruitore(fruitore);
@@ -3114,9 +3118,9 @@ public class Controller {
         }
     }
 
-    // -----------------------------------------------------------------------------------
-    // METODI DI SUPPORTO PER L'INPUT UTENTE
-    // -----------------------------------------------------------------------------------
+    // ==============================================================================
+    // 9. SUPPORTO INPUT UTENTE E LOGGING
+    // ==============================================================================
 
     /**
      * Richiede e valida uno username per la registrazione.
