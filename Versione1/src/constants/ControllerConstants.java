@@ -32,16 +32,16 @@ public class ControllerConstants {
     public static final String NO_USERS_REGISTERED = "Nessun utente registrato. Effettua la registrazione";
     public static final String LOGIN_SUCCESS = "Login effettuato con successo! Bentornato, ";
     public static final String LOGIN_FAILED = "Credenziali non valide. Riprova";
-    public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo!";
+    public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo! Ora puoi loggare nel sistema!";
     public static final String SAVING_USERS_SUCCESS = "Dati utente salvati con successo";
     // Costanti per autenticazione e registrazione
     public static final String TITLE_REGISTRATION = "\n===== REGISTRAZIONE NUOVO ACCOUNT =====";
     public static final String PROMPT_USERNAME = "Inserisci username: ";
     public static final String PROMPT_PASSWORD = "Inserisci password: ";
-    public static final String PROMPT_NEW_USERNAME = "Inserisci un nuovo username (non vuoto, senza spazi, lungo massimo %d caratteri, senza caratteri speciali): ";
-    public static final String PROMPT_NEW_PASSWORD = "Inserisci una nuova password (lunga almeno %d caratteri, contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale): ";
+    public static final String PROMPT_NEW_USERNAME = "Requisiti username:\n- non vuoto, senza spazi\n- lungo massimo %d caratteri\n- senza caratteri speciali\nInserisci un nuovo username: ";
+    public static final String PROMPT_NEW_PASSWORD = "Requisiti password:\n- lunga almeno %d caratteri\n- contenere almeno: una lettera maiuscola, una minuscola e un carattere speciale\nInserisci una nuova password: ";
     public static final String PROMPT_CONFIG_ROLE = "Sei un configuratore?";
-    public static final String DEFAULT_LOGIN_INTRO = "Effettua il login con le seguenti credenziali: ";
+    public static final String DEFAULT_LOGIN_INTRO = "Effettua il login con le seguenti credenziali:\n";
     public static final String DEFAULT_USERNAME_DISPLAY = "Username: %s";
     public static final String DEFAULT_PASSWORD_DISPLAY = "Password: %s";
     public static final String DEFAULT_LOGIN_INVALID = "Credenziali non valide. Tentativi rimasti: %d";
@@ -183,7 +183,9 @@ public class ControllerConstants {
     public static final String INFO_PERCORSO_ESISTENTE = "\n   Percorso nella gerarchia esistente: ";
     public static final String INFO_NESSUNA_GERARCHIA = "\nNessun'altra gerarchia presente nel sistema. Non è necessario creare conversioni";
     public static final String INFO_VISUALIZZA_FATTORI = "\nEcco i fattori di conversione relativi alla categoria \"%s\": ";
-    public static final String INFO_SELEZIONA_DESTINAZIONE = "\nOra seleziona la gerarchia di cui vuoi visualizzare le prestazioni che vuoi offrire rispetto alla categoria \"%s\":\n";
+    public static final String INFO_SELEZIONA_DESTINAZIONE_PRESTAZIONI = "\nOra seleziona la gerarchia di cui vuoi visualizzare le prestazioni che vuoi offrire rispetto alla categoria \"%s\":\n";
+    public static final String INFO_SELEZIONA_DESTINAZIONE_FATTORI = "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n";
+
     // Costanti per fattori di conversione - prompts
     public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ";
     // Costanti per fattori di conversione - messaggi di errore
