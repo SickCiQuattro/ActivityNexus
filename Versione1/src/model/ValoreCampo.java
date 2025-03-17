@@ -1,6 +1,7 @@
 package model;
 
-import java.io.*;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -9,34 +10,53 @@ import java.util.Objects;
  * <p>
  * Un ValoreCampo è costituito da:
  * <ul>
- * <li><b>Nome</b>: identificatore univoco obbligatorio</li>
+ * <li><b>Nome</b>: identificatore univoco obbligatorio (ad es. "Basso",
+ * "Medio", "Alto")</li>
  * <li><b>Descrizione</b>: informazione opzionale con dettagli aggiuntivi</li>
  * </ul>
  * <p>
- * Implementa {@link Serializable} per la persistenza dei dati.
+ * I valori di campo sono utilizzati per popolare i campi di una categoria e
+ * definiscono
+ * le opzioni valide tra cui gli utenti possono scegliere. Ad esempio, per un
+ * campo "Livello"
+ * potrebbero esistere i valori "Principiante", "Intermedio" e "Avanzato".
+ * <p>
+ * Questa classe implementa {@link Serializable} per consentire la persistenza
+ * dei dati
+ * quando necessario salvare o trasmettere categorie e le loro proprietà.
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti della classe:</b>
  * <ul>
- *   <li>Il nome non è mai null</li>
- *   <li>La descrizione non è mai null (può essere una stringa vuota)</li>
- *   <li>Due ValoreCampo sono considerati uguali se hanno lo stesso nome, indipendentemente dalla descrizione</li>
+ * <li>Il nome non è mai null</li>
+ * <li>La descrizione non è mai null (può essere una stringa vuota)</li>
+ * <li>Due ValoreCampo sono considerati uguali se hanno lo stesso nome,
+ * indipendentemente dalla descrizione</li>
  * </ul>
  *
  * @see Campo
  * @see Categoria
  */
 public class ValoreCampo implements Serializable {
+    // -----------------------------------------------------------------------------------
+    // FIELDS E COSTANTI
+    // -----------------------------------------------------------------------------------
+
+    /** Identificatore di versione per la serializzazione */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Messaggio di errore costante
+    /** Messaggio di errore per nome null */
     public static final String NOME_NON_NULL = "Il nome del valore non può essere null";
 
     /** Nome univoco che identifica questo valore all'interno di un campo */
     private String nome;
 
-    /** Descrizione opzionale con informazioni aggiuntive sul valore */
-    private String descrizione;
+    /**
+     * Descrizione opzionale con informazioni aggiuntive sul valore.
+     * Può essere una stringa vuota ma mai null.
+     */
+    private final String descrizione;
 
     // -----------------------------------------------------------------------------------
     // COSTRUTTORI
@@ -44,13 +64,17 @@ public class ValoreCampo implements Serializable {
 
     /**
      * Costruisce un valore del campo con il nome specificato e senza descrizione.
+     * <p>
+     * Questo costruttore è comodo quando non è necessaria una descrizione
+     * aggiuntiva
+     * per il valore del campo.
      *
      * @param nome il nome del valore del campo (non deve essere null)
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce un valore uguale a nome
-     * @post getDescrizione() restituisce una stringa vuota
+     * @post getNome().equals(nome)
+     * @post getDescrizione().isEmpty() == true
      */
     public ValoreCampo(String nome) {
         // Delega al costruttore completo con descrizione vuota
@@ -59,6 +83,8 @@ public class ValoreCampo implements Serializable {
 
     /**
      * Costruisce un valore del campo con il nome e la descrizione specificati.
+     * <p>
+     * Questo è il costruttore principale che inizializza completamente l'oggetto.
      *
      * @param nome        il nome del valore del campo (non deve essere null)
      * @param descrizione la descrizione del valore (se null, viene trattata come
@@ -66,8 +92,8 @@ public class ValoreCampo implements Serializable {
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce un valore uguale a nome
-     * @post getDescrizione() restituisce descrizione se non null, altrimenti stringa vuota
+     * @post getNome().equals(nome)
+     * @post getDescrizione().equals(descrizione != null ? descrizione : "")
      */
     public ValoreCampo(String nome, String descrizione) {
         // Verifica che il nome non sia null, lanciando un'eccezione in caso contrario
@@ -80,16 +106,17 @@ public class ValoreCampo implements Serializable {
     }
 
     // -----------------------------------------------------------------------------------
-    // GETTER E SETTER
+    // GETTERS E SETTERS
     // -----------------------------------------------------------------------------------
 
     /**
      * Restituisce il nome del valore del campo.
+     * <p>
+     * Il nome è l'identificatore univoco di questo valore all'interno del campo.
      *
      * @return il nome del valore del campo (mai null)
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito corrisponde al nome attualmente impostato
+     * @post result != null
      */
     public String getNome() {
         return this.nome;
@@ -99,13 +126,13 @@ public class ValoreCampo implements Serializable {
      * Imposta il nome del valore del campo.
      * <p>
      * Da usare con cautela se il valore fa già parte di un Campo o struttura dati
-     * ordinata.
+     * ordinata, poiché potrebbe alterare l'ordinamento o l'unicità.
      *
      * @param nome il nuovo nome del valore (non deve essere null)
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce un valore uguale al nome fornito
+     * @post getNome().equals(nome)
      */
     public void setNome(String nome) {
         // Verifica che il nuovo nome non sia null
@@ -114,31 +141,20 @@ public class ValoreCampo implements Serializable {
 
     /**
      * Restituisce la descrizione del valore del campo.
+     * <p>
+     * La descrizione fornisce dettagli aggiuntivi sul significato di questo valore.
      *
      * @return la descrizione (mai null, può essere stringa vuota)
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito corrisponde alla descrizione attualmente impostata
+     * @post result != null
      */
     public String getDescrizione() {
         return this.descrizione;
     }
 
-    /**
-     * Imposta la descrizione del valore del campo.
-     *
-     * @param descrizione la nuova descrizione (se null, viene impostata come
-     *                    stringa vuota)
-     *
-     * @post getDescrizione() restituisce descrizione se non null, altrimenti stringa vuota
-     * @post getDescrizione() non restituisce mai null
-     */
-    public void setDescrizione(String descrizione) {
-        // Gestisce il caso in cui la nuova descrizione sia null, convertendola in
-        // stringa vuota
-        this.descrizione = descrizione != null ? descrizione : "";
-    }
-
+    // -----------------------------------------------------------------------------------
+    // METODI DI UTILITÀ
+    // -----------------------------------------------------------------------------------
 
     // -----------------------------------------------------------------------------------
     // OVERRIDE DI OBJECT
@@ -149,11 +165,11 @@ public class ValoreCampo implements Serializable {
      * <p>
      * Formato: "nome" o "nome - descrizione" se la descrizione è presente.
      *
-     * @return una rappresentazione in stringa del valore
+     * @return una rappresentazione in stringa del valore (mai null)
      *
-     * @post il valore restituito non è null
-     * @post se la descrizione è vuota, restituisce solo il nome
-     * @post se la descrizione non è vuota, restituisce "nome - descrizione"
+     * @post result != null
+     * @post se descrizione.isEmpty(), result.equals(nome)
+     * @post se !descrizione.isEmpty(), result.equals(nome + " - " + descrizione)
      */
     @Override
     public String toString() {
@@ -170,14 +186,15 @@ public class ValoreCampo implements Serializable {
      * Confronta questo valore del campo con l'oggetto specificato.
      * <p>
      * Due valori sono considerati uguali se hanno lo stesso nome,
-     * indipendentemente dalla descrizione.
+     * indipendentemente dalla descrizione. Questo permette di utilizzare
+     * i ValoreCampo come chiavi in mappe e set dove l'identificazione avviene
+     * per nome.
      *
      * @param obj l'oggetto da confrontare
      * @return true se l'oggetto è un ValoreCampo con lo stesso nome
      *
-     * @post se obj == this, restituisce true
-     * @post se obj == null o obj non è di tipo ValoreCampo, restituisce false
-     * @post restituisce true se e solo se obj è un ValoreCampo con lo stesso nome
+     * @pre true (obj può essere null)
+     * @post result == true se e solo se obj è un ValoreCampo con lo stesso nome
      */
     @Override
     public boolean equals(Object obj) {
@@ -203,14 +220,17 @@ public class ValoreCampo implements Serializable {
      * Calcola l'hash code basato solo sul nome del valore.
      * <p>
      * Coerente con {@link #equals(Object)} per l'uso nelle collezioni hash.
+     * Poiché l'uguaglianza è determinata solo dal nome, l'hash code è calcolato
+     * solo in base ad esso.
      *
      * @return l'hash code basato sul nome
      *
-     * @post se due ValoreCampo sono uguali secondo equals(), hanno lo stesso hashCode()
+     * @post se due ValoreCampo hanno lo stesso nome, restituiranno lo stesso
+     *       hashCode
      */
     @Override
     public int hashCode() {
-        // L'hash code è basato solo sul nome
+        // L'hash code è basato solo sul nome per coerenza con equals()
         return Objects.hash(nome);
     }
 }
