@@ -511,7 +511,7 @@ public class Controller {
 
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
-                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        view.showSuccessMessage(ControllerConstants.LOGOUT_MESSAGE);
                         return;
 
                     default:
@@ -1365,7 +1365,6 @@ public class Controller {
 
         // Lista per tenere traccia delle categorie foglia e il livello massimo
         // raggiunto
-        List<Gerarchia> categorieFoglia = new ArrayList<>();
         int maxLevel = 0;
 
         // FASE 1: Creazione della categoria radice
@@ -1442,7 +1441,6 @@ public class Controller {
                 // Se la categoria non ha campo, è una foglia (attività concreta)
                 if (gerarchia.level() > maxLevel) {
                     maxLevel = gerarchia.level();
-                    categorieFoglia.add(gerarchia);
                 }
             }
         }
@@ -2417,6 +2415,24 @@ public class Controller {
         return false;
     }
 
+    /**
+     * Calcola le ore offerte in base alle ore richieste e al fattore di
+     * conversione.
+     * <p>
+     * Il calcolo tiene conto della direzione del fattore di conversione:
+     * <ul>
+     * <li>Se il fattore è < 1, tende ad arrotondare per difetto</li>
+     * <li>Se il fattore è > 1, tende ad arrotondare per eccesso</li>
+     * </ul>
+     *
+     * @param oreRichieste       ore richieste dal fruitore
+     * @param fattoreConversione fattore di conversione tra le categorie
+     * @return ore offerte calcolate in base al fattore di conversione
+     *
+     * @pre oreRichieste > 0
+     * @pre fattoreConversione > 0
+     * @post Il valore restituito è un numero intero positivo >= 1
+     */
     private static int getOreOfferte(int oreRichieste, double fattoreConversione) {
         double oreOfferteOriginali = oreRichieste * fattoreConversione;
         int oreOfferte;
@@ -2954,6 +2970,21 @@ public class Controller {
     // 8. GESTIONE PROPOSTE
     // ==============================================================================
 
+    /**
+     * Visualizza le proposte di scambio per un fruitore specifico.
+     * <p>
+     * Mostra un elenco numerato di tutte le proposte del fruitore, consentendo
+     * all'utente di:
+     * <ul>
+     * <li>Visualizzare i dettagli di ciascuna proposta</li>
+     * <li>Modificare lo stato di una proposta aperta</li>
+     * </ul>
+     *
+     * @param fruitore il fruitore le cui proposte devono essere visualizzate
+     * @pre fruitore != null
+     * @post Se ci sono proposte, vengono visualizzate tutte quelle del fruitore
+     * @post Se non ci sono proposte, viene mostrato un messaggio informativo
+     */
     public void visualizzaProposteFruitore(Fruitore fruitore) {
         List<Proposta> proposte = this.database.getPropostePerFruitore(fruitore);
 
@@ -3196,6 +3227,20 @@ public class Controller {
     }
 
     /**
+     * Registra un errore imprevisto nel sistema.
+     * <p>
+     * Cattura e registra gli errori imprevisti che si verificano durante
+     * l'esecuzione
+     * del programma,
+     * fornendo dettagli utili per il debug e la risoluzione dei problemi.
+     *
+     * @param e l'eccezione da registrare
+     *
+     * @pre e != null
+     * @post Il messaggio di errore viene registrato in un file di log
+     * @post Se non è possibile scrivere nel file di log, viene mostrato un
+     *       messaggio
+     *       di errore all'utente
      */
     private void logErrore(Exception e) {
         // Inizializza un builder per il messaggio di log

@@ -28,13 +28,13 @@ public class ControllerConstants {
     public static final String LOADING_ERROR = "Errore durante il caricamento dei dati: %s";
     public static final String LOADING_DEFAULT = "L'applicazione continuerà con un database vuoto";
     public static final String SAVING_DATA = "Salvataggio dati in corso...";
-    public static final String SAVING_SUCCESS = "Dati salvati con successo";
+    public static final String SAVING_SUCCESS = "Dati salvati!";
     public static final String SAVING_ERROR = "Errore durante il salvataggio dei dati: %s";
 
     // ==============================================================================
     // 2. COSTANTI PER MENU E SESSIONE
     // ==============================================================================
-    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo";
+    public static final String LOGOUT_MESSAGE = "Logout effettuato";
 
     // ==============================================================================
     // 3. COSTANTI PER AUTENTICAZIONE E REGISTRAZIONE
@@ -228,7 +228,7 @@ public class ControllerConstants {
 
     // Messaggi di successo
     public static final String SUCCESS_FATTORE_AGGIUNTO = "✓ Fattore di conversione aggiunto: %s";
-    public static final String SUCCESS_FATTORI_CREATI = "\nSono stati creati %d fattori di conversione tra gerarchie";
+    public static final String SUCCESS_FATTORI_CREATI = "Sono stati creati %d fattori di conversione tra gerarchie";
     public static final String SUCCESS_FATTORE_SEMPLICE = "Fattore di conversione aggiunto";
     public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato";
 
