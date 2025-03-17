@@ -6,21 +6,30 @@ import java.util.Objects;
 /**
  * Rappresenta una categoria all'interno di una struttura gerarchica.
  * <p>
- * Una categoria è un nodo nell'albero della gerarchia, identificata da un nome
- * univoco, con un possibile campo caratteristico che determina le specializzazioni:
+ * Una categoria è un nodo nell'albero della gerarchia di classificazione, con
+ * due possibili ruoli:
  * <ul>
- * <li><b>Categorie intermedie:</b> hanno un campo caratteristico che definisce
- * i valori per le sotto categorie (es. "Sport")</li>
- * <li><b>Categorie foglia:</b> senza campo caratteristico (campo = null),
- * rappresentano attività concrete (es. "Nuoto agonistico")</li>
+ * <li><b>Categoria intermedia:</b> possiede un campo caratteristico che
+ * definisce
+ * i criteri di suddivisione in sottocategorie (es. "Sport" con campo
+ * "Disciplina")</li>
+ * <li><b>Categoria foglia:</b> rappresenta un'attività concreta senza ulteriori
+ * suddivisioni
+ * (es. "Nuoto agonistico"), identificata dall'assenza di campo caratteristico
+ * (campo = null)</li>
  * </ul>
  * <p>
- * Implementa {@link Serializable} per la persistenza dei dati.
+ * Le categorie sono identificate dal loro nome e organizzate secondo relazioni
+ * gerarchiche
+ * padre-figlio all'interno di una {@link Gerarchia}.
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti della classe:</b>
  * <ul>
- *   <li>Il nome della categoria non è mai null</li>
- *   <li>Il campo associato può essere null (per categorie foglia)</li>
+ * <li>Il nome della categoria non è mai null</li>
+ * <li>Il campo caratteristico può essere null (per categorie foglia)</li>
+ * <li>Due categorie con lo stesso nome (ignorando maiuscole/minuscole) sono
+ * considerate equivalenti</li>
  * </ul>
  *
  * @see Campo
@@ -28,17 +37,23 @@ import java.util.Objects;
  * @see ValoreCampo
  */
 public class Categoria implements Serializable {
-    // Identificatore di versione per la serializzazione
+    // -----------------------------------------------------------------------------------
+    // FIELDS E COSTANTI
+    // -----------------------------------------------------------------------------------
+
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // Costante per i messaggi di errore, riutilizzata in più punti
+    /** Messaggio di errore per quando il nome è null */
     public static final String NOME_NON_NULL = "Il nome della categoria non può essere null";
 
-    // Nome univoco che identifica la categoria
+    /** Nome identificativo della categoria */
     private String nome;
 
-    // Campo caratteristico associato alla categoria (null per categorie foglia)
+    /**
+     * Campo caratteristico associato alla categoria
+     * (null per categorie foglia che rappresentano attività concrete)
+     */
     private Campo campo = null;
 
     // -----------------------------------------------------------------------------------
@@ -46,46 +61,42 @@ public class Categoria implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Costruisce una categoria foglia con il nome specificato.
-     * <p>
-     * Crea una categoria terminale che rappresenta un'attività concreta
-     * senza possibilità di ulteriore suddivisione.
+     * Costruisce una categoria foglia che rappresenta un'attività concreta.
      *
-     * @param nome il nome della categoria (non deve essere null)
+     * @param nome il nome della categoria
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce il nome fornito
+     * @post getNome().equals(nome)
      * @post hasCampo() == false
      * @post getCampo() == null
      */
     public Categoria(String nome) {
-        // Utilizzo di Objects.requireNonNull per validare il parametro e lanciare
-        // eccezione
-        // se il nome è null, usando il messaggio di errore definito nella costante
-        // NOME_NON_NULL
+        // Verifica che il nome non sia null, altrimenti lancia NullPointerException
         this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
+        // Per impostazione predefinita, campo è null (categoria foglia)
     }
 
     /**
      * Costruisce una categoria con nome e campo specificati.
      * <p>
      * Se campo != null, crea una categoria intermedia con possibili sottocategorie.
-     * Se campo == null, equivale al costruttore con un solo parametro.
+     * Se campo == null, crea una categoria foglia equivalente al costruttore con un
+     * solo parametro.
      *
-     * @param nome  il nome della categoria (non deve essere null)
+     * @param nome  il nome della categoria
      * @param campo il campo associato alla categoria (null per categorie foglia)
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce il nome fornito
-     * @post getCampo() restituisce il campo fornito
+     * @post getNome().equals(nome)
+     * @post getCampo() == campo
      * @post hasCampo() == (campo != null)
      */
     public Categoria(String nome, Campo campo) {
-        // Valida il nome come nel costruttore precedente
+        // Verifica che il nome non sia null
         this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
-        // Il campo può essere null (categoria foglia), quindi non c'è validazione
+        // Campo può essere null (categoria foglia)
         this.campo = campo;
     }
 
@@ -96,79 +107,74 @@ public class Categoria implements Serializable {
     /**
      * Restituisce il nome della categoria.
      *
-     * @return il nome della categoria (mai null)
+     * @return il nome della categoria, mai null
      *
-     * @post il valore restituito non è null
+     * @post result != null
      */
     public String getNome() {
-        // Restituisce il nome della categoria (sempre non-null)
         return this.nome;
     }
 
     /**
      * Imposta il nome della categoria.
      * <p>
-     * Attenzione: se la categoria è già inserita in una gerarchia, cambiare il nome
-     * potrebbe influenzare i metodi di ricerca e confronto.
+     * <b>Attenzione:</b> Se la categoria è già inserita in una gerarchia, cambiare
+     * il nome
+     * potrebbe compromettere la coerenza della struttura.
      *
-     * @param nome il nuovo nome della categoria (non deve essere null)
+     * @param nome il nuovo nome della categoria
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
-     * @post getNome() restituisce il valore fornito
+     * @post getNome().equals(nome)
      */
     public void setNome(String nome) {
-        // Valida il nuovo nome e lo assegna
         this.nome = Objects.requireNonNull(nome, NOME_NON_NULL);
     }
 
     /**
      * Restituisce il campo caratteristico della categoria.
      * <p>
-     * Il campo definisce la proprietà su cui si basa la classificazione
-     * delle sottocategorie (es. "Disciplina" per la categoria "Sport").
+     * Il campo determina la proprietà su cui si basano le sottocategorie
+     * (es. "Disciplina" per la categoria "Sport").
      *
      * @return il campo associato alla categoria, o null se la categoria è una
      *         foglia
-     * @see #hasCampo()
      *
-     * @post il valore restituito può essere null (per categorie foglia)
-     * @post se hasCampo() == true, il valore restituito non è null
-     * @post se hasCampo() == false, il valore restituito è null
+     * @post result == null se e solo se hasCampo() == false
      */
     public Campo getCampo() {
-        // Restituisce il campo (può essere null per categorie foglia)
         return this.campo;
     }
 
     /**
      * Imposta il campo caratteristico della categoria.
      * <p>
-     * Attenzione: modifica la natura della categoria (intermedia o foglia)
-     * e potrebbe richiedere aggiornamenti alla struttura gerarchica.
+     * <b>Attenzione:</b> Questo metodo cambia la natura della categoria (da
+     * intermedia a foglia
+     * o viceversa) e potrebbe richiedere aggiornamenti nella struttura gerarchica.
      *
      * @param campo il nuovo campo associato alla categoria (null per categorie
      *              foglia)
      *
-     * @post getCampo() restituisce il valore fornito
+     * @post getCampo() == campo
      * @post hasCampo() == (campo != null)
      */
     public void setCampo(Campo campo) {
-        // Assegna il campo (può essere null)
         this.campo = campo;
     }
 
     /**
      * Verifica se la categoria ha un campo caratteristico associato.
      * <p>
-     * Distingue tra categorie intermedie (true) e categorie foglia (false).
+     * Distingue tra categorie intermedie (con campo) e categorie foglia (senza
+     * campo).
      *
-     * @return true se categoria intermedia, false se categoria foglia
+     * @return true se la categoria è intermedia, false se è una foglia
      *
-     * @post il valore restituito è true se e solo se getCampo() != null
+     * @post result == (getCampo() != null)
      */
     public boolean hasCampo() {
-        // Verifica se il campo è diverso da null
         return this.campo != null;
     }
 
@@ -177,23 +183,24 @@ public class Categoria implements Serializable {
     // -----------------------------------------------------------------------------------
 
     /**
-     * Restituisce una rappresentazione in stringa della categoria.
+     * Restituisce una rappresentazione testuale della categoria.
      * <p>
-     * Include il nome e, se presente, il campo con tutti i suoi valori di dominio.
+     * Include il nome e, se presente, il campo caratteristico con i suoi valori di
+     * dominio.
      *
      * @return una rappresentazione in stringa della categoria
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito contiene il nome della categoria
-     * @post se hasCampo() == true, il valore restituito contiene la rappresentazione del campo
+     * @post result != null
+     * @post result contiene il nome della categoria
+     * @post se hasCampo() == true, result contiene anche la rappresentazione del
+     *       campo
      */
     @Override
     public String toString() {
-        // Costruisce la rappresentazione in stringa della categoria
         StringBuilder sb = new StringBuilder();
         sb.append("Nome: ").append(this.nome).append("\n");
 
-        // Se la categoria ha un campo, aggiunge anche la sua rappresentazione
+        // Aggiunge la rappresentazione del campo solo se presente
         if (hasCampo()) {
             sb.append("Campo: ").append(this.campo).append("\n");
         }
@@ -204,47 +211,48 @@ public class Categoria implements Serializable {
     /**
      * Confronta questa categoria con l'oggetto specificato.
      * <p>
-     * Due categorie sono uguali se hanno lo stesso nome (case-insensitive).
-     * Il campo caratteristico non viene considerato nel confronto.
+     * Due categorie sono considerate uguali se hanno lo stesso nome, ignorando
+     * maiuscole e minuscole.
+     * Il campo caratteristico non viene considerato per determinare l'uguaglianza.
      *
      * @param obj l'oggetto da confrontare
      * @return true se l'oggetto è una Categoria con lo stesso nome, false
      *         altrimenti
      *
-     * @post se this e obj sono lo stesso oggetto (riferimento identico), restituisce true
-     * @post se obj è null o non è un'istanza di Categoria, restituisce false
-     * @post se obj è una Categoria, restituisce true se e solo se i nomi sono uguali ignorando case
+     * @post se this == obj, result è true
+     * @post se obj == null o obj non è una Categoria, result è false
+     * @post se obj è una Categoria, result è true se e solo se
+     *       getNome().equalsIgnoreCase(((Categoria)obj).getNome())
      */
     @Override
     public boolean equals(Object obj) {
-        // Controllo di identità (stesso riferimento) per efficienza
+        // Ottimizzazione: controllo di identità
         if (this == obj) {
             return true;
         }
-        // Se obj è null o di classe diversa da Categoria, non sono uguali
+
+        // Controllo di tipo e null
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        // Cast sicuro (verificato sopra) e confronto dei nomi ignorando
-        // maiuscole/minuscole
+
+        // Confronto dei nomi ignorando maiuscole/minuscole
         Categoria categoria = (Categoria) obj;
         return nome.equalsIgnoreCase(categoria.getNome());
     }
 
     /**
-     * Calcola l'hash code per questa categoria.
+     * Calcola l'hash code della categoria basato sul nome in minuscolo.
      * <p>
-     * Coerente con {@link #equals(Object)}, basato sul nome in minuscolo.
-     * Garantisce che categorie uguali abbiano lo stesso hashcode.
+     * Garantisce la coerenza con il metodo {@link #equals(Object)}.
      *
      * @return l'hash code basato sul nome in minuscolo
      *
-     * @post se due categorie sono uguali secondo equals(), hanno lo stesso hashCode()
+     * @post se this.equals(altro), allora this.hashCode() == altro.hashCode()
      */
     @Override
     public int hashCode() {
-        // Calcola l'hash code basato sul nome convertito in minuscolo
-        // per mantenere coerenza con la definizione di equals
+        // Usa il nome in minuscolo per essere coerente con equals (case-insensitive)
         return nome.toLowerCase().hashCode();
     }
 }
