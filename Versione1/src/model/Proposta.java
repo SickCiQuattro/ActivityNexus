@@ -7,165 +7,154 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Rappresenta una proposta di scambio di prestazioni d'opera.
+ * Rappresenta una proposta di scambio di prestazioni d'opera nel sistema.
  * <p>
- * Una proposta è composta da:
+ * Una proposta è una richiesta formale di scambio che mette in relazione:
  * <ul>
- * <li>Una prestazione richiesta che si desidera ricevere</li>
- * <li>Una prestazione offerta che si è disposti a fornire in cambio</li>
- * <li>Uno stato che indica la fase corrente del ciclo di vita della
- * proposta</li>
+ * <li>Una prestazione richiesta che il propostitore desidera ricevere</li>
+ * <li>Una prestazione offerta che il propostitore è disposto a fornire in
+ * cambio</li>
+ * <li>Il fruitore che formula la proposta (propostitore)</li>
  * </ul>
  * <p>
- * La proposta può attraversare diversi stati (aperta, chiusa, ritirata) con
- * specifiche regole di transizione.
+ * <b>Ciclo di vita della proposta:</b>
+ * <ol>
+ * <li><b>APERTA</b>: stato iniziale quando la proposta viene inserita nel
+ * sistema</li>
+ * <li><b>CHIUSA</b>: quando la proposta viene accettata in un insieme
+ * chiuso</li>
+ * <li><b>RITIRATA</b>: quando il propostitore decide di ritirare la
+ * proposta</li>
+ * </ol>
+ * <p>
+ * Le transizioni di stato possibili sono solo da APERTA a CHIUSA o RITIRATA.
+ * Una volta chiusa o ritirata, una proposta non può tornare allo stato aperto.
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti della classe:</b>
  * <ul>
- * <li>Richiesta != null</li>
- * <li>offerta != null</li>
- * <li>Stato != null</li>
+ * <li>propostitore != null (ogni proposta ha un fruitore associato)</li>
+ * <li>richiesta != null (ogni proposta ha una prestazione richiesta)</li>
+ * <li>offerta != null (ogni proposta ha una prestazione offerta)</li>
+ * <li>stato != null (ogni proposta ha uno stato valido)</li>
+ * <li>dataCreazione != null (ogni proposta ha una data di creazione)</li>
  * </ul>
  *
  * @see Prestazione
  * @see StatoProposta
+ * @see Fruitore
+ * @see InsiemeChiuso
  */
 public class Proposta implements Serializable {
+    // -----------------------------------------------------------------------------------
+    // FIELDS E COSTANTI
+    // -----------------------------------------------------------------------------------
+
+    /** Identificatore di versione per la serializzazione */
     @Serial
     private static final long serialVersionUID = 1L;
 
     /** Fruitore che ha inviato la proposta */
     private final Fruitore propostitore;
 
-    /** Prestazione richiesta */
+    /** Prestazione richiesta dal propostitore */
     private final Prestazione richiesta;
 
-    /** Prestazione offerta in cambio */
+    /** Prestazione offerta in cambio dal propostitore */
     private final Prestazione offerta;
 
-    /** Stato corrente della proposta */
+    /** Stato corrente della proposta (APERTA, CHIUSA, RITIRATA) */
     private StatoProposta stato;
 
-    /** Data di creazione della proposta */
+    /** Data e ora di creazione della proposta */
     private final LocalDateTime dataCreazione;
 
+    /** Data e ora dell'ultima modifica di stato (null se ancora non modificata) */
     private LocalDateTime dataModifica;
 
+    /** Messaggi di errore per validazione */
+    private static final String ERRORE_FRUITORE_NULL = "Il fruitore non può essere null";
+    private static final String ERRORE_RICHIESTA_NULL = "La prestazione richiesta non può essere null";
+    private static final String ERRORE_OFFERTA_NULL = "La prestazione offerta non può essere null";
+    private static final String ERRORE_STATO_NULL = "Lo stato della proposta non può essere null";
+
+    // -----------------------------------------------------------------------------------
+    // COSTRUTTORI
+    // -----------------------------------------------------------------------------------
 
     /**
      * Crea una nuova proposta di scambio con i dettagli specificati.
+     * <p>
+     * La proposta viene inizializzata con la data di creazione corrente e
+     * la data di modifica a null (verrà impostata al primo cambiamento di stato).
      *
-     * @param propostitore  il fruitore che ha inviato la proposta (non può essere null)
-     * @param richiesta la prestazione richiesta (non può essere null)
-     * @param offerta   la prestazione offerta in cambio (non può essere null)
-     * @param stato     lo stato iniziale della proposta (non può essere null)
+     * @param propostitore il fruitore che ha inviato la proposta
+     * @param richiesta    la prestazione richiesta
+     * @param offerta      la prestazione offerta in cambio
+     * @param stato        lo stato iniziale della proposta (solitamente APERTA)
      * @throws NullPointerException se uno dei parametri è null
      *
+     * @pre propostitore != null
      * @pre richiesta != null
      * @pre offerta != null
      * @pre stato != null
+     * @post getPropostitore() == propostitore
      * @post getRichiesta() == richiesta
      * @post getOfferta() == offerta
      * @post getStato() == stato
+     * @post getDataCreazione() != null
+     * @post getDataModifica() == null
      */
     public Proposta(Fruitore propostitore, Prestazione richiesta, Prestazione offerta, StatoProposta stato) {
-        this.propostitore = Objects.requireNonNull(propostitore, "Il fruitore non può essere null");
-        this.richiesta = Objects.requireNonNull(richiesta, "La prestazione richiesta non può essere null");
-        this.offerta = Objects.requireNonNull(offerta, "La prestazione offerta non può essere null");
-        this.stato = Objects.requireNonNull(stato, "Lo stato della proposta non può essere null");
+        // Verifica che nessun parametro sia null, lancia NullPointerException con
+        // messaggio descrittivo
+        this.propostitore = Objects.requireNonNull(propostitore, ERRORE_FRUITORE_NULL);
+        this.richiesta = Objects.requireNonNull(richiesta, ERRORE_RICHIESTA_NULL);
+        this.offerta = Objects.requireNonNull(offerta, ERRORE_OFFERTA_NULL);
+        this.stato = Objects.requireNonNull(stato, ERRORE_STATO_NULL);
+
+        // Inizializza la data di creazione con il timestamp corrente
         this.dataCreazione = LocalDateTime.now();
+
+        // La data di modifica è inizialmente null (non ci sono state modifiche)
         this.dataModifica = null;
     }
+
+    // -----------------------------------------------------------------------------------
+    // METODI DI ACCESSO (GETTERS)
+    // -----------------------------------------------------------------------------------
 
     /**
      * Restituisce il fruitore che ha inviato la proposta.
      *
      * @return il fruitore che ha inviato la proposta (mai null)
      *
-     * @pre true
-     * @post risultato != null
-     * @post risultato == this.fruitore
+     * @post result != null
+     * @post result == this.propostitore
      */
     public Fruitore getPropostitore() {
         return this.propostitore;
     }
 
     /**
-     * Tenta di chiudere questa proposta.
-     * <p>
-     * Una proposta può essere chiusa solo se è attualmente aperta.
-     *
-     * @return true se la proposta è stata chiusa, false se era in uno stato
-     *         che non permette la chiusura
-     *
-     * @pre true (può essere invocato in qualsiasi stato)
-     * @post risultato == true ⟹ this.stato == StatoProposta.CHIUSA && old(this.stato) == StatoProposta.APERTA
-     * @post risultato == false ⟹ this.stato == old(this.stato) && old(this.stato) != StatoProposta.APERTA
-     */
-    public boolean chiudiProposta() {
-        if (stato == StatoProposta.APERTA) {
-            stato = StatoProposta.CHIUSA;
-            this.dataModifica = LocalDateTime.now();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Tenta di ritirare questa proposta.
-     * <p>
-     * Una proposta può essere ritirata solo se è attualmente aperta.
-     *
-     * @return true se la proposta è stata ritirata, false se era in uno stato
-     *         che non permette il ritiro
-     *
-     * @pre true (può essere invocato in qualsiasi stato)
-     * @post risultato == true ⟹ this.stato == StatoProposta.RITIRATA && old(this.stato) == StatoProposta.APERTA
-     * @post risultato == false ⟹ this.stato == old(this.stato) && old(this.stato) != StatoProposta.APERTA
-     */
-    public boolean ritiraProposta() {
-        if (stato == StatoProposta.APERTA) {
-            stato = StatoProposta.RITIRATA;
-            this.dataModifica = LocalDateTime.now();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Verifica se questa proposta è ancora aperta per possibili accettazioni.
-     *
-     * @return true se la proposta è nello stato APERTA, false altrimenti
-     *
-     * @pre true
-     * @post risultato == (this.stato == StatoProposta.APERTA)
-     * @post this.stato == old(this.stato) (non modifica lo stato)
-     */
-    public boolean isAperta() {
-        return stato == StatoProposta.APERTA;
-    }
-
-    /**
-     * Restituisce la prestazione richiesta.
+     * Restituisce la prestazione richiesta dal propostitore.
      *
      * @return la prestazione richiesta (mai null)
      *
-     * @pre true
-     * @post risultato != null
-     * @post risultato == this.richiesta
+     * @post result != null
+     * @post result == this.richiesta
      */
     public Prestazione getRichiesta() {
         return richiesta;
     }
 
     /**
-     * Restituisce la prestazione offerta.
+     * Restituisce la prestazione offerta dal propostitore.
      *
      * @return la prestazione offerta (mai null)
      *
-     * @pre true
-     * @post risultato != null
-     * @post risultato == this.offerta
+     * @post result != null
+     * @post result == this.offerta
      */
     public Prestazione getOfferta() {
         return offerta;
@@ -176,38 +165,118 @@ public class Proposta implements Serializable {
      *
      * @return lo stato della proposta (mai null)
      *
-     * @pre true
-     * @post risultato != null
-     * @post risultato == this.stato
+     * @post result != null
+     * @post result == this.stato
      */
     public StatoProposta getStato() {
         return stato;
     }
 
+    // -----------------------------------------------------------------------------------
+    // METODI DI CAMBIO STATO
+    // -----------------------------------------------------------------------------------
 
     /**
-     * Genera una rappresentazione testuale della proposta.
+     * Tenta di chiudere questa proposta.
+     * <p>
+     * Una proposta può essere chiusa solo se è attualmente aperta. Quando una
+     * proposta
+     * viene chiusa, la data di modifica viene aggiornata al timestamp corrente.
+     * <p>
+     * Il passaggio allo stato CHIUSA indica che la proposta è stata accettata e
+     * inserita in un insieme chiuso di scambio.
+     *
+     * @pre true (può essere invocato in qualsiasi stato)
+     * @post result == true ⟹ this.stato == StatoProposta.CHIUSA && la data di
+     * modifica è aggiornata
+     * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
+     */
+    public void chiudiProposta() {
+        // Verifica che la proposta sia nello stato APERTA
+        // Solo le proposte aperte possono essere chiuse
+        if (stato == StatoProposta.APERTA) {
+            // Modifica lo stato a CHIUSA
+            stato = StatoProposta.CHIUSA;
+
+            // Aggiorna la data di modifica con il timestamp corrente
+            this.dataModifica = LocalDateTime.now();
+
+        }
+
+        // Se la proposta non era aperta, l'operazione fallisce
+    }
+
+    /**
+     * Tenta di ritirare questa proposta.
+     * <p>
+     * Una proposta può essere ritirata solo se è attualmente aperta. Quando una
+     * proposta
+     * viene ritirata, la data di modifica viene aggiornata al timestamp corrente.
+     * <p>
+     * Il passaggio allo stato RITIRATA indica che il propostitore ha deciso
+     * di rimuovere la sua offerta dal sistema.
+     *
+     * @return true se la proposta è stata ritirata, false se era in uno stato
+     *         che non permette il ritiro
+     *
+     * @pre true (può essere invocato in qualsiasi stato)
+     * @post result == true ⟹ this.stato == StatoProposta.RITIRATA && la data di
+     *       modifica è aggiornata
+     * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
+     */
+    public boolean ritiraProposta() {
+        // Verifica che la proposta sia nello stato APERTA
+        // Solo le proposte aperte possono essere ritirate
+        if (stato == StatoProposta.APERTA) {
+            // Modifica lo stato a RITIRATA
+            stato = StatoProposta.RITIRATA;
+
+            // Aggiorna la data di modifica con il timestamp corrente
+            this.dataModifica = LocalDateTime.now();
+
+            return true; // Operazione riuscita
+        }
+
+        // Se la proposta non era aperta, l'operazione fallisce
+        return false;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI OVERRIDE DI OBJECT
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Genera una rappresentazione testuale dettagliata della proposta.
+     * <p>
+     * Include informazioni su propostitore, prestazioni richieste/offerte,
+     * stato attuale e storia delle modifiche.
      *
      * @return una stringa contenente i dettagli della proposta
      *
-     * @pre true
-     * @post risultato != null
-     * @post risultato contiene informazioni su richiesta, offerta e stato
+     * @post result != null
+     * @post result contiene informazioni su propostitore, richiesta, offerta, stato
+     *       e date
      */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PROPOSTA:\n" +
-                "Propositore: " + propostitore.getMail() +
-                "\nRichiesta: " + richiesta.toString() +
-                "\nOfferta: " + offerta.toString() +
-                "\nStato: " + stato.toString() +
-                "\nData creazione: "
-                + dataCreazione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+
+        // Intestazione e dettagli principali
+        sb.append("PROPOSTA:\n")
+                .append("Propositore: ").append(propostitore.getMail())
+                .append("\nRichiesta: ").append(richiesta.toString())
+                .append("\nOfferta: ").append(offerta.toString())
+                .append("\nStato: ").append(stato.toString())
+                .append("\nData creazione: ")
+                .append(dataCreazione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+
+        // Aggiunge informazioni sulla modifica di stato se presente
         if (dataModifica != null) {
-            sb.append("\nLa proposta è passata da " + StatoProposta.APERTA + " a " + stato + " il " +
-                    dataModifica.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            sb.append("\nLa proposta è passata da ").append(StatoProposta.APERTA)
+                    .append(" a ").append(stato).append(" il ")
+                    .append(dataModifica.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         }
+
         sb.append("\n");
         return sb.toString();
     }
@@ -215,25 +284,29 @@ public class Proposta implements Serializable {
     /**
      * Verifica se questa proposta è uguale a un altro oggetto.
      * <p>
-     * Due proposte sono considerate uguali se hanno gli stessi valori per
-     * richiesta, offerta e stato.
+     * Due proposte sono considerate uguali se hanno lo stesso propostitore,
+     * prestazioni richieste/offerte identiche e lo stesso stato.
      *
      * @param obj l'oggetto da confrontare con questa proposta
      * @return true se l'oggetto rappresenta una proposta uguale a questa
      *
-     * @pre true
-     * @post risultato == true se e solo se obj instanceof Proposta &&
+     * @post result == true se e solo se obj instanceof Proposta &&
+     *       Objects.equals(propostitore, ((Proposta)obj).propostitore) &&
      *       Objects.equals(richiesta, ((Proposta)obj).richiesta) &&
      *       Objects.equals(offerta, ((Proposta)obj).offerta) &&
      *       stato == ((Proposta)obj).stato
      */
     @Override
     public boolean equals(Object obj) {
+        // Verifica identità di riferimento (ottimizzazione)
         if (this == obj)
             return true;
+
+        // Verifica tipo e non-nullità
         if (obj == null || getClass() != obj.getClass())
             return false;
 
+        // Cast sicuro (verificato sopra) e confronto dei campi significativi
         Proposta other = (Proposta) obj;
         return Objects.equals(propostitore, other.propostitore) &&
                 Objects.equals(richiesta, other.richiesta) &&
@@ -243,16 +316,16 @@ public class Proposta implements Serializable {
 
     /**
      * Calcola il codice hash per questa proposta.
+     * <p>
+     * Garantisce la coerenza con il metodo equals().
      *
      * @return il codice hash calcolato
      *
-     * @pre true
      * @post se x.equals(y) == true, allora x.hashCode() == y.hashCode()
-     * @post risultato == Objects.hash(richiesta, offerta, stato)
      */
     @Override
     public int hashCode() {
+        // Usa gli stessi campi considerati in equals()
         return Objects.hash(propostitore, richiesta, offerta, stato);
     }
 }
-
