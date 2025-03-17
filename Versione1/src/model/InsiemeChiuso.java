@@ -155,13 +155,12 @@ public class InsiemeChiuso implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("┌───────────────────────────────────┐\n");
-        sb.append("│        INSIEME CHIUSO             │\n");
-        sb.append("├───────────────────────────────────┤\n");
-        sb.append(String.format("│ Proposte: %-23d │\n", proposte.size()));
-        sb.append(String.format("│ Scambi: %-25d │\n", scambi.size()));
-        sb.append(String.format("│ Stato: %-26s │\n", notificato ? "Notificato" : "Non notificato"));
-        sb.append("└───────────────────────────────────┘");
+        sb.append("╔════════════════════════════════════════╗\n");
+        sb.append("║           INSIEME CHIUSO               ║\n");
+        sb.append("╚════════════════════════════════════════╝\n");
+        sb.append("Proposte: ").append(proposte.size()).append("\n");
+        sb.append("Scambi: ").append(scambi.size()).append("\n");
+        sb.append("Stato: ").append(notificato ? "Notificato" : "Non notificato").append("\n");
 
         return sb.toString();
     }
@@ -173,44 +172,41 @@ public class InsiemeChiuso implements Serializable {
      */
     public String getDettagli() {
         StringBuilder sb = new StringBuilder();
-        sb.append("╔═════════════════════════════════════════════╗\n");
-        sb.append("║           DETTAGLI INSIEME CHIUSO           ║\n");
-        sb.append("╠═════════════════════════════════════════════╣\n");
-        sb.append(String.format("║ Proposte coinvolte: %-22d ║\n", proposte.size()));
-        sb.append(String.format("║ Scambi da effettuare: %-19d ║\n", scambi.size()));
-        sb.append(String.format("║ Stato: %-32s ║\n", notificato ? "Notificato" : "In attesa di notifica"));
-        sb.append("╠═════════════════════════════════════════════╣\n");
-        sb.append("║ SCAMBI DA EFFETTUARE                        ║\n");
-        sb.append("╠═════════════════════════════════════════════╣\n");
+        sb.append("╔════════════════════════════════════════╗\n");
+        sb.append("║       DETTAGLI INSIEME CHIUSO          ║\n");
+        sb.append("╚════════════════════════════════════════╝\n");
+        sb.append("Proposte coinvolte: ").append(proposte.size()).append("\n");
+        sb.append("Scambi da effettuare: ").append(scambi.size()).append("\n");
+        sb.append("Stato: ").append(notificato ? "Notificato" : "In attesa").append("\n\n");
+
+        sb.append("====== SCAMBI DA EFFETTUARE ======\n\n");
 
         if (scambi.isEmpty()) {
-            sb.append("║ Nessuno scambio da effettuare              ║\n");
+            sb.append("Nessuno scambio da effettuare\n");
         } else {
             for (int i = 0; i < scambi.size(); i++) {
                 Scambio scambio = scambi.get(i);
-                sb.append(String.format("║ %d. %s fornisce a %s:\n",
-                        (i + 1),
-                        scambio.getFornitore().getUsername(),
-                        scambio.getRicevente().getUsername()));
-                sb.append(String.format("║    %s\n", scambio.getPrestazione().toString()));
+                String fornitore = scambio.getFornitore().getUsername();
+                String ricevente = scambio.getRicevente().getUsername();
+
+                sb.append(String.format("%d. %s → %s\n", (i + 1), fornitore, ricevente));
+                sb.append("   ").append(scambio.getPrestazione().toString()).append("\n\n");
             }
         }
 
-        sb.append("╠═════════════════════════════════════════════╣\n");
-        sb.append("║ FRUITORI COINVOLTI                          ║\n");
-        sb.append("╠═════════════════════════════════════════════╣\n");
+        sb.append("====== FRUITORI COINVOLTI ======\n\n");
 
         Set<Fruitore> fruitori = getFruitori();
         if (fruitori.isEmpty()) {
-            sb.append("║ Nessun fruitore coinvolto                  ║\n");
+            sb.append("Nessun fruitore coinvolto\n");
         } else {
+            int j = 1;
             for (Fruitore fruitore : fruitori) {
-                sb.append(String.format("║ • %s\n", fruitore.getUsername()));
-                sb.append(String.format("║   Email: %s\n", fruitore.getMail()));
+                sb.append(String.format("%d. %s\n", j++, fruitore.getUsername()));
+                sb.append("   Email: ").append(fruitore.getMail()).append("\n\n");
             }
         }
 
-        sb.append("╚═════════════════════════════════════════════╝");
         return sb.toString();
     }
 
@@ -221,21 +217,22 @@ public class InsiemeChiuso implements Serializable {
      */
     public String getReportCompatto() {
         StringBuilder sb = new StringBuilder();
-        sb.append("SCAMBI DA EFFETTUARE:\n");
+        sb.append("╔════════════════════════════════════════╗\n");
+        sb.append("║        SCAMBI DA EFFETTUARE            ║\n");
+        sb.append("╚════════════════════════════════════════╝\n");
 
         if (scambi.isEmpty()) {
             sb.append("Nessuno scambio da effettuare\n");
         } else {
             for (int i = 0; i < scambi.size(); i++) {
                 Scambio scambio = scambi.get(i);
-                sb.append(String.format("%d) %s → %s: %s\n",
-                        (i + 1),
-                        scambio.getFornitore().getUsername(),
-                        scambio.getRicevente().getUsername(),
-                        scambio.getPrestazione().toString()));
+                String fornitore = scambio.getFornitore().getUsername();
+                String ricevente = scambio.getRicevente().getUsername();
+
+                sb.append(String.format("%d) %s → %s\n", (i + 1), fornitore, ricevente));
+                sb.append("   ").append(scambio.getPrestazione().toString()).append("\n");
             }
         }
-
         return sb.toString();
     }
 
@@ -246,7 +243,9 @@ public class InsiemeChiuso implements Serializable {
      */
     public String getContattiEmail() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CONTATTI EMAIL PER NOTIFICHE:\n");
+        sb.append("╔════════════════════════════════════════╗\n");
+        sb.append("║    CONTATTI EMAIL PER NOTIFICHE        ║\n");
+        sb.append("╚════════════════════════════════════════╝\n");
 
         Set<Fruitore> fruitori = getFruitori();
         if (fruitori.isEmpty()) {
@@ -254,10 +253,8 @@ public class InsiemeChiuso implements Serializable {
         } else {
             int i = 1;
             for (Fruitore fruitore : fruitori) {
-                sb.append(String.format("%d) %s <%s>\n",
-                        i++,
-                        fruitore.getUsername(),
-                        fruitore.getMail()));
+                sb.append(String.format("%d) %s\n", i++, fruitore.getUsername()));
+                sb.append("   <").append(fruitore.getMail()).append(">\n\n");
             }
         }
 
