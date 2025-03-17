@@ -285,9 +285,9 @@ public class ConsoleView {
 
         List<String> menuItems = List.of(
                 GREEN + "1. Visualizza categorie" + RESET,
-                GREEN + "2. Formula proposta di scambio d'opera" + RESET,
+                BLUE + "2. Formula proposta di scambio d'opera" + RESET,
                 GREEN + "3. Visualizza proposte di scambio d'opera" + RESET,
-                GREEN + "4. Ritira una proposta aperta" + RESET,
+                BLUE + "4. Ritira una proposta aperta" + RESET,
                 MENU_EXIT);
 
         printMenuBox(USER_MENU_TITLE, menuItems);

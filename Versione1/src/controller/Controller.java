@@ -824,7 +824,7 @@ public class Controller {
         String username = view.getInput(ControllerConstants.PROMPT_USERNAME);
 
         // Richiesta della password all'utente
-        String password = view.getInput(ControllerConstants.PROMPT_PASSWORD);
+        String password = view.getPasswordInput(ControllerConstants.PROMPT_PASSWORD);
 
         // Verifica delle credenziali attraverso il database
         // Ritorna l'utente se valido, null altrimenti
@@ -1053,7 +1053,7 @@ public class Controller {
         for (int i = 2; i >= 0; i--) {
             // Richiede l'inserimento delle credenziali
             String username = view.getInput(ControllerConstants.PROMPT_USERNAME);
-            String password = view.getInput(ControllerConstants.PROMPT_PASSWORD);
+            String password = view.getPasswordInput(ControllerConstants.PROMPT_PASSWORD);
             this.view.showMessage("\n");
             // Verifica se le credenziali inserite corrispondono a quelle generate
             if (usernameDefault.equals(username) && passwordDefault.equals(password))
@@ -1849,7 +1849,7 @@ public class Controller {
         int numScelte = this.database.getGerarchie().size();
         // Gli indici visualizzati partono da 1, quindi sottraiamo 1 per ottenere
         // l'indice effettivo (0-based)
-        int indiceScelta = richiediIndiceDaUtente(ControllerConstants.MSG_SCELTA_GERARCHIA, numScelte) - 1;
+        int indiceScelta = view.getIntInput(ControllerConstants.MSG_SCELTA_GERARCHIA, 1, numScelte) - 1;
 
         // Restituisce la gerarchia selezionata
         return this.database.getGerarchia(indiceScelta);
@@ -1885,66 +1885,10 @@ public class Controller {
         int numScelte = foglie.size();
         // Gli indici visualizzati partono da 1, quindi sottraiamo 1 per ottenere
         // l'indice effettivo (0-based)
-        int indiceScelta = richiediIndiceDaUtente(ControllerConstants.MSG_SCELTA_FOGLIA, numScelte) - 1;
+        int indiceScelta = view.getIntInput(ControllerConstants.MSG_SCELTA_FOGLIA, 1, numScelte) - 1;
 
         // Restituisce la foglia selezionata
         return foglie.get(indiceScelta);
-    }
-
-    /**
-     * Richiede all'utente di selezionare un'opzione numerica da un intervallo
-     * definito.
-     * <p>
-     * Implementa un ciclo di validazione che garantisce che l'input fornito sia:
-     * <ul>
-     * <li>Un numero intero valido</li>
-     * <li>Compreso tra 1 e il numero massimo di opzioni disponibili</li>
-     * </ul>
-     * <p>
-     * Il metodo mostra un messaggio personalizzato e continua a richiedere input
-     * finché non viene fornito un valore valido.
-     *
-     * @param messaggio il messaggio da mostrare all'utente durante la richiesta
-     * @param numScelte il numero massimo di scelte disponibili (limite superiore
-     *                  dell'intervallo)
-     * @return l'indice numerico selezionato dall'utente (1-based)
-     *
-     * @pre messaggio != null
-     * @pre numScelte > 0
-     * @pre this.view != null
-     * @post Il valore restituito è un intero compreso tra 1 e numScelte (inclusi)
-     * @post L'utente ha ricevuto feedback appropriati in caso di input non valido
-     * @post Il metodo ha gestito correttamente eventuali errori di formato
-     *       nell'input
-     */
-    private int richiediIndiceDaUtente(String messaggio, int numScelte) {
-        boolean validInput = false;
-        int indiceScelta = 0;
-
-        // Ciclo di validazione: continua finché non viene fornito un input valido
-        while (!validInput) {
-            // Richiede l'input all'utente
-            String scelta = this.view.getInput(messaggio);
-
-            try {
-                // Tenta di convertire l'input in un numero intero
-                indiceScelta = Integer.parseInt(scelta);
-
-                // Verifica che l'indice sia nel range valido (da 1 a numScelte)
-                if (indiceScelta > 0 && indiceScelta <= numScelte) {
-                    validInput = true; // Input valido, uscita dal ciclo
-                } else {
-                    // Indice fuori dal range valido
-                    this.view.showMessage(String.format(ControllerConstants.MSG_SCELTA_ERRATA, numScelte));
-                }
-            } catch (NumberFormatException e) {
-                // Input non convertibile in numero
-                this.view.showMessage(String.format(ControllerConstants.MSG_SCELTA_ERRATA, numScelte));
-            }
-        }
-
-        // Restituisce l'indice validato
-        return indiceScelta;
     }
 
     /**
@@ -2300,6 +2244,7 @@ public class Controller {
         // Intestazione e spiegazione del processo
         view.showMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
         view.showMessage(ControllerConstants.INFO_PROPOSTA_DESCRIZIONE);
+        view.showWarningMessage(ControllerConstants.INFO_PROPOSTA_AVVERTENZA);
 
         // FASE 1: Selezione della prestazione richiesta
         view.showMessage("\n" + ControllerConstants.STEP_SELEZIONE_RICHIESTA);
@@ -2367,20 +2312,7 @@ public class Controller {
         view.showMessage(String.format(ControllerConstants.STEP_FATTORE_CONV, fattoreConversione));
 
         // Calcolo delle ore offerte basate sul fattore di conversione
-        double oreOfferteOriginali = oreRichieste * fattoreConversione;
-        int oreOfferte;
-        // Se il fattore è < 1, tende ad arrotondare per difetto
-        // Se il fattore è > 1, tende ad arrotondare per eccesso
-        if (fattoreConversione < 1) {
-            // Per fattori < 1, arrotonda per difetto se la parte decimale è <= 0.5
-            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
-                    (oreOfferteOriginali % 1 > 0.5 ? 1 : 0)));
-        } else {
-            // Per fattori > 1, arrotonda per difetto anche se la parte decimale è > 0.5
-            // ma < 0.7 per compensare l'asimmetria
-            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
-                    (oreOfferteOriginali % 1 > 0.7 ? 1 : 0)));
-        }
+        int oreOfferte = getOreOfferte(oreRichieste, fattoreConversione);
         // FASE 5: Presentazione del risultato e conferma
         view.showMessage("\n" + ControllerConstants.STEP_RIEPILOGO_PROPOSTA);
         view.showMessage(String.format(ControllerConstants.INFO_RIEPILOGO_PROPOSTA,
@@ -2408,6 +2340,24 @@ public class Controller {
             view.showMessage(ControllerConstants.INFO_PROPOSTA_RITIRATA);
         }
         return false;
+    }
+
+    private static int getOreOfferte(int oreRichieste, double fattoreConversione) {
+        double oreOfferteOriginali = oreRichieste * fattoreConversione;
+        int oreOfferte;
+        // Se il fattore è < 1, tende ad arrotondare per difetto
+        // Se il fattore è > 1, tende ad arrotondare per eccesso
+        if (fattoreConversione < 1) {
+            // Per fattori < 1, arrotonda per difetto se la parte decimale è <= 0.5
+            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
+                    (oreOfferteOriginali % 1 > 0.5 ? 1 : 0)));
+        } else {
+            // Per fattori > 1, arrotonda per difetto anche se la parte decimale è > 0.5
+            // ma < 0.7 per compensare l'asimmetria
+            oreOfferte = (int) Math.max(1, Math.floor(oreOfferteOriginali +
+                    (oreOfferteOriginali % 1 > 0.7 ? 1 : 0)));
+        }
+        return oreOfferte;
     }
 
     /**
@@ -2898,13 +2848,15 @@ public class Controller {
         }
 
         view.showMessage("\n=== INSIEMI CHIUSI ===");
+        view.showWarningMessage("Il simbolo [✓] indica che i fruitori sono stati notificati");
+        view.showWarningMessage("Il simbolo [!] indica che i fruitori NON sono stati ancora notificati");
         for (int i = 0; i < insiemi.size(); i++) {
             InsiemeChiuso insieme = insiemi.get(i);
             view.showMessage((i + 1) + ") " + (insieme.isNotificato() ? "[✓] " : "[!] ") +
                     "Insieme chiuso con " + insieme.getNumeroScambi() + " scambi");
         }
 
-        int scelta = richiediIndiceDaUtente("Seleziona un insieme chiuso da visualizzare (0 per tornare indietro): ",
+        int scelta = view.getIntInput("Seleziona un insieme chiuso da visualizzare (0 per tornare indietro): ", 0,
                 insiemi.size());
 
         if (scelta == 0)

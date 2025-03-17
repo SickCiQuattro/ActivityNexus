@@ -215,6 +215,7 @@ public class ControllerConstants {
     public static final String PROMPT_CONFERMA_PROPOSTA = "Confermi questa proposta di scambio?";
     public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
     public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata";
+    public static final String INFO_PROPOSTA_AVVERTENZA = "\nIl sistema ammette una tolleranza di 1 ora rispetto alla proposta";
     // Messaggi per la gestione delle proposte
     public static final String MSG_NESSUNA_PROPOSTA_APERTA = "Non hai proposte aperte da modificare";
     public static final String TITLE_MODIFICA_PROPOSTA = "=== MODIFICA STATO PROPOSTA ===";
