@@ -10,23 +10,27 @@ import java.util.Set;
 /**
  * Campo caratteristico di una categoria nel sistema gerarchico.
  * <p>
- * Rappresenta una proprietà di una categoria che può assumere valori da un
- * dominio predefinito. Ogni valore nel dominio, rappresentato da un
- * {@link ValoreCampo}, definisce una possibile specializzazione della categoria.
+ * Un campo rappresenta una proprietà distintiva che caratterizza una categoria
+ * e
+ * determina le sue possibili specializzazioni. Il dominio del campo (insieme di
+ * {@link ValoreCampo}) definisce i valori che la proprietà può assumere,
+ * ciascuno
+ * dei quali corrisponde a una potenziale sottocategoria.
  * <p>
- * All'interno della struttura gerarchica:
+ * <b>Ruolo nella struttura gerarchica:</b>
  * <ul>
- * <li>Le categorie non-foglia hanno un campo che determina le possibili
- * sotto categorie</li>
- * <li>Le categorie foglia (attività concrete) non hanno campi
+ * <li>Le categorie <b>non-foglia</b> hanno sempre un campo che determina le
+ * possibili sottocategorie</li>
+ * <li>Le categorie <b>foglia</b> (attività concrete) non hanno campi
  * caratteristici</li>
  * </ul>
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti della classe:</b>
  * <ul>
- *   <li>Il nome del campo non è mai null</li>
- *   <li>Il dominio non contiene mai valori null</li>
- *   <li>L'insieme dominio non è mai null (può essere vuoto)</li>
+ * <li>Il nome del campo non è mai null</li>
+ * <li>Il dominio non contiene mai valori null</li>
+ * <li>L'insieme dominio non è mai null (può essere vuoto)</li>
  * </ul>
  *
  * @see ValoreCampo
@@ -34,20 +38,20 @@ import java.util.Set;
  * @see Gerarchia
  */
 public class Campo implements Serializable {
-    // Identificatore di versione per la serializzazione
+    // -----------------------------------------------------------------------------------
+    // FIELDS E COSTANTI
+    // -----------------------------------------------------------------------------------
     @Serial
     private static final long serialVersionUID = 1L;
-    
-    /** Messaggio per eccezioni di nome nullo */
-    private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
 
-    /** Messaggio per eccezioni di valore nullo */
+    /** Messaggi di errore per validazione */
+    private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
     private static final String ERRORE_VALORE_NULLO = "Il valore non può essere null";
 
-    /** Nome del campo (es. "Disciplina", "Area geografica") */
+    /** Nome identificativo del campo */
     private String nome;
 
-    /** Insieme di valori che costituiscono il dominio del campo */
+    /** Insieme dei valori possibili per questo campo */
     private final Set<ValoreCampo> dominio;
 
     // -----------------------------------------------------------------------------------
@@ -157,7 +161,7 @@ public class Campo implements Serializable {
         // Verifica che il valore non sia null e lancia eccezione in caso contrario
         Objects.requireNonNull(valore, ERRORE_VALORE_NULLO);
 
-        // Tenta di aggiungere il valore al dominio
+        // Aggiunge il valore al dominio
         this.dominio.add(valore);
     }
 
@@ -167,7 +171,8 @@ public class Campo implements Serializable {
      * @param nomeValore il nome del valore da cercare
      * @return true se un valore con quel nome è presente, false altrimenti
      *
-     * @post il valore restituito riflette correttamente la presenza o assenza di un valore con il nome specificato
+     * @post il valore restituito è true se e solo se esiste v nel getDominio() tale
+     *       che v.getNome().equals(nomeValore)
      */
     public boolean hasValore(String nomeValore) {
         // Se il nome è null, non è possibile identificare un valore da cercare
@@ -185,7 +190,6 @@ public class Campo implements Serializable {
         // Nessun valore con il nome specificato trovato
         return false;
     }
-
 
     // -----------------------------------------------------------------------------------
     // METODI OVERRIDE DI OBJECT
@@ -214,6 +218,7 @@ public class Campo implements Serializable {
                 sb.append("\t").append(valore).append("\n");
             }
         }
+
         return sb.toString();
     }
 
@@ -224,7 +229,8 @@ public class Campo implements Serializable {
      * @param obj l'oggetto da confrontare con questo campo
      * @return true se l'oggetto è un Campo uguale a questo, false altrimenti
      *
-     * @post il valore restituito è true solo se obj è un Campo con nome e dominio uguali
+     * @post il valore restituito è true solo se obj è un Campo con nome e dominio
+     *       uguali a questo
      */
     @Override
     public boolean equals(Object obj) {
