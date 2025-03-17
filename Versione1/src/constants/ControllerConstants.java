@@ -129,7 +129,6 @@ public class ControllerConstants {
     public static final String GERARCHIA_ADDED = "Gerarchia aggiunta al database con successo!";
     public static final String CONVERSIONE_TITLE = "Generazione dei fattori di conversione...";
     // Costanti per gerarchie - prompt
-    public static final String MSG_SCELTA_ERRATA = "La scelta deve essere un valore intero compreso tra 1 e %d";
     public static final String MSG_LISTA_GERARCHIE = "\nEcco una lista delle categorie radice delle gerarchie presenti. Le radici sono contrassegnate da un numero: ";
     public static final String MSG_SCELTA_GERARCHIA = "Inserisci il numero corrispondente alla gerarchia scelta: ";
     public static final String MSG_LISTA_FOGLIE = "\nEcco la gerarchia scelta. Le foglie sono contrassegnate da un numero: ";
@@ -228,13 +227,33 @@ public class ControllerConstants {
     public static final String ERROR_MODIFICA_PROPOSTA = "Impossibile modificare la proposta. Potrebbe essere già chiusa o ritirata";
     public static final String TITLE_PROPOSTE_CATEGORIA = "=== PROPOSTE PER CATEGORIA ===";
     public static final String INFO_PROPOSTE_PER_CATEGORIA = "Proposte che coinvolgono la categoria \"%s\":\n";
-    public static final String HEADER_PROPOSTE_TROVATE = "✓ Proposte trovate: %d";
-    public static final String INFO_PROPOSTE_FRUITORE = "Fruitore: %s (Email: %s)";
     public static final String MSG_NESSUNA_PROPOSTA_CATEGORIA = "Non ci sono proposte che coinvolgono la categoria \"%s\"";
-    public static final String SUCCESS_VISUALIZZAZIONE_COMPLETATA = "Visualizzazione delle proposte completata con successo";
-    public static final String SEPARATOR_LINE = "----------------------------------------";
+
+    // Costanti per InsiemeChiuso e Scambi
+    public static final String TITLE_INSIEME_CHIUSO_TROVATO = "È stato trovato un ciclo di scambio valido!";
+    public static final String INFO_PROPOSTE_INSIEME_CHIUSO = "Le seguenti proposte formano un insieme chiuso:";
+    public static final String INFO_DETTAGLI_SCAMBI = "\nDettagli degli scambi:";
+    public static final String FORMATO_LISTA_SCAMBI = "- %s";
+
+    // Costanti per valutaProposteScambio
+    public static final String TITLE_INSIEMI_CHIUSI = "\n=== INSIEMI CHIUSI ===";
+    public static final String INFO_NOTIFICA_SIMBOLO = "Il simbolo [✓] indica che i fruitori sono stati notificati";
+    public static final String INFO_NON_NOTIFICA_SIMBOLO = "Il simbolo [!] indica che i fruitori NON sono stati ancora notificati";
+    public static final String FORMATO_INSIEME_CHIUSO = "%d) %s Insieme chiuso con %d scambi";
+    public static final String SIMBOLO_NOTIFICATO = "[✓] ";
+    public static final String SIMBOLO_NON_NOTIFICATO = "[!] ";
+    public static final String PROMPT_SELEZIONA_INSIEME_CHIUSO = "Seleziona un insieme chiuso da visualizzare (0 per tornare indietro): ";
+    public static final String PROMPT_NOTIFICA_INSIEME = "Vuoi contrassegnare questo insieme chiuso come notificato?";
+    public static final String SUCCESS_INSIEME_NOTIFICATO = "Insieme chiuso contrassegnato come notificato.";
+    public static final String MSG_NESSUN_INSIEME_CHIUSO = "Non sono presenti insiemi chiusi nel sistema.";
+
+    public static final String PROMPT_VALORI_CAMPO = "Inserisci i valori possibili per il campo '%s':";
+
+    public static final String MSG_NESSUNA_PROPOSTA = "Non hai alcuna proposta di scambo d'opera";
+
+    public static final String TITLE_PROPOSTE_FRUITORE = "Ecco le tue proposte di scambio d'opera:\n";
+
     // Costanti per separatori visivi
     public static final String SEPARATORE = "\n----------------------------------------------------------";
-
 
 }

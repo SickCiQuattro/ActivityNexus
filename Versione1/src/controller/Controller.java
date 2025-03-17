@@ -1645,7 +1645,7 @@ public class Controller {
         int valoreCount = 0;
 
         // Messaggio introduttivo
-        view.showMessage("Inserisci i valori possibili per il campo '" + campo.getNome() + "':");
+        view.showMessage(String.format(ControllerConstants.PROMPT_VALORI_CAMPO, campo.getNome()));
 
         // Ciclo di inserimento valori
         while (!finished) {
@@ -2434,25 +2434,23 @@ public class Controller {
         // Se viene trovato un ciclo valido
         if (insiemeChiuso != null) {
             // Informa l'utente del ciclo trovato
-            view.showSuccessMessage("È stato trovato un ciclo di scambio valido!");
-            view.showMessage("Le seguenti proposte formano un insieme chiuso:");
+            view.showSuccessMessage(ControllerConstants.TITLE_INSIEME_CHIUSO_TROVATO);
+            view.showMessage(ControllerConstants.INFO_PROPOSTE_INSIEME_CHIUSO);
 
             // Chiudi tutte le proposte nell'insieme e mostra dettagli
             for (Proposta proposta : insiemeChiuso.getProposte()) {
                 proposta.chiudiProposta();
-                view.showMessage("- " + proposta);
+                view.showMessage(String.format(ControllerConstants.FORMATO_LISTA_SCAMBI, proposta));
             }
 
             // Mostra gli scambi che formano il ciclo
-            view.showMessage("\nDettagli degli scambi:");
+            view.showMessage(ControllerConstants.INFO_DETTAGLI_SCAMBI);
             for (Scambio scambio : insiemeChiuso.getScambi()) {
-                view.showMessage("- " + scambio.toString());
+                view.showMessage(String.format(ControllerConstants.FORMATO_LISTA_SCAMBI, scambio.toString()));
             }
             this.database.aggiungiInsiemeChiuso(insiemeChiuso);
-
             this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
         }
-
     }
 
     /**
@@ -2843,21 +2841,23 @@ public class Controller {
         List<InsiemeChiuso> insiemi = database.getInsiemiChiusi();
 
         if (insiemi.isEmpty()) {
-            view.showMessage("Non sono presenti insiemi chiusi nel sistema.");
+            view.showMessage(ControllerConstants.MSG_NESSUN_INSIEME_CHIUSO);
             return;
         }
 
-        view.showMessage("\n=== INSIEMI CHIUSI ===");
-        view.showWarningMessage("Il simbolo [✓] indica che i fruitori sono stati notificati");
-        view.showWarningMessage("Il simbolo [!] indica che i fruitori NON sono stati ancora notificati");
+        view.showMessage(ControllerConstants.TITLE_INSIEMI_CHIUSI);
+        view.showWarningMessage(ControllerConstants.INFO_NOTIFICA_SIMBOLO);
+        view.showWarningMessage(ControllerConstants.INFO_NON_NOTIFICA_SIMBOLO);
         for (int i = 0; i < insiemi.size(); i++) {
             InsiemeChiuso insieme = insiemi.get(i);
-            view.showMessage((i + 1) + ") " + (insieme.isNotificato() ? "[✓] " : "[!] ") +
-                    "Insieme chiuso con " + insieme.getNumeroScambi() + " scambi");
+            view.showMessage(String.format(ControllerConstants.FORMATO_INSIEME_CHIUSO,
+                    (i + 1),
+                    insieme.isNotificato() ? ControllerConstants.SIMBOLO_NOTIFICATO
+                            : ControllerConstants.SIMBOLO_NON_NOTIFICATO,
+                    insieme.getNumeroScambi()));
         }
 
-        int scelta = view.getIntInput("Seleziona un insieme chiuso da visualizzare (0 per tornare indietro): ", 0,
-                insiemi.size());
+        int scelta = view.getIntInput(ControllerConstants.PROMPT_SELEZIONA_INSIEME_CHIUSO, 0, insiemi.size());
 
         if (scelta == 0)
             return;
@@ -2866,11 +2866,11 @@ public class Controller {
         view.showMessage("\n" + selezionato.getDettagli());
 
         if (!selezionato.isNotificato()) {
-            boolean conferma = view.getConfirmation("Vuoi contrassegnare questo insieme chiuso come notificato?");
+            boolean conferma = view.getConfirmation(ControllerConstants.PROMPT_NOTIFICA_INSIEME);
             if (conferma) {
                 selezionato.setNotificato(true);
                 salvaTutti();
-                view.showSuccessMessage("Insieme chiuso contrassegnato come notificato.");
+                view.showSuccessMessage(ControllerConstants.SUCCESS_INSIEME_NOTIFICATO);
             }
         }
     }
@@ -2954,11 +2954,11 @@ public class Controller {
         List<Proposta> proposte = this.database.getPropostePerFruitore(fruitore);
 
         if (proposte.isEmpty()) {
-            this.view.showMessage("Non hai alcuna proposta di scambo d'opera");
+            this.view.showMessage(ControllerConstants.MSG_NESSUNA_PROPOSTA);
             return;
         }
 
-        this.view.showMessage("Ecco le tue proposte di scambio d'opera:\n");
+        this.view.showMessage(ControllerConstants.TITLE_PROPOSTE_FRUITORE);
         for (Proposta proposta : proposte) {
             this.view.showMessage(proposta.toString());
         }
