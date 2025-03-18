@@ -223,8 +223,6 @@ public class ControllerConstants {
     // Messaggi di errore
     public static final String ERROR_FATTORE_SPECIALIZZATO = "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate";
     public static final String ERROR_FATTORE_NON_SPECIALIZZATO = "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate";
-    public static final String ERROR_FATTORE_FORMATO = "Il fattore di conversione deve essere un valore decimale compreso tra 0.5 e 2";
-    public static final String ERROR_FATTORE_RANGE = "Il fattore di conversione tra gerarchie deve essere un valore decimale compreso tra 0.5 e 2";
 
     // Messaggi di successo
     public static final String SUCCESS_FATTORE_AGGIUNTO = "✓ Fattore di conversione aggiunto: %s";

@@ -2001,8 +2001,8 @@ public class Controller {
             double fattore = richiediEValidaFattore(
                     fogliaRiferimento.data().getNome() + " (" + categoriaRadice.getNome() + ")",
                     fogliaRiferimentoEsistente.data().getNome() + " (" + categoriaRadiceEsistente.getNome() + ")",
-                    0.5, 2.0, // Limiti min e max del fattore
-                    ControllerConstants.ERROR_FATTORE_RANGE); // Messaggio di errore in caso di input non valido
+                    0.5, 2.0 // Limiti min e max del fattore
+            ); // Messaggio di errore in caso di input non valido
 
             // Aggiunge il fattore di conversione al sistema globale di conversione
             this.database.getConversioneGerarchie().addFattoreConversione(
@@ -2129,17 +2129,13 @@ public class Controller {
             double minFattore = isSpecializzata ? 1.0 : 0.5; // Minimo: 1.0 per specializzate, 0.5 per altre
             double maxFattore = isSpecializzata ? 2.0 : 1.0; // Massimo: 2.0 per specializzate, 1.0 per altre
 
-            // Seleziona il messaggio di errore appropriato
-            String messaggioErrore = isSpecializzata ? ControllerConstants.ERROR_FATTORE_SPECIALIZZATO
-                    : ControllerConstants.ERROR_FATTORE_NON_SPECIALIZZATO;
-
             // Richiede all'utente di definire il fattore di conversione
             double fattore = richiediEValidaFattore(
                     fogliaRiferimento.data().getNome(), // Categoria di riferimento
                     foglia.data().getNome(), // Categoria da confrontare
                     minFattore, // Valore minimo accettabile
-                    maxFattore, // Valore massimo accettabile
-                    messaggioErrore); // Messaggio di errore
+                    maxFattore // Valore massimo accettabile
+            );
 
             // Aggiunge il fattore di conversione al sistema
             gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
@@ -2157,7 +2153,6 @@ public class Controller {
      * @param categoriaDestinazione nome della categoria di destinazione
      * @param minFattore            valore minimo accettabile per il fattore
      * @param maxFattore            valore massimo accettabile per il fattore
-     * @param messaggioErrore       messaggio di errore (usato solo per logging)
      * @return il fattore di conversione validato
      * 
      * @pre categoriaOrigine != null
@@ -2166,7 +2161,7 @@ public class Controller {
      * @post minFattore <= result <= maxFattore
      */
     private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
-            double minFattore, double maxFattore, String messaggioErrore) {
+            double minFattore, double maxFattore) {
         // Richiede all'utente di inserire il fattore di conversione
         return view.getDoubleInput(
                 String.format(ControllerConstants.PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione), minFattore,
