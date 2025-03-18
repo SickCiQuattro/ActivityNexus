@@ -218,7 +218,7 @@ public class ControllerConstants {
     public static final String INFO_SELEZIONA_DESTINAZIONE_FATTORI = "\nOra seleziona la gerarchia di cui vuoi visualizzare i fattori di conversione relativi alla categoria \"%s\":\n";
 
     // Prompts
-    public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\": ";
+    public static final String PROMPT_FATTORE = "Inserisci il fattore di conversione tra la categoria \"%s\" e la categoria \"%s\"";
 
     // Messaggi di errore
     public static final String ERROR_FATTORE_SPECIALIZZATO = "Il fattore di conversione viene consigliato maggiore di 1 e massimo 2 per attività più specializzate";

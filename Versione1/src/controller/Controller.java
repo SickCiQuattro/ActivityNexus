@@ -2148,66 +2148,29 @@ public class Controller {
     }
 
     /**
-     * Richiede e valida un fattore di conversione numerico dall'utente.
+     * Richiede e valida un fattore di conversione dall'utente.
      * <p>
-     * Implementa un ciclo di validazione che garantisce che il valore inserito:
-     * <ul>
-     * <li>Sia un numero decimale valido</li>
-     * <li>Rientri nell'intervallo specificato dai parametri</li>
-     * <li>Rappresenti correttamente la relazione tra le categorie</li>
-     * </ul>
-     * <p>
-     * Il metodo guida l'utente fornendo contesto sulle categorie coinvolte e
-     * continua a richiedere input finché non viene fornito un valore accettabile.
+     * Mostra informazioni sulle categorie coinvolte e acquisisce un valore numerico
+     * nel range specificato utilizzando la validazione integrata in getFloatInput.
      *
-     * @param categoriaOrigine      nome della categoria di origine per la
-     *                              conversione
-     * @param categoriaDestinazione nome della categoria di destinazione per la
-     *                              conversione
+     * @param categoriaOrigine      nome della categoria di origine
+     * @param categoriaDestinazione nome della categoria di destinazione
      * @param minFattore            valore minimo accettabile per il fattore
-     *                              (incluso)
      * @param maxFattore            valore massimo accettabile per il fattore
-     *                              (incluso)
-     * @param messaggioErrore       messaggio da mostrare in caso di input non
-     *                              valido
-     * @return il fattore di conversione validato come numero decimale
-     *
+     * @param messaggioErrore       messaggio di errore (usato solo per logging)
+     * @return il fattore di conversione validato
+     * 
      * @pre categoriaOrigine != null
      * @pre categoriaDestinazione != null
-     * @pre minFattore > 0
-     * @pre maxFattore >= minFattore
-     * @pre messaggioErrore != null
-     * @pre this.view != null
-     * @post Il valore restituito è un numero decimale > 0
-     * @post Il valore restituito è compreso tra minFattore e maxFattore (inclusi)
-     * @post L'utente ha ricevuto feedback appropriato in caso di input non valido
-     * @post Il metodo ha gestito correttamente eventuali errori di formato
-     *       nell'input
+     * @pre minFattore <= maxFattore
+     * @post minFattore <= result <= maxFattore
      */
     private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
             double minFattore, double maxFattore, String messaggioErrore) {
-        // Ciclo di validazione: continua finché non viene fornito un valore valido
-        while (true) {
-            // Richiede all'utente di inserire il fattore di conversione
-            String value = view.getInput(
-                    String.format(ControllerConstants.PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione));
-
-            try {
-                // Converte l'input in un valore numerico
-                double fattore = Double.parseDouble(value);
-
-                // Verifica che il valore sia nel range consentito
-                if (fattore >= minFattore && fattore <= maxFattore) {
-                    return fattore; // Valore valido, esce dal ciclo
-                } else {
-                    // Valore fuori dal range consentito
-                    view.showMessage(messaggioErrore);
-                }
-            } catch (NumberFormatException e) {
-                // Input non convertibile in numero decimale
-                view.showMessage(ControllerConstants.ERROR_FATTORE_FORMATO);
-            }
-        }
+        // Richiede all'utente di inserire il fattore di conversione
+        return view.getDoubleInput(
+                String.format(ControllerConstants.PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione), minFattore,
+                maxFattore);
     }
 
     /**

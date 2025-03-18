@@ -349,11 +349,11 @@ public class ConsoleView {
      * @post min <= result <= max
      * @post Il metodo ha richiesto input finché non ha ricevuto un valore valido
      */
-    public float getFloatInput(String prompt, float min, float max) {
+    public double getDoubleInput(String prompt, double min, double max) {
         while (true) {
             try {
                 String input = getInput(prompt + String.format(RANGE_PROMPT_FORMAT, min, max));
-                float value = Float.parseFloat(input);
+                double value = Double.parseDouble(input);
                 if (value >= min && value <= max) {
                     return value;
                 } else {
