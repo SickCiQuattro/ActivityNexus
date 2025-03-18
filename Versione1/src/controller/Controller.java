@@ -1998,11 +1998,12 @@ public class Controller {
             mostraPercorsoFino(fogliaRiferimentoEsistente);
 
             // Richiede all'utente il fattore di conversione con validazione
-            double fattore = richiediEValidaFattore(
-                    fogliaRiferimento.data().getNome() + " (" + categoriaRadice.getNome() + ")",
-                    fogliaRiferimentoEsistente.data().getNome() + " (" + categoriaRadiceEsistente.getNome() + ")",
-                    0.5, 2.0 // Limiti min e max del fattore
-            ); // Messaggio di errore in caso di input non valido
+            double fattore = view.getDoubleInput(
+                    String.format(ControllerConstants.PROMPT_FATTORE,
+                            fogliaRiferimento.data().getNome() + " (" + categoriaRadice.getNome() + ")",
+                            fogliaRiferimentoEsistente.data().getNome() + " (" + categoriaRadiceEsistente.getNome()
+                                    + ")"),
+                    0.5, 2.0);
 
             // Aggiunge il fattore di conversione al sistema globale di conversione
             this.database.getConversioneGerarchie().addFattoreConversione(
@@ -2130,42 +2131,16 @@ public class Controller {
             double maxFattore = isSpecializzata ? 2.0 : 1.0; // Massimo: 2.0 per specializzate, 1.0 per altre
 
             // Richiede all'utente di definire il fattore di conversione
-            double fattore = richiediEValidaFattore(
-                    fogliaRiferimento.data().getNome(), // Categoria di riferimento
-                    foglia.data().getNome(), // Categoria da confrontare
-                    minFattore, // Valore minimo accettabile
-                    maxFattore // Valore massimo accettabile
-            );
+            double fattore = view.getDoubleInput(
+                    String.format(ControllerConstants.PROMPT_FATTORE, fogliaRiferimento.data().getNome(),
+                            foglia.data().getNome()),
+                    minFattore,
+                    maxFattore);
 
             // Aggiunge il fattore di conversione al sistema
             gerarchia.getFattoreConversione().addFattoreConversione(foglia.level(), fattore);
             view.showMessage(ControllerConstants.SUCCESS_FATTORE_SEMPLICE);
         }
-    }
-
-    /**
-     * Richiede e valida un fattore di conversione dall'utente.
-     * <p>
-     * Mostra informazioni sulle categorie coinvolte e acquisisce un valore numerico
-     * nel range specificato utilizzando la validazione integrata in getFloatInput.
-     *
-     * @param categoriaOrigine      nome della categoria di origine
-     * @param categoriaDestinazione nome della categoria di destinazione
-     * @param minFattore            valore minimo accettabile per il fattore
-     * @param maxFattore            valore massimo accettabile per il fattore
-     * @return il fattore di conversione validato
-     * 
-     * @pre categoriaOrigine != null
-     * @pre categoriaDestinazione != null
-     * @pre minFattore <= maxFattore
-     * @post minFattore <= result <= maxFattore
-     */
-    private double richiediEValidaFattore(String categoriaOrigine, String categoriaDestinazione,
-            double minFattore, double maxFattore) {
-        // Richiede all'utente di inserire il fattore di conversione
-        return view.getDoubleInput(
-                String.format(ControllerConstants.PROMPT_FATTORE, categoriaOrigine, categoriaDestinazione), minFattore,
-                maxFattore);
     }
 
     /**
