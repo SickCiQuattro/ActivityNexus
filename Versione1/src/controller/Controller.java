@@ -44,12 +44,10 @@ import java.util.*;
  * @see view.ConsoleView
  */
 public class Controller {
-    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le funzionalità
+    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le
+    // funzionalità
     // da monilitico a moduli più piccoli e coesi
-    // TODO: refactor Database
-    // TODO: refactor View
     // TODO: refactor Controller
-    // TODO: refactor Gerarchia
 
     private Database database;
     private final ConsoleView view;
@@ -352,14 +350,16 @@ public class Controller {
      * @pre this.database != null
      * @pre this.view != null
      * @post Se non ci sono utenti registrati, viene mostrato un messaggio
-     *       informativo
-     * @post Se l'autenticazione fallisce, viene mostrato un messaggio di errore
+     *       appropriato e l'autenticazione non procede
+     * @post Se l'autenticazione fallisce, viene mostrato un messaggio di errore e
+     *       l'utente ritorna al menu principale
      * @post Se l'autenticazione ha successo per un Configuratore, viene mostrato il
-     *       menu Configuratore
+     *       menu Configuratore fino al logout
      * @post Se l'autenticazione ha successo per un Fruitore, viene mostrato il menu
-     *       Fruitore
-     * @post L'applicazione rimane nello stato autenticato finché l'utente non
-     *       effettua il logout
+     *       Fruitore fino al logout
+     * @post Il metodo non modifica lo stato degli utenti nel database
+     * @post Se la sessione termina con logout, il controllo ritorna al menu
+     *       principale senza side effects
      */
     private void handleLogin() {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
@@ -397,19 +397,31 @@ public class Controller {
      * <p>
      * Coordina l'intero flusso di registrazione che include:
      * <ol>
-     * <li>Validazione preliminare tramite l'autenticazione temporanea</li>
-     * <li>Raccolta e convalida delle credenziali (username e password)</li>
      * <li>Selezione del tipo di account (Configuratore o Fruitore)</li>
-     * <li>Creazione dell'account nel database</li>
+     * <li>Per i Configuratori: validazione preliminare tramite l'autenticazione
+     * temporanea</li>
+     * <li>Per i Fruitori: verifica della disponibilità di comprensori nel
+     * sistema</li>
+     * <li>Raccolta e convalida delle credenziali (username e password)</li>
+     * <li>Per i Fruitori: raccolta di email e associazione a comprensorio</li>
+     * <li>Creazione dell'account nel database con ruolo appropriato</li>
      * </ol>
      *
      * @pre this.database != null
      * @pre this.view != null
-     * @post Se la registrazione ha successo, l'utente viene aggiunto al database
-     * @post Se la registrazione ha successo, i dati utente vengono salvati su file
-     *       (tramite salvaUtenti())
-     * @post Viene mostrato un messaggio appropriato all'utente in base all'esito
-     *       della registrazione
+     * @post Se la registrazione è completata con successo, un nuovo utente è stato
+     *       aggiunto al database
+     * @post Se la registrazione è completata con successo, i dati utente sono
+     *       salvati in modo persistente
+     * @post Se viene registrato un Fruitore, questo è associato a un Comprensorio
+     *       valido
+     * @post Se viene tentata la registrazione di un Fruitore senza comprensori
+     *       disponibili, l'operazione fallisce
+     * @post Se l'utente annulla in qualsiasi fase, la registrazione viene
+     *       interrotta senza modificare il database
+     * @post Lo username scelto è univoco nel sistema (non esisteva prima della
+     *       registrazione)
+     * @post L'utente riceve feedback appropriato sull'esito della registrazione
      */
     private void handleRegistration() {
         // Presentazione delle opzioni di registrazione
@@ -1292,15 +1304,18 @@ public class Controller {
      *
      * @pre this.database != null
      * @pre this.view != null
-     * @post Una nuova gerarchia completa viene aggiunta al database
-     * @post I dati delle gerarchie vengono salvati su file (tramite
-     *       serializeGerarchie())
-     * @post I fattori di conversione vengono salvati su file (tramite
-     *       serializeConversioneGerarchie())
-     * @post Se esistono altre gerarchie, vengono configurati fattori di conversione
-     *       tra la nuova e le esistenti
-     * @post Viene mostrato un messaggio di conferma al completamento
-     *       dell'operazione
+     * @pre this.database.getGerarchie() != null
+     * @post Una nuova gerarchia valida e completa viene aggiunta al database
+     * @post La gerarchia creata ha una struttura ad albero coerente con almeno un
+     *       nodo radice
+     * @post La gerarchia ha un sistema di fattori di conversione interni
+     *       configurato correttamente
+     * @post I dati delle gerarchie vengono salvati in modo persistente su file
+     * @post I fattori di conversione vengono salvati in modo persistente su file
+     * @post Se esistono altre gerarchie, sono stati definiti fattori di conversione
+     *       bidirezionali
+     * @post L'utente riceve feedback appropriato ad ogni fase del processo di
+     *       creazione
      */
     private void creaGerarchia() {
         // Mostra informazioni introduttive sulla creazione della gerarchia
@@ -2200,8 +2215,8 @@ public class Controller {
      * gerarchie diverse.
      * <p>
      * Questo metodo implementa l'algoritmo di conversione completo che permette di
-     * stabilire una relazione
-     * quantitativa tra categorie diverse, considerando tre componenti:
+     * stabilire una relazione quantitativa tra categorie diverse, considerando tre
+     * componenti:
      * <ol>
      * <li>Fattore interno alla gerarchia di origine (dalla foglia richiesta al nodo
      * di riferimento)</li>
@@ -2211,10 +2226,9 @@ public class Controller {
      * </ol>
      * <p>
      * Il risultato finale è il prodotto di questi tre fattori, che permette di
-     * determinare
-     * il rapporto di conversione tra ore di categorie diverse, consentendo scambi
-     * equi
-     * tra prestazioni di natura differente.
+     * determinare il rapporto di conversione tra ore di categorie diverse,
+     * consentendo scambi
+     * equi tra prestazioni di natura differente.
      *
      * @param gerarchiaOrigine      gerarchia della categoria richiesta
      * @param fogliaRichiesta       nodo foglia della categoria richiesta
@@ -2231,14 +2245,15 @@ public class Controller {
      * @pre gerarchiaOrigine.getFattoreConversione().getFogliaRiferimento() != null
      * @pre gerarchiaDestinazione.getFattoreConversione().getFogliaRiferimento() !=
      *      null
-     * @pre fogliaRichiesta appartiene a gerarchiaOrigine
-     * @pre fogliaOfferta appartiene a gerarchiaDestinazione
-     * @post Il valore restituito è un numero decimale positivo > 0
-     * @post Se le gerarchie sono identiche, il fattore inter-gerarchia è 1.0
-     * @post Il fattore risultante è il prodotto di: fattoreIntraOrigine *
+     * @pre fogliaRichiesta.isLeaf() == true
+     * @pre fogliaOfferta.isLeaf() == true
+     * @post Il valore restituito è un numero decimale compreso tra 0.5 e 2.0
+     * @post Se gerarchiaOrigine.equals(gerarchiaDestinazione), il fattore
+     *       inter-gerarchia utilizzato è 1.0
+     * @post Il calcolo è matematicamente coerente: fattoreIntraOrigine *
      *       fattoreInterGerarchia * fattoreIntraDestinazione
-     * @post Il fattore può essere usato per convertire quantitativamente ore tra le
-     *       categorie specificate
+     * @post Il valore viene limitato nell'intervallo [0.5, 2.0] anche se il calcolo
+     *       produrrebbe valori fuori range
      */
     private double calcolaFattoreConversione(
             Gerarchia gerarchiaOrigine, TreeNode<Categoria> fogliaRichiesta,
@@ -2292,29 +2307,28 @@ public class Controller {
      * </ol>
      * <p>
      * Il processo applica automaticamente i fattori di conversione tra gerarchie
-     * diverse
-     * per garantire l'equità dello scambio, considerando la specificità delle
-     * categorie
-     * coinvolte.
+     * diverse per garantire l'equità dello scambio, considerando la specificità
+     * delle
+     * categorie coinvolte.
      *
      * @param fruitore il fruitore che sta creando la proposta di scambio
      * @return true se la proposta è stata creata e registrata con successo, false
      *         se l'utente ha annullato o la creazione è fallita
      *
      * @pre fruitore != null
+     * @pre fruitore.getComprensorio() != null
      * @pre this.view != null
      * @pre this.database != null
-     * @pre database.getGerarchie() non è vuoto (deve esistere almeno una gerarchia
-     *      nel sistema)
-     * @post Se restituisce true, una nuova proposta è stata creata e registrata nel
-     *       database
-     * @post Se restituisce true, la proposta ha stato APERTA e viene salvata
-     *       tramite salvaUtenti()
-     * @post Se restituisce false, nessuna proposta attiva è stata aggiunta al
-     *       sistema (o è stata aggiunta con stato RITIRATA)
-     * @post L'utente riceve feedback appropriati durante l'intero processo
-     * @post Il calcolo delle ore offerte è basato sul fattore di conversione tra le
-     *       categorie selezionate
+     * @pre database.getGerarchie().size() > 0
+     * @post Se restituisce true, una nuova proposta con StatoProposta.APERTA è
+     *       stata aggiunta al database
+     * @post Se restituisce false, nessuna proposta con stato APERTA è stata
+     *       aggiunta al sistema
+     * @post L'utente riceve feedback specifici ad ogni passaggio del processo
+     * @post Le ore offerte sono calcolate matematicamente in base al fattore di
+     *       conversione tra le categorie
+     * @post La proposta creata ha riferimenti validi al fruitore e alle prestazioni
+     *       selezionate
      */
     private Boolean propostaScambioOpera(Fruitore fruitore) {
         // Intestazione e spiegazione del processo
@@ -2459,8 +2473,8 @@ public class Controller {
      * proposta del fruitore.
      * <p>
      * Analizza tutte le proposte attive degli altri fruitori appartenenti allo
-     * stesso comprensorio
-     * del fruitore specificato, cercando cicli di scambio che formino insiemi
+     * stesso comprensorio del fruitore specificato, cercando cicli di scambio che
+     * formino insiemi
      * chiusi. Il processo include:
      * <ol>
      * <li>Verifica della presenza di proposte per il fruitore</li>
@@ -2473,24 +2487,28 @@ public class Controller {
      * </ol>
      * <p>
      * Un insieme chiuso è valido quando tutti i fruitori coinvolti ricevono una
-     * prestazione che
-     * soddisfa la loro richiesta e forniscono una prestazione che soddisfa la
+     * prestazione che soddisfa la loro richiesta e forniscono una prestazione che
+     * soddisfa la
      * richiesta di un altro.
      *
      * @param fruitore il fruitore che ha appena creato una proposta
      * 
      * @pre fruitore != null
+     * @pre fruitore.getComprensorio() != null
      * @pre this.view != null
      * @pre this.database != null
-     * @post Se viene trovato un ciclo valido, le proposte coinvolte vengono chiuse
-     *       (StatoProposta.CHIUSA)
-     * @post Se viene trovato un ciclo valido, viene creato un InsiemeChiuso nel
-     *       sistema
-     * @post Se viene trovato un ciclo valido, l'InsiemeChiuso viene salvato nel
-     *       database
-     * @post Se non viene trovato alcun ciclo valido, lo stato delle proposte rimane
+     * @post Se viene trovato un ciclo valido, tutte le proposte coinvolte hanno
+     *       stato StatoProposta.CHIUSA
+     * @post Se viene trovato un ciclo valido, esiste un InsiemeChiuso nel database
+     *       contenente tutte e sole le proposte del ciclo
+     * @post Se viene trovato un ciclo valido, l'InsiemeChiuso contiene lo stesso
+     *       numero di Scambi e di Proposte
+     * @post Se viene trovato un ciclo valido, l'InsiemeChiuso è persistente nel
+     *       sistema (salvato su file)
+     * @post Se non viene trovato alcun ciclo, lo stato di tutte le proposte rimane
      *       invariato
-     * @post Gli utenti ricevono notifica appropriata sull'esito dell'operazione
+     * @post Se il fruitore non ha proposte aperte, il metodo termina senza effetti
+     *       collaterali
      */
     private void valutaProposteScambio(Fruitore fruitore) {
         if (fruitore == null) {
@@ -2618,13 +2636,17 @@ public class Controller {
      * @pre propostaCorrente != null
      * @pre proposteAltri != null (può essere vuota)
      * @pre propostaCorrente.getStato() == StatoProposta.APERTA
-     * @post Il grafo restituito non è null
-     * @post Ogni arco nel grafo rappresenta uno scambio potenziale valido tra due
-     *       fruitori
-     * @post Ogni arco contiene riferimenti validi a fruitore fornitore, fruitore
-     *       ricevente e proposta
-     * @post Il grafo include tutte le possibili connessioni compatibili tra le
-     *       proposte
+     * @pre propostaCorrente.getPropostitore().equals(fruitoreCorrente)
+     * @post Il grafo restituito non è mai null, anche se vuoto (può essere una
+     *       mappa vuota)
+     * @post Ogni arco nel grafo rappresenta uno scambio potenziale valido con
+     *       compatibilità di categoria
+     * @post Per ogni ArcoScambio nel grafo, arco.getFornitore() != null &&
+     *       arco.getRicevente() != null
+     * @post Per ogni ArcoScambio nel grafo, arco.getProposta() != null &&
+     *       arco.getProposta().getStato() == StatoProposta.APERTA
+     * @post Il grafo contiene tutte e sole le connessioni in cui una categoria
+     *       offerta corrisponde a una categoria richiesta
      */
     private Map<Fruitore, List<ArcoScambio>> costruisciGrafoScambi(
             Fruitore fruitoreCorrente,
@@ -2755,8 +2777,7 @@ public class Controller {
      * </ul>
      * <p>
      * Quando viene trovato un ciclo valido, viene creato un insieme chiuso con
-     * tutti
-     * gli scambi e le proposte coinvolte.
+     * tutti gli scambi e le proposte coinvolte.
      * 
      * @param fruitoreIniziale il fruitore da cui iniziare la ricerca
      * @param grafo            il grafo degli scambi potenziali
@@ -2765,14 +2786,17 @@ public class Controller {
      * @pre fruitoreIniziale != null
      * @pre grafo != null
      * @pre fruitoreIniziale.getComprensorio() != null
-     * @post Se viene trovato un ciclo valido, restituisce un InsiemeChiuso non null
-     * @post Se restituito, l'InsiemeChiuso contiene tutte le proposte e gli scambi
-     *       che formano il ciclo
-     * @post Se restituito, l'InsiemeChiuso ha lo stesso comprensorio del fruitore
-     *       iniziale
-     * @post Se non viene trovato alcun ciclo valido, restituisce null
-     * @post L'algoritmo considera tutti i possibili cicli partendo dal fruitore
-     *       iniziale
+     * @post Se viene trovato un ciclo valido, result != null e
+     *       result.getProposte().size() > 0
+     * @post Se viene trovato un ciclo valido, result.getProposte().size() ==
+     *       result.getScambi().size()
+     * @post Se viene trovato un ciclo valido, il ciclo è chiuso (l'ultimo fruitore
+     *       fornisce al primo)
+     * @post Se viene trovato un ciclo valido, ogni fruitore nel ciclo appare
+     *       esattamente una volta come fornitore
+     * @post Se viene trovato un ciclo valido, ogni fruitore nel ciclo appare
+     *       esattamente una volta come ricevente
+     * @post Se non viene trovato alcun ciclo valido, result == null
      */
     private InsiemeChiuso trovaCicloScambio(Fruitore fruitoreIniziale, Map<Fruitore, List<ArcoScambio>> grafo) {
         // Strutture dati per il tracciamento del percorso
@@ -2807,8 +2831,7 @@ public class Controller {
             Scambio scambio = new Scambio(
                     arco.getFornitore(),
                     arco.getRicevente(),
-                    proposta.getOfferta()
-            );
+                    proposta.getOfferta());
             insiemeChiuso.aggiungiScambio(scambio);
 
             // Passa al nodo precedente

@@ -21,20 +21,30 @@ import java.util.*;
  * <li>Recupero di foglie e nodi a diversi livelli</li>
  * </ul>
  *
- * <p><b>Invarianti:</b>
+ * <p>
+ * <b>Invarianti:</b>
  * <ul>
- *   <li>La radice dell'albero non è mai null</li>
- *   <li>Il fattore di conversione non è mai null</li>
- *   <li>I nodi dell'albero contengono sempre oggetti di tipo Categoria non null</li>
- *   <li>Due gerarchie sono considerate uguali se hanno la stessa categoria radice</li>
+ * <li>La radice dell'albero non è mai null</li>
+ * <li>Il fattore di conversione non è mai null</li>
+ * <li>I nodi dell'albero contengono sempre oggetti di tipo Categoria non
+ * null</li>
+ * <li>Due gerarchie sono considerate uguali se hanno la stessa categoria
+ * radice</li>
  * </ul>
  *
  * @see Categoria
  * @see FattoreConversione
+ * @see LinkedMultiTreeNode
+ * @see Serializable
  */
 public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Serializable {
+    // -----------------------------------------------------------------------------------
+    // CAMPI E COSTANTI
+    // -----------------------------------------------------------------------------------
+
+    /** Identificatore per la serializzazione */
     @Serial
-    private static final long serialVersionUID = 1L; // Identificatore per la serializzazione
+    private static final long serialVersionUID = 1L;
 
     /** Fattore di conversione associato alla gerarchia */
     private final FattoreConversione fattoreConversione = new FattoreConversione();
@@ -45,20 +55,28 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Costruisce una Gerarchia con la categoria radice specificata.
+     * <p>
+     * Crea un albero con un singolo nodo radice contenente la categoria
+     * specificata.
+     * Inizializza anche il sistema di fattori di conversione associato alla
+     * gerarchia.
      *
      * @param categoriaRadice la categoria radice della gerarchia
      * @throws NullPointerException se categoriaRadice è null
      *
      * @pre categoriaRadice != null
-     * @post root().data() restituisce categoriaRadice
+     * @post root().data().equals(categoriaRadice)
      * @post getFattoreConversione() != null
      */
     public Gerarchia(Categoria categoriaRadice) {
         super(categoriaRadice); // Inizializza il nodo radice con la categoria specificata
+
+        // Non è necessario inizializzare fattoreConversione poiché viene fatto
+        // implicitamente alla dichiarazione del campo
     }
 
     // -----------------------------------------------------------------------------------
-    // METODI DI GESTIONE DELLA STRUTTURA
+    // METODI DI ACCESSO AI DATI (GETTERS)
     // -----------------------------------------------------------------------------------
 
     /**
@@ -69,7 +87,9 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      *
      * @return il gestore dei fattori di conversione
      *
-     * @post il valore restituito non è null
+     * @pre true (nessuna precondizione)
+     * @post result != null
+     * @post result è l'istanza di FattoreConversione associata a questa gerarchia
      */
     public FattoreConversione getFattoreConversione() {
         return fattoreConversione;
@@ -83,12 +103,15 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      * Restituisce tutte le foglie della gerarchia.
      * <p>
      * Una foglia è un nodo che non ha figli. La lista restituita include tutte
-     * le foglie trovate durante l'attraversamento in pre-ordine.
+     * le foglie trovate durante l'attraversamento in pre-ordine dell'albero,
+     * quindi l'ordine riflette la sequenza di visita.
      *
      * @return lista di nodi foglia
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito contiene tutti e soli i nodi foglia della gerarchia
+     * @pre true (nessuna precondizione)
+     * @post result != null
+     * @post per ogni nodo in result, nodo.isLeaf() == true
+     * @post result contiene tutti e soli i nodi foglia della gerarchia
      */
     public ArrayList<TreeNode<Categoria>> getFoglie() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
@@ -120,12 +143,18 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
      * <p>
      * Per ogni livello trovato nell'albero, viene aggiunta alla lista la prima
      * foglia incontrata a quel livello durante l'attraversamento in pre-ordine.
+     * <p>
+     * Questo metodo è utile quando si desidera avere un rappresentante di ogni
+     * livello
+     * per operazioni come visualizzazione o configurazione di conversioni.
      *
      * @return lista di nodi foglia, uno per ogni livello presente
      *
-     * @post il valore restituito non è null
-     * @post il valore restituito contiene al massimo un nodo foglia per ogni livello distinto
-     * @post tutti gli elementi nella lista restituita sono nodi foglia (isLeaf() == true)
+     * @pre true (nessuna precondizione)
+     * @post result != null
+     * @post per ogni nodo in result, nodo.isLeaf() == true
+     * @post per ogni livello L che ha almeno una foglia, esiste esattamente un nodo
+     *       in result con level() == L
      */
     public ArrayList<TreeNode<Categoria>> getFogliePerLivello() {
         ArrayList<TreeNode<Categoria>> foglie = new ArrayList<>();
@@ -134,7 +163,10 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
         TraversalAction<TreeNode<Categoria>> action = new TraversalAction<>() {
             @Override
             public void perform(TreeNode<Categoria> node) {
-                // Aggiunge il nodo solo se è foglia E il suo livello non è già stato trovato
+                // Aggiunge il nodo solo se:
+                // 1. È una foglia (non ha figli)
+                // 2. Il suo livello non è già stato trovato (add() restituisce true se
+                // l'elemento è nuovo)
                 if (node.isLeaf() && livelloFoglie.add(node.level())) {
                     foglie.add(node);
                 }
@@ -142,6 +174,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
             @Override
             public boolean isCompleted() {
+                // Continua l'attraversamento fino alla fine
                 return false;
             }
         };
@@ -151,15 +184,25 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
     }
 
     // -----------------------------------------------------------------------------------
-    // METODI DI VISUALIZZAZIONE
+    // METODI DI VISUALIZZAZIONE PUBBLICI
     // -----------------------------------------------------------------------------------
 
     /**
      * Restituisce una rappresentazione in stringa della gerarchia.
-     * La stringa include i nomi delle categorie e i valori del campo associato alla
-     * categoria.
+     * <p>
+     * Genera una visualizzazione ad albero con indentazione, includendo i nomi
+     * delle
+     * categorie e i valori del campo associato a ogni categoria.
+     * <p>
+     * Questa versione utilizza i parametri di visualizzazione predefiniti,
+     * senza numerazione di foglie o fattori di conversione.
      *
      * @return una rappresentazione in stringa della gerarchia
+     *
+     * @pre true (nessuna precondizione)
+     * @post result != null
+     * @post result contiene una rappresentazione testuale di tutti i nodi
+     *       dell'albero
      */
     @Override
     public String toString() {
@@ -169,9 +212,18 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Visualizza la gerarchia con numeri progressivi accanto alle foglie.
-     * Utile per permettere all'utente di selezionare una foglia.
+     * <p>
+     * Questo formato è particolarmente utile quando si desidera permettere
+     * all'utente
+     * di selezionare una foglia specifica tramite numero. Le foglie sono numerate
+     * in ordine di attraversamento pre-ordine dell'albero.
      *
      * @return stringa con rappresentazione della gerarchia e numeri di selezione
+     *
+     * @pre true (nessuna precondizione)
+     * @post result != null
+     * @post result contiene una rappresentazione testuale con foglie numerate
+     *       progressivamente
      */
     public String toStringSelezioneFoglia() {
         // Configura la visualizzazione per numerare le foglie
@@ -183,9 +235,19 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
     /**
      * Visualizza la gerarchia con i valori di conversione calcolati per ogni
      * foglia.
+     * <p>
+     * Mostra accanto a ogni foglia il fattore di conversione calcolato,
+     * moltiplicato per il fattore esterno specificato. Utile per visualizzare
+     * come i valori si trasformano tra diversi livelli.
      *
      * @param fattoreEsterno valore esterno da applicare alla conversione
      * @return stringa con rappresentazione della gerarchia e valori di conversione
+     *
+     * @pre true (fattoreEsterno può essere qualsiasi numero)
+     * @post result != null
+     * @post result contiene una rappresentazione testuale con fattori di
+     *       conversione
+     *       calcolati per ogni foglia
      */
     public String toStringFattoreConversione(double fattoreEsterno) {
         // Configura la visualizzazione per mostrare i fattori di conversione
@@ -195,22 +257,43 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
         return visualizzaGerarchia(parametri);
     }
 
+    // -----------------------------------------------------------------------------------
+    // METODI DI SUPPORTO ALLA VISUALIZZAZIONE (PRIVATI)
+    // -----------------------------------------------------------------------------------
+
     /**
      * Classe di supporto per configurare la visualizzazione della gerarchia.
+     * <p>
+     * Raccoglie tutti i parametri che influenzano la formattazione della
+     * visualizzazione
+     * in un singolo oggetto per semplificare il passaggio al metodo di
+     * visualizzazione.
      */
     private static class ParametriVisualizzazione {
-        boolean numeraFoglie = false; // Indica se numerare le foglie per selezione
-        boolean mostraFattoriConversione = false; // Indica se mostrare i fattori di conversione
-        double fattoreEsterno = 1.0; // Fattore esterno da applicare alle conversioni
+        /** Flag che indica se numerare le foglie per facilitare la selezione */
+        boolean numeraFoglie = false;
+
+        /** Flag che indica se mostrare i fattori di conversione per le foglie */
+        boolean mostraFattoriConversione = false;
+
+        /** Fattore esterno da applicare ai calcoli di conversione */
+        double fattoreEsterno = 1.0;
     }
 
     /**
      * Metodo centrale per la visualizzazione della gerarchia.
+     * <p>
      * Implementa tutte le varianti di visualizzazione in base ai parametri
-     * specificati.
+     * specificati,
+     * traversando l'albero in pre-ordine e costruendo progressivamente la
+     * rappresentazione
+     * testuale con indentazione appropriata.
      * 
      * @param parametri i parametri di visualizzazione
      * @return stringa formattata rappresentante la gerarchia
+     *
+     * @pre parametri != null
+     * @post result != null
      */
     private String visualizzaGerarchia(ParametriVisualizzazione parametri) {
         final StringBuilder builder = new StringBuilder();
@@ -288,10 +371,16 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Calcola il fattore di conversione per un nodo foglia.
+     * <p>
+     * Utilizza il sistema di fattori di conversione della gerarchia per calcolare
+     * il fattore appropriato per il livello del nodo specificato, moltiplicato
+     * per un fattore esterno opzionale.
      * 
-     * @param nodo           il nodo foglia
+     * @param nodo           il nodo foglia di cui calcolare il fattore
      * @param fattoreEsterno fattore di conversione esterno da applicare
      * @return il valore di conversione calcolato, o null se non disponibile
+     *
+     * @pre nodo != null
      */
     private Double calcolaFattoreConversione(TreeNode<Categoria> nodo, double fattoreEsterno) {
         try {
@@ -315,10 +404,17 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Visualizza il campo associato a un nodo non-foglia.
+     * <p>
+     * Aggiunge alla rappresentazione testuale il nome del campo caratteristico
+     * associato alla categoria del nodo.
      * 
      * @param nodo          il nodo di cui visualizzare il campo
      * @param prefissoLinea il prefisso da usare per l'indentazione
      * @param builder       il builder su cui accumulare il risultato
+     *
+     * @pre nodo != null
+     * @pre prefissoLinea != null
+     * @pre builder != null
      */
     private void visualizzaCampoNodo(TreeNode<Categoria> nodo, String prefissoLinea, StringBuilder builder) {
         // Aggiunge indentazione solo se non è il nodo radice
@@ -339,10 +435,16 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Ottiene il valore da visualizzare per un nodo.
+     * <p>
+     * Recupera il valore di campo appropriato per il nodo corrente,
+     * prelevandolo dalla coda di valori preparati per il genitore.
      * 
      * @param nodo          il nodo attuale
      * @param valoriPerNodo mappa dei valori assegnati per nodo
      * @return il valore da visualizzare o null se non disponibile
+     *
+     * @pre nodo != null
+     * @pre valoriPerNodo != null
      */
     private ValoreCampo ottieniValoreNodo(TreeNode<Categoria> nodo,
             Map<TreeNode<Categoria>, Queue<ValoreCampo>> valoriPerNodo) {
@@ -360,11 +462,18 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Prepara i valori da assegnare ai figli di un nodo.
+     * <p>
+     * Crea e memorizza una coda di valori di campo che verranno successivamente
+     * assegnati ai figli del nodo durante la visualizzazione.
      * 
      * @param nodo               il nodo corrente
      * @param genitoriProcessati set dei genitori già elaborati
      * @param valoriPerNodo      mappa che associa nodi genitori alle code di valori
      *                           per i loro figli
+     *
+     * @pre nodo != null
+     * @pre genitoriProcessati != null
+     * @pre valoriPerNodo != null
      */
     private void preparaValoriNodo(TreeNode<Categoria> nodo, Set<TreeNode<Categoria>> genitoriProcessati,
             Map<TreeNode<Categoria>, Queue<ValoreCampo>> valoriPerNodo) {
@@ -410,10 +519,17 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Crea la stringa di indentazione per la visualizzazione dell'albero.
+     * <p>
+     * Genera un prefisso di indentazione appropriato per visualizzare
+     * la struttura gerarchica dell'albero in modo leggibile.
      * 
      * @param nodo    il nodo corrente
      * @param livello il livello del nodo
      * @return la stringa di indentazione
+     *
+     * @pre nodo != null
+     * @pre livello >= 0
+     * @post result != null
      */
     private String creaIndentazione(TreeNode<Categoria> nodo, int livello) {
         StringBuilder builder = new StringBuilder();
@@ -436,11 +552,14 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Verifica se un nodo è l'ultimo figlio del suo genitore.
+     * <p>
      * Utilizza confronto di riferimenti invece di equals per evitare
      * conflitti con l'implementazione di equals nella classe.
      *
      * @param nodo il nodo da verificare
      * @return true se il nodo è l'ultimo figlio, false altrimenti
+     *
+     * @pre nodo != null
      */
     private boolean isUltimoFiglio(TreeNode<Categoria> nodo) {
         TreeNode<Categoria> genitore = nodo.parent();
@@ -463,10 +582,17 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
 
     /**
      * Confronta questa gerarchia con l'oggetto specificato.
+     * <p>
      * Due gerarchie sono considerate uguali se hanno la stessa categoria radice.
+     * Questo è coerente con l'invariante che identifica una gerarchia tramite
+     * la sua categoria principale.
      *
      * @param obj l'oggetto da confrontare con questa gerarchia
      * @return true se l'oggetto è uguale a questa gerarchia, false altrimenti
+     *
+     * @post se obj instanceof Gerarchia, result ==
+     *       (this.root().data().equals(((Gerarchia)obj).root().data()))
+     * @post se !(obj instanceof Gerarchia), result == false
      */
     @Override
     public boolean equals(Object obj) {
@@ -484,5 +610,4 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
         Gerarchia other = (Gerarchia) obj;
         return Objects.equals(this.root().data(), other.root().data());
     }
-
 }
