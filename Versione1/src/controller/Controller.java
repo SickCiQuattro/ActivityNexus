@@ -2524,53 +2524,6 @@ public class Controller {
     }
 
     /**
-     * Classe interna che rappresenta un arco nel grafo degli scambi.
-     * <p>
-     * Un arco rappresenta una relazione direzionale "fornisce a" tra due fruitori,
-     * dove un fruitore offre una prestazione che soddisfa la richiesta di un altro.
-     * Ogni arco mantiene riferimenti a:
-     * <ul>
-     * <li>Il fruitore che fornisce la prestazione (fornitore)</li>
-     * <li>Il fruitore che riceve la prestazione (ricevente)</li>
-     * <li>La proposta che contiene i dettagli della prestazione</li>
-     * </ul>
-     * <p>
-     * Gli archi sono utilizzati per costruire il grafo che rappresenta tutte
-     * le possibili connessioni di scambio tra i fruitori del sistema.
-     */
-    private static class ArcoScambio {
-        private final Fruitore fornitore;
-        private final Fruitore ricevente;
-        private final Proposta proposta;
-
-        public ArcoScambio(Fruitore fornitore, Fruitore ricevente, Proposta proposta) {
-            this.fornitore = fornitore;
-            this.ricevente = ricevente;
-            this.proposta = proposta;
-        }
-
-        public Fruitore getFornitore() {
-            return fornitore;
-        }
-
-        public Fruitore getRicevente() {
-            return ricevente;
-        }
-
-        public Proposta getProposta() {
-            return proposta;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s → %s: %s",
-                    fornitore.getUsername(),
-                    ricevente.getUsername(),
-                    proposta.getOfferta().toString());
-        }
-    }
-
-    /**
      * Costruisce un grafo orientato che rappresenta le possibili connessioni
      * tra fruitori basate sulle loro proposte di scambio.
      * <p>
