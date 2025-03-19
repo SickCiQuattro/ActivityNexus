@@ -123,6 +123,11 @@ public class Controller {
                         handleRegistration();
                         break;
 
+                    case "2001":
+                        this.view.displayShrek();
+                        this.view.pressEnterToContinue();
+                        break;
+
                     case "0": // Uscita
                         // Prima di uscire, salva tutti i dati
                         salvaTutti();
@@ -525,6 +530,11 @@ public class Controller {
                         visualizzaInsiemiChiusi();
                         break;
 
+                    case "sus":
+                        view.displayAmongUs();
+                        view.pressEnterToContinue();
+                        break;
+
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
                         view.showSuccessMessage(ControllerConstants.LOGOUT_MESSAGE);
@@ -607,6 +617,12 @@ public class Controller {
                     case "4":
                         modificaStatoProposta(fruitore);
                         break;
+
+                    case "sus":
+                        view.displayAmongUs();
+                        view.pressEnterToContinue();
+                        break;
+
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
                         view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
