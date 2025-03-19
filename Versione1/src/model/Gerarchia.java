@@ -496,7 +496,7 @@ public class Gerarchia extends LinkedMultiTreeNode<Categoria> implements Seriali
         Categoria categoria = nodoProcessare.data();
         if (categoria != null && categoria.getCampo() != null) {
             // Recupera il dominio dei valori possibili dal campo
-            Set<ValoreCampo> dominio = categoria.getCampo().getDominio();
+            List<ValoreCampo> dominio = categoria.getCampo().getDominio();
 
             if (dominio != null && !dominio.isEmpty()) {
                 // Conta quanti figli ha il nodo

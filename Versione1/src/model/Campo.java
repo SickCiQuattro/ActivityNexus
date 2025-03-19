@@ -2,20 +2,19 @@ package model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Campo caratteristico di una categoria nel sistema gerarchico.
  * <p>
  * Un campo rappresenta una proprietà distintiva che caratterizza una categoria
  * e
- * determina le sue possibili specializzazioni. Il dominio del campo (insieme di
+ * determina le sue possibili specializzazioni. Il dominio del campo (lista di
  * {@link ValoreCampo}) definisce i valori che la proprietà può assumere,
- * ciascuno
- * dei quali corrisponde a una potenziale sottocategoria.
+ * ciascuno dei quali corrisponde a una potenziale sottocategoria.
  * <p>
  * <b>Ruolo nella struttura gerarchica:</b>
  * <ul>
@@ -30,7 +29,7 @@ import java.util.Set;
  * <ul>
  * <li>Il nome del campo non è mai null</li>
  * <li>Il dominio non contiene mai valori null</li>
- * <li>L'insieme dominio non è mai null (può essere vuoto)</li>
+ * <li>La lista dominio non è mai null (può essere vuota)</li>
  * </ul>
  *
  * @see ValoreCampo
@@ -47,12 +46,13 @@ public class Campo implements Serializable {
     /** Messaggi di errore per validazione */
     private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
     private static final String ERRORE_VALORE_NULLO = "Il valore non può essere null";
+    private static final String ERRORE_VALORE_DUPLICATO = "Il valore è già presente nel dominio";
 
     /** Nome identificativo del campo */
     private String nome;
 
-    /** Insieme dei valori possibili per questo campo */
-    private final Set<ValoreCampo> dominio;
+    /** Lista dei valori possibili per questo campo, nell'ordine di inserimento */
+    private final List<ValoreCampo> dominio;
 
     // -----------------------------------------------------------------------------------
     // COSTRUTTORI
@@ -66,30 +66,32 @@ public class Campo implements Serializable {
      *
      * @pre nome != null
      * @post getNome() restituisce il nome fornito
-     * @post getDominio() restituisce un insieme vuoto
+     * @post getDominio() restituisce una lista vuota
      */
     public Campo(String nome) {
-        // Delega al costruttore più completo con un HashSet vuoto come dominio iniziale
-        this(nome, new HashSet<>());
+        // Delega al costruttore più completo con una ArrayList vuota come dominio
+        // iniziale
+        this(nome, new ArrayList<>());
     }
 
     /**
      * Costruisce un Campo con il nome e il dominio specificati.
      *
      * @param nome    il nome del campo
-     * @param dominio l'insieme iniziale di valori per il campo
+     * @param dominio la lista iniziale di valori per il campo
      * @throws NullPointerException se il nome è null
      *
      * @pre nome != null
      * @post getNome() restituisce il nome fornito
-     * @post getDominio() contiene tutti i valori non-null di dominio
+     * @post getDominio() contiene tutti i valori non-null di dominio nell'ordine
+     *       originale
      */
-    public Campo(String nome, Set<ValoreCampo> dominio) {
+    public Campo(String nome, List<ValoreCampo> dominio) {
         // Verifica che il nome non sia null e lancia eccezione in caso contrario
         this.nome = Objects.requireNonNull(nome, ERRORE_NOME_NULLO);
 
-        // Inizializza un nuovo insieme per memorizzare i valori del dominio
-        this.dominio = new HashSet<>();
+        // Inizializza una nuova lista per memorizzare i valori del dominio
+        this.dominio = new ArrayList<>();
 
         // Se il dominio fornito non è null, copia i valori non-null nel dominio interno
         if (dominio != null) {
@@ -133,15 +135,17 @@ public class Campo implements Serializable {
 
     /**
      * Restituisce una vista non modificabile del dominio dei valori.
+     * L'ordine degli elementi nella lista restituita corrisponde all'ordine di
+     * inserimento.
      *
-     * @return una vista immutabile dell'insieme dei valori del dominio
+     * @return una vista immutabile della lista dei valori del dominio
      *
      * @post il valore restituito non è null
-     * @post il valore restituito è un insieme non modificabile
+     * @post il valore restituito è una lista non modificabile
      */
-    public Set<ValoreCampo> getDominio() {
+    public List<ValoreCampo> getDominio() {
         // Restituisce una vista immutabile per proteggere l'incapsulamento
-        return Collections.unmodifiableSet(this.dominio);
+        return Collections.unmodifiableList(this.dominio);
     }
 
     // -----------------------------------------------------------------------------------
@@ -150,18 +154,21 @@ public class Campo implements Serializable {
 
     /**
      * Aggiunge un valore al dominio del campo.
+     * Il valore viene aggiunto alla fine della lista, preservando l'ordine di
+     * inserimento.
      *
      * @param valore il valore da aggiungere
      * @throws NullPointerException se il valore è null
      *
      * @pre valore != null
      * @post getDominio().contains(valore) == true
+     * @post getDominio().get(getDominio().size()-1) == valore
      */
     public void addValore(ValoreCampo valore) {
         // Verifica che il valore non sia null e lancia eccezione in caso contrario
         Objects.requireNonNull(valore, ERRORE_VALORE_NULLO);
 
-        // Aggiunge il valore al dominio
+        // Aggiunge il valore al dominio alla fine della lista
         this.dominio.add(valore);
     }
 
@@ -197,7 +204,8 @@ public class Campo implements Serializable {
 
     /**
      * Restituisce una rappresentazione in stringa del campo.
-     * Include il nome del campo seguito dalla lista dei valori nel dominio.
+     * Include il nome del campo seguito dalla lista dei valori nel dominio
+     * nell'ordine originale.
      *
      * @return una rappresentazione in stringa del campo formattata su più righe
      *
@@ -224,13 +232,14 @@ public class Campo implements Serializable {
 
     /**
      * Confronta questo campo con l'oggetto specificato.
-     * Due campi sono uguali se hanno lo stesso nome e dominio.
+     * Due campi sono uguali se hanno lo stesso nome e gli stessi valori di dominio
+     * (indipendentemente dall'ordine).
      *
      * @param obj l'oggetto da confrontare con questo campo
      * @return true se l'oggetto è un Campo uguale a questo, false altrimenti
      *
-     * @post il valore restituito è true solo se obj è un Campo con nome e dominio
-     *       uguali a questo
+     * @post il valore restituito è true solo se obj è un Campo con nome uguale e
+     *       dominio contenente gli stessi elementi di questo
      */
     @Override
     public boolean equals(Object obj) {
@@ -246,8 +255,18 @@ public class Campo implements Serializable {
 
         // Cast sicuro (verificato sopra) e confronto dei campi
         Campo other = (Campo) obj;
-        return Objects.equals(this.nome, other.nome) &&
-                Objects.equals(this.dominio, other.dominio);
+        if (!Objects.equals(this.nome, other.nome)) {
+            return false;
+        }
+
+        // Verifica che i domini contengano gli stessi elementi (indipendentemente
+        // dall'ordine)
+        if (this.dominio.size() != other.dominio.size()) {
+            return false;
+        }
+
+        // Verifica che tutti gli elementi di this.dominio siano in other.dominio
+        return this.dominio.containsAll(other.dominio);
     }
 
     /**
@@ -259,7 +278,8 @@ public class Campo implements Serializable {
      */
     @Override
     public int hashCode() {
-        // Calcola l'hash basato su nome e dominio
-        return Objects.hash(nome, dominio);
+        // Calcola l'hash basato su nome e sul contenuto del dominio
+        // (indipendentemente dall'ordine)
+        return Objects.hash(nome, new ArrayList<>(dominio));
     }
 }

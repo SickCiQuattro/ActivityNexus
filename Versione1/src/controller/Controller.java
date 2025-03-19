@@ -1400,6 +1400,7 @@ public class Controller {
 
         // Lista per tenere traccia delle categorie foglia e il livello massimo
         // raggiunto
+        List<Gerarchia> categorieFoglia = new ArrayList<>();
         int maxLevel = 0;
 
         // FASE 1: Creazione della categoria radice
@@ -1476,6 +1477,7 @@ public class Controller {
                 // Se la categoria non ha campo, è una foglia (attività concreta)
                 if (gerarchia.level() > maxLevel) {
                     maxLevel = gerarchia.level();
+                    categorieFoglia.add(gerarchia);
                 }
             }
         }

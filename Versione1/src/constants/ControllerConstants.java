@@ -163,7 +163,7 @@ public class ControllerConstants {
     public static final String PROMPT_NOME_SOTTOCATEGORIA = "Inserisci il nome della sottocategoria di '%s': ";
     public static final String PROMPT_CAMPO_CARATTERISTICO = "Vuoi aggiungere un campo caratteristico a questa categoria?";
     public static final String PROMPT_NOME_CAMPO = "Inserisci il nome del campo: ";
-    public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore numero %d: ";
+    public static final String PROMPT_VALORE_DOMINIO = "\nInserisci il nome del valore numero %d (0 per annullare): ";
     public static final String PROMPT_DESCRIZIONE_VALORE = "Inserisci una descrizione per '%s' (facoltativa, premi INVIO per saltare): ";
     public static final String PROMPT_ALTRO_VALORE = "Vuoi aggiungere un altro valore di dominio?";
     public static final String PROMPT_VALORI_CAMPO = "Inserisci i valori possibili per il campo '%s':";
