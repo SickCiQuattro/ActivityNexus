@@ -12,10 +12,11 @@ public class ControllerConstants {
     public static final String PROMPT_CHOICE = "Cosa vuoi fare? ";
     public static final String ERROR_INVALID_INPUT = "Input non valido. Riprova.";
     // Costanti per percorsi file
-    public static final String USERS_FILE_PATH = "src/data/utenti.ser";
-    public static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
-    public static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
-    public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
+    public static final String DATA_DIR = "data";
+    public static final String USERS_FILE_PATH = DATA_DIR + "/utenti.ser";
+    public static final String COMPRESORI_FILE_PATH = DATA_DIR + "/comprensori.ser";
+    public static final String GERARCHIE_FILE_PATH = DATA_DIR + "/gerarchie.ser";
+    public static final String CONVERSIONE_FILE_PATH = DATA_DIR + "/conversione.ser";
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
     public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
