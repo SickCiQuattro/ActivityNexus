@@ -168,6 +168,9 @@ public class Controller {
      * @post L'applicazione può procedere anche se alcuni o tutti i dati non sono stati caricati
      */
     private void loadData() {
+        // Crea la directory data se non esiste
+        createDataDirectoryIfNotExists();
+        
         view.showMessage(ControllerConstants.LOADING_DATA);
 
         try {
@@ -234,6 +237,20 @@ public class Controller {
         java.io.File file = new java.io.File(path);
         // Controlla sia l'esistenza che la dimensione del file (deve essere > 0)
         return file.exists() && file.length() > 0;
+    }
+
+    /**
+     * Crea la directory data se non esiste.
+     * Questo metodo assicura che la directory per i file di dati sia presente
+     * prima di tentare di salvare o caricare dati.
+     *
+     * @post La directory specificata da DATA_DIR esiste nel filesystem
+     */
+    private void createDataDirectoryIfNotExists() {
+        java.io.File dataDir = new java.io.File(ControllerConstants.DATA_DIR);
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
     }
 
     /**
