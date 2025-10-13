@@ -322,6 +322,7 @@ public class Controller {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
         if (database.getUtenti().isEmpty()) {
             view.showMessage(ControllerConstants.NO_USERS_REGISTERED);
+            view.pressEnterToContinue();
             return;
         }
 
