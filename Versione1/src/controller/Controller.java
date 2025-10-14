@@ -185,6 +185,7 @@ public class Controller {
      *       stati caricati
      */
     private void loadData() {
+        createDataDirectoryIfNotExists();
         view.showMessage(ControllerConstants.LOADING_DATA);
 
         try {
@@ -248,6 +249,22 @@ public class Controller {
             // Re-inizializza il database per garantire uno stato pulito
             this.database = new Database();
             view.pressEnterToContinue();
+        }
+    }
+
+    /**
+     * Crea la directory per i dati se non esiste già.
+     * <p>
+     * Questo metodo assicura che la directory specificata in DATA_DIR
+     * esista prima di tentare operazioni di lettura o scrittura dei file.
+     *
+     * @post Se la directory non esisteva, viene creata insieme a tutte le directory parent necessarie
+     * @post Se la directory esisteva già, non viene modificata
+     */
+    private void createDataDirectoryIfNotExists() {
+        java.io.File dataDir = new java.io.File(ControllerConstants.DATA_DIR);
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
         }
     }
 

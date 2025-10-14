@@ -13,12 +13,13 @@ public class ControllerConstants {
     public static final String SEPARATORE = "\n----------------------------------------------------------";
 
     // Costanti per percorsi file
-    public static final String USERS_FILE_PATH = "src/data/utenti.ser";
-    public static final String COMPRESORI_FILE_PATH = "src/data/comprensori.ser";
-    public static final String GERARCHIE_FILE_PATH = "src/data/gerarchie.ser";
-    public static final String CONVERSIONE_FILE_PATH = "src/data/conversione.ser";
-    public static final String PROPOSTE_FILE_PATH = "src/data/proposte.ser";
-    public static final String INSIEMECHIUSO_FILE_PATH = "src/data/insiemechiuso.ser";
+    public static final String DATA_DIR = "data";
+    public static final String USERS_FILE_PATH = DATA_DIR + "/utenti.ser";
+    public static final String COMPRESORI_FILE_PATH = DATA_DIR + "/comprensori.ser";
+    public static final String GERARCHIE_FILE_PATH = DATA_DIR + "/gerarchie.ser";
+    public static final String CONVERSIONE_FILE_PATH = DATA_DIR + "/conversione.ser";
+    public static final String PROPOSTE_FILE_PATH = DATA_DIR + "/proposte.ser";
+    public static final String INSIEMECHIUSO_FILE_PATH = DATA_DIR + "/insiemechiuso.ser";
 
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
