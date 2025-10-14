@@ -13,7 +13,11 @@ public class ControllerConstants {
     public static final String SEPARATORE = "\n----------------------------------------------------------";
 
     // Costanti per percorsi file
-    public static final String DATA_DIR = "data";
+    // Usa il percorso relativo alla directory di progetto (Versione1)
+    // Se il programma viene eseguito da src/, risale di un livello
+    public static final String DATA_DIR = System.getProperty("user.dir").endsWith("src") 
+        ? "../data" 
+        : "data";
     public static final String USERS_FILE_PATH = DATA_DIR + "/utenti.ser";
     public static final String COMPRESORI_FILE_PATH = DATA_DIR + "/comprensori.ser";
     public static final String GERARCHIE_FILE_PATH = DATA_DIR + "/gerarchie.ser";
