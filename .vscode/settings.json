@@ -1,0 +1,16 @@
+{
+    "java.project.sourcePaths": [
+        "Versione1/src"
+    ],
+    "java.project.outputPath": "Versione1/out/production/Versione1",
+    "java.project.referencedLibraries": [
+        "tree/tree/build/libs/tree-0.2.5.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "code-runner.executorMap": {
+        "java": "cd $dir && javac -cp \"$workspaceRoot/tree/tree/build/libs/tree-0.2.5.jar\" -d $workspaceRoot/Versione1/out/production/Versione1 -sourcepath $workspaceRoot/Versione1/src $fileName && java -cp \"$workspaceRoot/Versione1/out/production/Versione1:$workspaceRoot/tree/tree/build/libs/tree-0.2.5.jar\" $fileNameWithoutExt"
+    },
+    "code-runner.runInTerminal": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.clearPreviousOutput": false
+}

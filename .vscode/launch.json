@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Main (Versione1)",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "Versione1",
+            "cwd": "${workspaceFolder}/Versione1",
+            "classPaths": [
+                "${workspaceFolder}/Versione1/out/production/Versione1",
+                "${workspaceFolder}/tree/tree/build/libs/tree-0.2.5.jar"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
