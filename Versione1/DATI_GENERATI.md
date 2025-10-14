@@ -6,14 +6,14 @@ Questo documento descrive in dettaglio tutti i dati serializzati generati per il
 
 Tutti i file sono salvati in: `data/`
 
-| File                | Dimensione | Contenuto                                        |
-| ------------------- | ---------- | ------------------------------------------------ |
-| `utenti.ser`        | 1.2 KB     | 2 configuratori + 3 fruitori                     |
-| `comprensori.ser`   | 440 B      | 3 comprensori (valli lombarde)                   |
-| `gerarchie.ser`     | 3.8 KB     | 3 gerarchie multi-livello                        |
-| `conversione.ser`   | 554 B      | Fattori di conversione tra foglie di riferimento |
-| `proposte.ser`      | 6.1 KB     | 15 proposte (10 aperte, 3 chiuse, 2 ritirate)    |
-| `insiemechiuso.ser` | 58 B       | Lista vuota di insiemi chiusi                    |
+| File                | Dimensione | Contenuto                                             |
+| ------------------- | ---------- | ----------------------------------------------------- |
+| `utenti.ser`        | 1.0 KB     | 2 configuratori + 3 fruitori                          |
+| `comprensori.ser`   | 440 B      | 3 comprensori (valli lombarde)                        |
+| `gerarchie.ser`     | 3.8 KB     | 3 gerarchie multi-livello                             |
+| `conversione.ser`   | 554 B      | Fattori di conversione tra foglie di riferimento      |
+| `proposte.ser`      | 6.5 KB     | 21 proposte (10 aperte, 2 ritirate, 9 chiuse)         |
+| `insiemechiuso.ser` | 6.0 KB     | 3 insiemi chiusi (9 proposte chiuse, 8 scambi totali) |
 
 ---
 
@@ -46,16 +46,18 @@ Tutti i file sono salvati in: `data/`
 
     - Password: `Giulia123@`
     - Email: `giulia.bianchi@email.it`
-    - Comprensorio: Valtrompia
+    - Comprensorio: Valcamonica
     - ✅ Username: max 20 char, solo alfanumerici, senza spazi
     - ✅ Password: min 8 char, maiuscola, minuscola, numero, carattere speciale
 
 3. **lucaverdi**
     - Password: `Luca123#`
     - Email: `luca.verdi@email.it`
-    - Comprensorio: Valsabbia
+    - Comprensorio: Valcamonica
     - ✅ Username: max 20 char, solo alfanumerici, senza spazi
     - ✅ Password: min 8 char, maiuscola, minuscola, numero, carattere speciale
+
+> **Nota**: Tutti i fruitori sono nello stesso comprensorio (Valcamonica) per permettere la creazione di insiemi chiusi di scambio.
 
 ---
 
@@ -361,37 +363,67 @@ Per convertire tra categorie di gerarchie diverse:
 
 ---
 
-### Proposte CHIUSE (3)
+### Proposte CHIUSE in Insiemi (9)
 
-#### 11. giuliabianchi
+Le seguenti proposte sono state chiuse perché fanno parte di insiemi chiusi di scambio:
 
--   **Richiede:** Allenamento Tennis, 2 ore
+#### Insieme Chiuso 1: Ciclo a 3 (Mario→Giulia→Luca→Mario)
+
+**Proposta 11. mariorossi**
+-   **Offre:** Allenamento Tennis, 2 ore
+-   **Richiede:** Ripetizioni Matematica Base, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 1)
+
+**Proposta 12. giuliabianchi**
 -   **Offre:** Ripetizioni Matematica Base, 2 ore
--   **Stato:** CHIUSA
+-   **Richiede:** Giardinaggio, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 1)
 
-#### 12. lucaverdi
+**Proposta 13. lucaverdi**
+-   **Offre:** Giardinaggio, 2 ore
+-   **Richiede:** Allenamento Tennis, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 1)
 
+#### Insieme Chiuso 2: Ciclo a 2 (Mario↔Giulia) - NOTIFICATO
+
+**Proposta 14. mariorossi**
+-   **Offre:** Allenamento Calcio, 3 ore
 -   **Richiede:** Ripetizioni Inglese, 3 ore
--   **Offre:** Giardinaggio, 3 ore
--   **Stato:** CHIUSA
+-   **Stato:** CHIUSA (in insieme chiuso 2)
 
-#### 13. mariorossi
+**Proposta 15. giuliabianchi**
+-   **Offre:** Ripetizioni Inglese, 3 ore
+-   **Richiede:** Allenamento Calcio, 3 ore
+-   **Stato:** CHIUSA (in insieme chiuso 2)
 
--   **Richiede:** Corso Informatica Base, 1 ora
--   **Offre:** Allenamento Nuoto, 1 ora
--   **Stato:** CHIUSA
+#### Insieme Chiuso 3: Ciclo complesso a 3
+
+**Proposta 16. mariorossi**
+-   **Offre:** Pulizie Domestiche, 2 ore
+-   **Richiede:** Allenamento Basket, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 3)
+
+**Proposta 17. giuliabianchi**
+-   **Offre:** Allenamento Basket, 2 ore
+-   **Richiede:** Piccole Riparazioni, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 3)
+
+**Proposta 18. lucaverdi**
+-   **Offre:** Piccole Riparazioni, 2 ore
+-   **Richiede:** Pulizie Domestiche, 2 ore
+-   **Stato:** CHIUSA (in insieme chiuso 3)
 
 ---
 
 ### Proposte RITIRATE (2)
 
-#### 14. mariorossi
+#### 19. mariorossi
 
 -   **Richiede:** Piccole Riparazioni, 4 ore
 -   **Offre:** Allenamento Calcio, 3 ore
 -   **Stato:** RITIRATA
 
-#### 15. giuliabianchi
+#### 20. giuliabianchi
 
 -   **Richiede:** Allenamento Nuoto, 2 ore
 -   **Offre:** Ripetizioni Inglese, 2 ore
@@ -399,16 +431,127 @@ Per convertire tra categorie di gerarchie diverse:
 
 ---
 
+## 🔄 INSIEMI CHIUSI (insiemechiuso.ser)
+
+### Insieme Chiuso 1: Ciclo a 3 partecipanti
+
+**Tipo:** Ciclo Mario→Giulia→Luca→Mario  
+**Stato:** Non notificato  
+**Numero di scambi:** 3
+
+**Fruitori coinvolti:**
+- mariorossi (mario.rossi@email.it)
+- giuliabianchi (giulia.bianchi@email.it)  
+- lucaverdi (luca.verdi@email.it)
+
+**Proposte incluse:** 3 (proposte 11, 12, 13)
+
+**Scambi da effettuare:**
+
+1. **mariorossi → lucaverdi**
+   - Prestazione: Allenamento Tennis, 2 ore
+   
+2. **giuliabianchi → mariorossi**
+   - Prestazione: Ripetizioni Matematica Base, 2 ore
+   
+3. **lucaverdi → giuliabianchi**
+   - Prestazione: Giardinaggio, 2 ore
+
+**Descrizione del ciclo:**
+- Mario offre Tennis a Luca
+- Luca offre Giardinaggio a Giulia
+- Giulia offre Matematica Base a Mario
+- Tutti ricevono ciò che hanno richiesto
+
+---
+
+### Insieme Chiuso 2: Ciclo a 2 partecipanti (scambio diretto)
+
+**Tipo:** Ciclo Mario↔Giulia  
+**Stato:** ✅ NOTIFICATO  
+**Numero di scambi:** 2
+
+**Fruitori coinvolti:**
+- mariorossi (mario.rossi@email.it)
+- giuliabianchi (giulia.bianchi@email.it)
+
+**Proposte incluse:** 2 (proposte 14, 15)
+
+**Scambi da effettuare:**
+
+1. **mariorossi → giuliabianchi**
+   - Prestazione: Allenamento Calcio, 3 ore
+   
+2. **giuliabianchi → mariorossi**
+   - Prestazione: Ripetizioni Inglese, 3 ore
+
+**Descrizione del ciclo:**
+- Mario offre Calcio a Giulia
+- Giulia offre Inglese a Mario
+- Scambio diretto perfettamente bilanciato (3 ore ciascuno)
+
+---
+
+### Insieme Chiuso 3: Ciclo complesso a 3
+
+**Tipo:** Ciclo complesso (Pulizie→Basket→Riparazioni)  
+**Stato:** Non notificato  
+**Numero di scambi:** 3
+
+**Fruitori coinvolti:**
+- mariorossi (mario.rossi@email.it)
+- giuliabianchi (giulia.bianchi@email.it)
+- lucaverdi (luca.verdi@email.it)
+
+**Proposte incluse:** 3 (proposte 16, 17, 18)
+
+**Scambi da effettuare:**
+
+1. **mariorossi → lucaverdi**
+   - Prestazione: Pulizie Domestiche, 2 ore
+   
+2. **giuliabianchi → mariorossi**
+   - Prestazione: Allenamento Basket, 2 ore
+   
+3. **lucaverdi → giuliabianchi**
+   - Prestazione: Piccole Riparazioni, 2 ore
+
+**Descrizione del ciclo:**
+- Mario offre Pulizie a Luca
+- Luca offre Riparazioni a Giulia
+- Giulia offre Basket a Mario
+- Ciclo di 3 gerarchie diverse (Sport, Formazione, Servizi)
+
+---
+
+### Statistiche Insiemi Chiusi
+
+| Insieme | Partecipanti | Scambi | Proposte | Notificato | Ore Totali Scambiate |
+|---------|--------------|--------|----------|------------|----------------------|
+| 1       | 3            | 3      | 3        | ❌ No      | 6                    |
+| 2       | 2            | 2      | 2        | ✅ Sì      | 6                    |
+| 3       | 3            | 3      | 3        | ❌ No      | 6                    |
+| **TOT** | **3**        | **8**  | **9**    | **1/3**    | **18**               |
+
+**Vantaggi degli insiemi chiusi:**
+- ✅ Ogni fruitore riceve esattamente ciò che ha richiesto
+- ✅ Tutti partecipano attivamente offrendo prestazioni
+- ✅ Nessuno resta escluso dal ciclo di scambio
+- ✅ Ore bilanciate (tutti scambiano la stessa quantità di ore)
+- ✅ I configuratori possono facilitare gli scambi contattando i fruitori
+
+---
+
 ## 📊 Statistiche
 
 ### Per Fruitore
 
-| Fruitore      | Proposte Totali | Aperte | Chiuse | Ritirate |
-| ------------- | --------------- | ------ | ------ | -------- |
-| mariorossi    | 6               | 4      | 1      | 1        |
-| giuliabianchi | 6               | 4      | 1      | 1        |
-| lucaverdi     | 3               | 2      | 1      | 0        |
-| **TOTALE**    | **15**          | **10** | **3**  | **2**    |
+| Fruitore      | Proposte Totali | Aperte | Chiuse (insiemi) | Ritirate |
+| ------------- | --------------- | ------ | ---------------- | -------- |
+| mariorossi    | 8               | 4      | 3                | 1        |
+| giuliabianchi | 8               | 4      | 3                | 1        |
+| lucaverdi     | 5               | 2      | 3                | 0        |
+| **TOTALE**    | **21**          | **10** | **9**            | **2**    |
 
 ### Per Categoria (nelle proposte)
 
@@ -438,9 +581,9 @@ Per convertire tra categorie di gerarchie diverse:
 | ------------- | ---------- | ------------- | ------------ | ------------------------- |
 | admin         | Admin123!  | Configuratore | -            | Amministratore principale |
 | config01      | Config01#  | Configuratore | -            | Configuratore secondario  |
-| mariorossi    | Mario123!  | Fruitore      | Valcamonica  | 6 proposte totali         |
-| giuliabianchi | Giulia123@ | Fruitore      | Valtrompia   | 6 proposte totali         |
-| lucaverdi     | Luca123#   | Fruitore      | Valsabbia    | 3 proposte totali         |
+| mariorossi    | Mario123!  | Fruitore      | Valcamonica  | 8 proposte (3 in insiemi) |
+| giuliabianchi | Giulia123@ | Fruitore      | Valcamonica  | 8 proposte (3 in insiemi) |
+| lucaverdi     | Luca123#   | Fruitore      | Valcamonica  | 5 proposte (3 in insiemi) |
 
 ---
 
@@ -476,5 +619,33 @@ I file saranno ricreati in `data/`
     -   Servizi Domestici: 6 foglie, 3 livelli di profondità
 -   ✅ Fattori di conversione tra le gerarchie (sia interni che tra gerarchie diverse)
 -   ✅ Informazioni su almeno **10 proposte aperte** (abbiamo 10)
--   ✅ Informazioni su almeno **3 proposte chiuse** (abbiamo 3)
+-   ✅ Informazioni su almeno **3 proposte chiuse** (abbiamo 9 in insiemi chiusi)
 -   ✅ Informazioni su almeno **2 proposte ritirate** (abbiamo 2)
+-   ✅ Informazioni su **insiemi chiusi** con cicli di scambio validi (abbiamo 3 insiemi con 8 scambi totali)
+
+---
+
+## 📝 Note Finali
+
+### Insiemi Chiusi Generati
+
+Il sistema include **3 insiemi chiusi** che dimostrano il funzionamento del matching delle proposte:
+
+1. **Insieme 1** - Ciclo a 3 fruitori (Mario→Giulia→Luca→Mario)
+   - 3 scambi bilanciati
+   - Coinvolge tutte e 3 le gerarchie
+   - Non ancora notificato
+
+2. **Insieme 2** - Scambio diretto (Mario↔Giulia)
+   - 2 scambi perfettamente bilanciati (3 ore ciascuno)
+   - Già notificato ai configuratori
+   - Esempio di match semplice
+
+3. **Insieme 3** - Ciclo complesso a 3
+   - 3 scambi tra gerarchie diverse
+   - Dimostra la versatilità del sistema
+   - In attesa di notifica
+
+Tutti i fruitori sono stati assegnati allo stesso comprensorio (Valcamonica) per permettere la creazione di insiemi chiusi di scambio, rispettando il vincolo che gli scambi possano avvenire solo tra fruitori dello stesso comprensorio geografico.
+
+````
