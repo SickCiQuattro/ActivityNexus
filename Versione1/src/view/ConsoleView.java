@@ -205,6 +205,7 @@ public class ConsoleView {
      */
     public void showErrorMessage(String messaggio) {
         System.out.println(ERROR_LABEL + " " + RED + messaggio + RESET);
+        pressEnterToContinue();
     }
 
     /**
@@ -222,6 +223,7 @@ public class ConsoleView {
      */
     public void showSuccessMessage(String messaggio) {
         System.out.println(SUCCESS_LABEL + " " + GREEN + messaggio + RESET);
+        pressEnterToContinue();
     }
 
     /**

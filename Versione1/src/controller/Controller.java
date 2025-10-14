@@ -137,7 +137,7 @@ public class Controller {
 
                     default:
                         // Gestisce input non validi
-                        view.showMessage(ControllerConstants.INVALID_OPTION);
+                        view.showWarningMessage(ControllerConstants.INVALID_OPTION);
                 }
 
             } catch (Exception e) {
@@ -146,8 +146,6 @@ public class Controller {
 
                 // Logging dell'errore invece di una semplice stack trace
                 logErrore(e);
-
-                view.pressEnterToContinue(); // Attende input utente prima di continuare
             }
         }
     }
@@ -240,15 +238,13 @@ public class Controller {
             }
 
             // Indica all'utente che il processo di caricamento è completato con successo
-            view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
-
+            view.showMessage(ControllerConstants.LOADING_COMPLETE);
         } catch (Exception e) {
             // Gestione centralizzata degli errori durante il caricamento
             view.showErrorMessage(String.format(ControllerConstants.LOADING_ERROR, e.getMessage()));
             view.showMessage(ControllerConstants.LOADING_DEFAULT);
             // Re-inizializza il database per garantire uno stato pulito
             this.database = new Database();
-            view.pressEnterToContinue();
         }
     }
 
@@ -258,7 +254,8 @@ public class Controller {
      * Questo metodo assicura che la directory specificata in DATA_DIR
      * esista prima di tentare operazioni di lettura o scrittura dei file.
      *
-     * @post Se la directory non esisteva, viene creata insieme a tutte le directory parent necessarie
+     * @post Se la directory non esisteva, viene creata insieme a tutte le directory
+     *       parent necessarie
      * @post Se la directory esisteva già, non viene modificata
      */
     private void createDataDirectoryIfNotExists() {
@@ -348,7 +345,7 @@ public class Controller {
             this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
-            view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
+            view.showMessage(ControllerConstants.SAVING_SUCCESS);
         } catch (Exception e) {
             // Gestisce eventuali errori durante il salvataggio
             view.showErrorMessage(String.format(ControllerConstants.SAVING_ERROR, e.getMessage()));
@@ -388,7 +385,6 @@ public class Controller {
         // Verifica preliminare: almeno un utente deve essere registrato nel sistema
         if (database.getUtenti().isEmpty()) {
             view.showErrorMessage(ControllerConstants.NO_USERS_REGISTERED);
-            view.pressEnterToContinue();
             return;
         }
 
@@ -397,7 +393,8 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showMessage(ControllerConstants.LOGIN_FAILED);
+            view.showWarningMessage(ControllerConstants.LOGIN_FAILED);
+            view.pressEnterToContinue();
             return;
         }
 
@@ -474,7 +471,6 @@ public class Controller {
             } else {
                 view.showErrorMessage(ControllerConstants.REGISTRATION_CANCELLED);
             }
-            this.view.pressEnterToContinue();
         } catch (Exception e) {
             view.showErrorMessage(String.format(
                     ControllerConstants.ERROR_REGISTRATION, e.getMessage()));
@@ -554,7 +550,7 @@ public class Controller {
 
                     case "0": // Logout
                         // Termina il ciclo e ritorna al menu principale
-                        view.showSuccessMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
                         return;
 
                     default:
@@ -650,13 +646,9 @@ public class Controller {
                         view.showMessage(ControllerConstants.INVALID_OPTION);
                 }
 
-                // Pausa per permettere all'utente di leggere i risultati
-                view.pressEnterToContinue();
-
             } catch (Exception e) {
                 // Gestione centralizzata delle eccezioni per garantire robustezza
                 view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
-                view.pressEnterToContinue();
             }
         }
     }
