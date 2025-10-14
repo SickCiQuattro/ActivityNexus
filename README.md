@@ -319,12 +319,6 @@ rm -rf Versione1/data
 -   ➕ Gestione gerarchie
 -   ➕ Conversione intra-gerarchia
 
-## 👥 Team
-
--   **Repository**: [SickCiQuattro/ProjectIngSW](https://github.com/SickCiQuattro/ProjectIngSW)
--   **Progetto**: ActivityNexus - Sistema di Gestione Gerarchie
--   **Anno**: 2025
-
 ## 📄 Licenza
 
 Copyright © 2025 ProjectIngSW Team. Tutti i diritti riservati.
@@ -334,19 +328,6 @@ Copyright © 2025 ProjectIngSW Team. Tutti i diritti riservati.
 -   **Scalified Tree Library** (v0.2.5)
     -   Licenza: Apache License 2.0
     -   Repository: [scalified/tree](https://github.com/scalified/tree)
-
-## 🤝 Contributi
-
-Questo è un progetto didattico. Per bug report o suggerimenti:
-
-1. Apri una Issue su GitHub
-2. Descrivi il problema o la feature richiesta
-3. Attendi feedback dal team
-
-## 📞 Contatti e Supporto
-
--   **Issues**: [GitHub Issues](https://github.com/SickCiQuattro/ProjectIngSW/issues)
--   **Repository**: [ProjectIngSW](https://github.com/SickCiQuattro/ProjectIngSW)
 
 ## ⭐ Riconoscimenti
 
