@@ -124,22 +124,22 @@ public class ConsoleView {
     private static final String WARNING_LABEL = BG_YELLOW + BLACK + " AVVISO " + RESET;
 
     /** Messaggio per input numerico non valido */
-    private static final String INVALID_NUMBER_MESSAGE = "Inserire un numero valido";
+    private static final String INVALID_NUMBER_MESSAGE = "Inserisci un numero valido.";
 
     /** Messaggio per input fuori range */
-    private static final String OUT_OF_RANGE_MESSAGE = "Inserire un valore compreso tra ";
+    private static final String OUT_OF_RANGE_MESSAGE = "Inserisci un valore compreso tra ";
 
     /** Messaggio per input di conferma non valido */
-    private static final String INVALID_CONFIRMATION_MESSAGE = "Risposta non valida. Utilizzare 's' per confermare o 'n' per annullare";
+    private static final String INVALID_CONFIRMATION_MESSAGE = "Risposta non valida. Utilizza 's' per confermare o 'n' per annullare.";
 
     /** Messaggio per attendere pressione del tasto INVIO */
-    private static final String PRESS_ENTER_MESSAGE = YELLOW + PROMPT_SYMBOL + " Premere INVIO per continuare..."
+    private static final String PRESS_ENTER_MESSAGE = YELLOW + PROMPT_SYMBOL + " Premi INVIO per continuare..."
             + RESET;
 
     /** Formato per il prompt di input con range */
-    private static final String RANGE_PROMPT_FORMAT = " [%s-%s]:";
+    private static final String RANGE_PROMPT_FORMAT = " [%s-%s]";
 
-    /** Prompt per la conferma */
+    /** Suffisso per prompt di conferma */
     private static final String CONFIRMATION_PROMPT_SUFFIX = " (s/n): ";
 
     /** Prompt per l'inserimento della scelta nel menu */
@@ -150,7 +150,7 @@ public class ConsoleView {
     // -----------------------------------------------------------------------------------
 
     // Menu principale
-    private static final String MENU_LOGIN = GREEN + "1. Login" + RESET;
+    private static final String MENU_LOGIN = GREEN + "1. Accesso" + RESET;
     private static final String MENU_REGISTRATION = CYAN + "2. Registrazione" + RESET;
     private static final String MENU_EXIT = RED + "0. Uscita" + RESET;
 
@@ -351,7 +351,13 @@ public class ConsoleView {
     public int getIntInput(String prompt, int min, int max) {
         while (true) {
             try {
-                String input = getInput(prompt + String.format(RANGE_PROMPT_FORMAT, min, max));
+                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare duplicazioni
+                String cleanPrompt = prompt.trim();
+                if (cleanPrompt.endsWith(":")) {
+                    cleanPrompt = cleanPrompt.substring(0, cleanPrompt.length() - 1).trim();
+                }
+                
+                String input = getInput(cleanPrompt + String.format(RANGE_PROMPT_FORMAT, min, max) + ": ");
                 int value = Integer.parseInt(input);
                 if (value >= min && value <= max) {
                     return value;
@@ -384,7 +390,13 @@ public class ConsoleView {
     public double getDoubleInput(String prompt, double min, double max) {
         while (true) {
             try {
-                String input = getInput(prompt + String.format(RANGE_PROMPT_FORMAT, min, max));
+                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare duplicazioni
+                String cleanPrompt = prompt.trim();
+                if (cleanPrompt.endsWith(":")) {
+                    cleanPrompt = cleanPrompt.substring(0, cleanPrompt.length() - 1).trim();
+                }
+                
+                String input = getInput(cleanPrompt + String.format(RANGE_PROMPT_FORMAT, min, max) + ": ");
                 double value = Double.parseDouble(input);
                 if (value >= min && value <= max) {
                     return value;

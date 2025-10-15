@@ -184,13 +184,13 @@ public class Controller {
      */
     private void loadData() {
         createDataDirectoryIfNotExists();
-        view.showMessage(ControllerConstants.LOADING_DATA);
+        view.showInfoMessage(ControllerConstants.LOADING_DATA);
 
         try {
             // Carica i dati utenti se il file esiste
             if (fileEsistente(ControllerConstants.USERS_FILE_PATH)) {
                 this.database.deserializeUtenti(ControllerConstants.USERS_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "utenti"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "utenti"));
             } else {
                 // Altrimenti, indica che si parte da zero per questa sezione
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato utente"));
@@ -199,7 +199,7 @@ public class Controller {
             // Carica i dati comprensori se il file esiste
             if (fileEsistente(ControllerConstants.COMPRESORI_FILE_PATH)) {
                 this.database.deserializeComprensori(ControllerConstants.COMPRESORI_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "comprensori"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "comprensori"));
             } else {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "comprensorio"));
             }
@@ -207,7 +207,7 @@ public class Controller {
             // Carica i dati gerarchie se il file esiste
             if (fileEsistente(ControllerConstants.GERARCHIE_FILE_PATH)) {
                 this.database.deserializeGerarchie(ControllerConstants.GERARCHIE_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "gerarchie"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "gerarchie"));
             } else {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "gerarchia"));
             }
@@ -215,7 +215,7 @@ public class Controller {
             // Carica i dati conversione gerarchie se il file esiste
             if (fileEsistente(ControllerConstants.CONVERSIONE_FILE_PATH)) {
                 this.database.deserializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "conversione gerarchie"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "conversione gerarchie"));
             } else {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato di conversione"));
             }
@@ -223,7 +223,7 @@ public class Controller {
             // Carica i dati proposte se il file esiste
             if (fileEsistente(ControllerConstants.PROPOSTE_FILE_PATH)) {
                 this.database.deserializeProposte(ControllerConstants.PROPOSTE_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "proposte"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "proposte"));
             } else {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "proposta"));
             }
@@ -231,14 +231,14 @@ public class Controller {
             // Carica i dati insieme chiuso se il file esiste
             if (fileEsistente(ControllerConstants.INSIEMECHIUSO_FILE_PATH)) {
                 this.database.deserializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
-                view.showMessage(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "insieme chiuso"));
+                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "insieme chiuso"));
             } else {
                 // Altrimenti, indica che si parte da zero per questa sezione
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato insieme chiuso"));
             }
 
             // Indica all'utente che il processo di caricamento è completato con successo
-            view.showMessage(ControllerConstants.LOADING_COMPLETE);
+            view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
         } catch (Exception e) {
             // Gestione centralizzata degli errori durante il caricamento
             view.showErrorMessage(String.format(ControllerConstants.LOADING_ERROR, e.getMessage()));
@@ -333,7 +333,7 @@ public class Controller {
      */
     private void salvaTutti() {
         // Informa l'utente che il processo di salvataggio è iniziato
-        view.showMessage(ControllerConstants.SAVING_DATA);
+        view.showInfoMessage(ControllerConstants.SAVING_DATA);
 
         try {
             // Salva tutti i componenti del database in file separati
@@ -345,7 +345,7 @@ public class Controller {
             this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
-            view.showMessage(ControllerConstants.SAVING_SUCCESS);
+            view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
         } catch (Exception e) {
             // Gestisce eventuali errori durante il salvataggio
             view.showErrorMessage(String.format(ControllerConstants.SAVING_ERROR, e.getMessage()));
@@ -399,7 +399,7 @@ public class Controller {
 
         // Autenticazione riuscita: mostra un messaggio di benvenuto personalizzato con
         // delay automatico
-        view.showMessageWithDelay(ControllerConstants.LOGIN_SUCCESS + utente.getUsername() + ".", 1500);
+        view.showMessageWithDelay(ControllerConstants.LOGIN_SUCCESS + utente.getUsername() + "!", 1500);
 
         // Reindirizzamento al menu appropriato in base al ruolo dell'utente
         if (utente.isConfig()) {
@@ -445,7 +445,7 @@ public class Controller {
      */
     private void handleRegistration() {
         // Presentazione delle opzioni di registrazione
-        view.showMessage(ControllerConstants.TITLE_REGISTRATION);
+        view.showInfoMessage(ControllerConstants.TITLE_REGISTRATION);
 
         // Determinazione del tipo di account (Configuratore o Fruitore)
         boolean isConfiguratore = this.view.getConfirmation(ControllerConstants.PROMPT_CONFIG_ROLE);
@@ -555,7 +555,7 @@ public class Controller {
 
                     default:
                         // Gestione di input non validi
-                        view.showMessage(ControllerConstants.INVALID_OPTION);
+                        view.showWarningMessage(ControllerConstants.INVALID_OPTION);
                         view.pressEnterToContinue();
                 }
 
@@ -642,7 +642,7 @@ public class Controller {
 
                     default:
                         // Gestione di input non validi
-                        view.showMessage(ControllerConstants.INVALID_OPTION);
+                        view.showWarningMessage(ControllerConstants.INVALID_OPTION);
                         view.pressEnterToContinue();
                 }
 
@@ -720,7 +720,7 @@ public class Controller {
      */
     private boolean registraConfiguratore() {
         // Mostra intestazione per la registrazione configuratore
-        view.showMessage(ControllerConstants.TITLE_REGISTRA_CONFIGURATORE);
+        view.showInfoMessage(ControllerConstants.TITLE_REGISTRA_CONFIGURATORE);
 
         // Verifica di sicurezza preliminare per prevenire registrazioni automatizzate
         if (!defaultUtente()) {
@@ -784,7 +784,7 @@ public class Controller {
      */
     private boolean registraFruitore() {
         // Mostra intestazione per la registrazione fruitore
-        view.showMessage(ControllerConstants.TITLE_REGISTRA_FRUITORE);
+        view.showInfoMessage(ControllerConstants.TITLE_REGISTRA_FRUITORE);
 
         // Selezione del comprensorio di appartenenza
         Comprensorio comprensorio = selezionaComprensorio();
@@ -902,7 +902,7 @@ public class Controller {
         String passwordDefault = UserUtil.generateRandomPassword();
 
         // Mostra le credenziali all'utente
-        view.showMessage(ControllerConstants.DEFAULT_LOGIN_INTRO);
+        view.showInfoMessage(ControllerConstants.DEFAULT_LOGIN_INTRO);
         view.showMessage(String.format(ControllerConstants.DEFAULT_USERNAME_DISPLAY, usernameDefault));
         view.showMessage(String.format(ControllerConstants.DEFAULT_PASSWORD_DISPLAY, passwordDefault));
 
@@ -918,12 +918,12 @@ public class Controller {
 
             // Se le credenziali non corrispondono, mostra un messaggio di errore
             // con il numero di tentativi rimasti
-            view.showMessage(String.format(ControllerConstants.DEFAULT_LOGIN_INVALID, i));
+            view.showWarningMessage(String.format(ControllerConstants.DEFAULT_LOGIN_INVALID, i));
         }
 
         // Se sono stati esauriti tutti i tentativi, mostra un messaggio di errore
         // e interrompi il processo di registrazione
-        view.showMessage(ControllerConstants.DEFAULT_LOGIN_FAILED);
+        view.showErrorMessage(ControllerConstants.DEFAULT_LOGIN_FAILED);
         return false;
     }
 
@@ -987,7 +987,7 @@ public class Controller {
      */
     private void creaComprensorio() {
         // Mostra informazioni introduttive sul processo di creazione
-        view.showMessage(ControllerConstants.TITLE_NEW_COMPRENSORIO);
+        view.showInfoMessage(ControllerConstants.TITLE_NEW_COMPRENSORIO);
         view.showMessage(ControllerConstants.INFO_COMPRENSORIO_DESC);
         view.showMessage(ControllerConstants.INFO_COMPRENSORIO_NEXT);
 
@@ -998,8 +998,7 @@ public class Controller {
             view.showSuccessMessage(ControllerConstants.COMPRENSORIO_CREATED);
         } else {
             // In caso di annullamento o errore
-            view.showMessage(ControllerConstants.OPERATION_CANCELLED);
-            view.pressEnterToContinue();
+            view.showInfoMessage(ControllerConstants.OPERATION_CANCELLED);
         }
     }
 
@@ -1028,7 +1027,7 @@ public class Controller {
      */
     public boolean createComprensorio() {
         // Mostra il titolo della prima fase: definizione del nome del comprensorio
-        view.showMessage(ControllerConstants.STEP_NOME_COMPRENSORIO);
+        view.showInfoMessage(ControllerConstants.STEP_NOME_COMPRENSORIO);
 
         String nome = null;
         boolean nomeValido = false;
@@ -1060,7 +1059,7 @@ public class Controller {
         }
 
         // Inizia la seconda fase: aggiunta dei comuni al comprensorio
-        view.showMessage(ControllerConstants.STEP_COMUNI_COMPRENSORIO);
+        view.showInfoMessage(ControllerConstants.STEP_COMUNI_COMPRENSORIO);
         view.showMessage(String.format(ControllerConstants.INFO_AGGIUNGI_COMUNI, nome));
         view.showMessage(ControllerConstants.INFO_MINIMO_UN_COMUNE);
 
@@ -1218,7 +1217,7 @@ public class Controller {
         }
 
         // Mostra il titolo della selezione
-        this.view.showMessage(ControllerConstants.TITLE_SELEZIONA_COMPRENSORIO);
+        this.view.showInfoMessage(ControllerConstants.TITLE_SELEZIONA_COMPRENSORIO);
         this.view.showMessage(ControllerConstants.INFO_SELEZIONE_COMPRENSORIO);
 
         // Visualizza l'elenco dei comprensori in formato numerato
@@ -1350,7 +1349,7 @@ public class Controller {
      */
     private void creaGerarchia() {
         // Mostra informazioni introduttive sulla creazione della gerarchia
-        view.showMessage(ControllerConstants.TITLE_NEW_GERARCHIA);
+        view.showInfoMessage(ControllerConstants.TITLE_NEW_GERARCHIA);
 
         // Creazione della struttura principale della gerarchia
         Gerarchia gerarchia = createGerarchia();
@@ -1408,7 +1407,7 @@ public class Controller {
      */
     private Gerarchia createGerarchia() {
         // Intestazione e spiegazione iniziale per l'utente
-        view.showMessage(ControllerConstants.TITLE_CREATE_GERARCHIA);
+        view.showInfoMessage(ControllerConstants.TITLE_CREATE_GERARCHIA);
         view.showMessage(ControllerConstants.INFO_GERARCHIA_DESC);
         view.showMessage(ControllerConstants.INFO_GERARCHIA_PROCESS);
 
@@ -1418,7 +1417,7 @@ public class Controller {
         int maxLevel = 0;
 
         // FASE 1: Creazione della categoria radice
-        view.showMessage(ControllerConstants.STEP_RADICE_GERARCHIA);
+        view.showInfoMessage(ControllerConstants.STEP_RADICE_GERARCHIA);
         view.showMessage(ControllerConstants.INFO_RADICE_DESC);
         view.showMessage(ControllerConstants.INFO_RADICE_CAMPO);
 
@@ -1434,7 +1433,7 @@ public class Controller {
         }
 
         // FASE 2: Creazione della struttura gerarchica basata sui valori di dominio
-        view.showMessage(ControllerConstants.STEP_STRUTTURA_GERARCHIA);
+        view.showInfoMessage(ControllerConstants.STEP_STRUTTURA_GERARCHIA);
         view.showMessage(ControllerConstants.INFO_STRUTTURA_DESC);
         view.showMessage(ControllerConstants.INFO_STRUTTURA_VALORI);
 
@@ -1497,7 +1496,7 @@ public class Controller {
         }
 
         // FASE 3: Riepilogo finale
-        view.showMessage(ControllerConstants.STEP_COMPLETAMENTO_GERARCHIA);
+        view.showInfoMessage(ControllerConstants.STEP_COMPLETAMENTO_GERARCHIA);
         view.showMessage(ControllerConstants.SUCCESS_GERARCHIA_COMPLETATA);
         view.showMessage(String.format(ControllerConstants.RIEPILOGO_PROFONDITA, maxLevel));
         view.showMessage(String.format(ControllerConstants.RIEPILOGO_FOGLIE, rootGerarchia.getFoglie().size()));
@@ -2300,7 +2299,7 @@ public class Controller {
      */
     private Boolean propostaScambioOpera(Fruitore fruitore) {
         // Intestazione e spiegazione del processo
-        view.showMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
+        view.showInfoMessage(ControllerConstants.TITLE_PROPOSTA_SCAMBIO);
         view.showMessage(ControllerConstants.INFO_PROPOSTA_DESCRIZIONE);
         view.showWarningMessage(ControllerConstants.INFO_PROPOSTA_AVVERTENZA);
 
@@ -2979,7 +2978,7 @@ public class Controller {
         }
 
         // Mostra il titolo della selezione
-        this.view.showMessage(ControllerConstants.TITLE_MODIFICA_PROPOSTA);
+        this.view.showInfoMessage(ControllerConstants.TITLE_MODIFICA_PROPOSTA);
         this.view.showMessage(ControllerConstants.INFO_SELEZIONE_PROPOSTA);
 
         // Visualizza l'elenco delle proposte in formato numerato
