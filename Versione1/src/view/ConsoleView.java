@@ -191,6 +191,25 @@ public class ConsoleView {
     }
 
     /**
+     * Mostra un messaggio sulla console e attende INVIO.
+     * <p>
+     * Visualizza il messaggio specificato seguito da un'interruzione di riga.
+     * Attende che l'utente prema INVIO per continuare. Utile per mostrare
+     * informazioni che l'utente deve poter leggere prima che lo schermo si pulisca.
+     *
+     * @param messaggio il messaggio da visualizzare
+     * 
+     * @pre true (messaggio può essere null)
+     * @post Se messaggio == null, viene visualizzato "null"
+     * @post Se messaggio != null, il messaggio viene visualizzato sulla console
+     * @post L'esecuzione si blocca fino alla pressione di INVIO
+     */
+    public void showMessageAndWait(String messaggio) {
+        System.out.println(messaggio);
+        pressEnterToContinue();
+    }
+
+    /**
      * Mostra un messaggio di errore con formattazione rossa.
      * <p>
      * Visualizza il messaggio con sfondo rosso per l'etichetta "ERRORE" e testo
@@ -214,16 +233,22 @@ public class ConsoleView {
      * Visualizza il messaggio con sfondo verde per l'etichetta "SUCCESSO" e testo
      * verde
      * per il contenuto, per confermare operazioni completate con successo.
+     * Attende che l'utente prema INVIO per permettergli di leggere il messaggio.
      *
      * @param messaggio il messaggio di successo
      * 
      * @pre true (messaggio può essere null)
      * @post Il messaggio di successo viene visualizzato sulla console con
      *       formattazione verde
+     * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
     public void showSuccessMessage(String messaggio) {
         System.out.println(SUCCESS_LABEL + " " + GREEN + messaggio + RESET);
         pressEnterToContinue();
+    }
+
+    public void showSuccessMessageNoWait(String messaggio) {
+        System.out.println(SUCCESS_LABEL + " " + GREEN + messaggio + RESET);
     }
 
     /**
@@ -231,15 +256,18 @@ public class ConsoleView {
      * <p>
      * Visualizza il messaggio con sfondo blu per l'etichetta "INFO" e testo blu
      * per il contenuto, per comunicare informazioni neutrali all'utente.
+     * Attende che l'utente prema INVIO per permettergli di leggere il messaggio.
      *
      * @param messaggio il messaggio informativo
      * 
      * @pre true (messaggio può essere null)
      * @post Il messaggio informativo viene visualizzato sulla console con
      *       formattazione blu
+     * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
     public void showInfoMessage(String messaggio) {
         System.out.println(INFO_LABEL + " " + BLUE + messaggio + RESET);
+        pressEnterToContinue();
     }
 
     /**
@@ -249,12 +277,14 @@ public class ConsoleView {
      * giallo
      * per il contenuto, per segnalare situazioni che richiedono attenzione ma non
      * sono errori.
+     * Attende che l'utente prema INVIO per permettergli di leggere il messaggio.
      *
      * @param messaggio il messaggio di avviso
      * 
      * @pre true (messaggio può essere null)
      * @post Il messaggio di avviso viene visualizzato sulla console con
      *       formattazione gialla
+     * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
     public void showWarningMessage(String messaggio) {
         System.out.println(WARNING_LABEL + " " + YELLOW + messaggio + RESET);
@@ -389,7 +419,7 @@ public class ConsoleView {
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                showErrorMessage(INVALID_CONFIRMATION_MESSAGE);
+                showMessage(INVALID_CONFIRMATION_MESSAGE);
             }
         }
     }
@@ -407,6 +437,31 @@ public class ConsoleView {
     public void pressEnterToContinue() {
         System.out.print(PRESS_ENTER_MESSAGE);
         scanner.nextLine();
+    }
+
+    /**
+     * Mostra un messaggio e attende automaticamente per un tempo specificato.
+     * <p>
+     * Visualizza il messaggio e mette in pausa l'esecuzione per permettere
+     * all'utente di leggere, senza richiedere l'interazione con INVIO.
+     * Utile per messaggi di benvenuto, logout o altri messaggi informativi
+     * che non richiedono conferma esplicita.
+     *
+     * @param messaggio    il messaggio da visualizzare
+     * @param millisecondi il tempo di attesa in millisecondi (es. 2000 = 2 secondi)
+     * 
+     * @pre true (messaggio può essere null)
+     * @pre millisecondi >= 0
+     * @post Il messaggio è stato visualizzato
+     * @post L'esecuzione è stata bloccata per il tempo specificato
+     */
+    public void showMessageWithDelay(String messaggio, int millisecondi) {
+        System.out.println(messaggio);
+        try {
+            Thread.sleep(millisecondi);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**

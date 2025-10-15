@@ -393,13 +393,13 @@ public class Controller {
 
         // Se l'autenticazione fallisce, mostra un messaggio di errore
         if (utente == null) {
-            view.showWarningMessage(ControllerConstants.LOGIN_FAILED);
-            view.pressEnterToContinue();
+            view.showErrorMessage(ControllerConstants.LOGIN_FAILED);
             return;
         }
 
-        // Autenticazione riuscita: mostra un messaggio di benvenuto personalizzato
-        view.showMessage(ControllerConstants.LOGIN_SUCCESS + utente.getUsername() + ".");
+        // Autenticazione riuscita: mostra un messaggio di benvenuto personalizzato con
+        // delay automatico
+        view.showMessageWithDelay(ControllerConstants.LOGIN_SUCCESS + utente.getUsername() + ".", 1500);
 
         // Reindirizzamento al menu appropriato in base al ruolo dell'utente
         if (utente.isConfig()) {
@@ -549,22 +549,19 @@ public class Controller {
                         break;
 
                     case "0": // Logout
-                        // Termina il ciclo e ritorna al menu principale
-                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        // Termina il ciclo e ritorna al menu principale con delay automatico
+                        view.showMessageWithDelay(ControllerConstants.LOGOUT_MESSAGE, 1500);
                         return;
 
                     default:
                         // Gestione di input non validi
                         view.showMessage(ControllerConstants.INVALID_OPTION);
+                        view.pressEnterToContinue();
                 }
-
-                // Pausa per permettere all'utente di leggere i risultati
-                view.pressEnterToContinue();
 
             } catch (Exception e) {
                 // Gestione centralizzata delle eccezioni per garantire robustezza
                 view.showErrorMessage(String.format(ControllerConstants.ERROR_GENERIC, e.getMessage()));
-                view.pressEnterToContinue();
             }
         }
     }
@@ -613,6 +610,8 @@ public class Controller {
                         Gerarchia gerarchiaScelta = selezionaGerarchia();
                         // visualizzare
                         this.view.showMessage(gerarchiaScelta.toString());
+                        // Attende che l'utente legga i dati prima di pulire lo schermo
+                        this.view.pressEnterToContinue();
                         break;
 
                     case "2": // Proposta scambio d'opera
@@ -637,13 +636,14 @@ public class Controller {
                         break;
 
                     case "0": // Logout
-                        // Termina il ciclo e ritorna al menu principale
-                        view.showMessage(ControllerConstants.LOGOUT_MESSAGE);
+                        // Termina il ciclo e ritorna al menu principale con delay automatico
+                        view.showMessageWithDelay(ControllerConstants.LOGOUT_MESSAGE, 1500);
                         return;
 
                     default:
                         // Gestione di input non validi
                         view.showMessage(ControllerConstants.INVALID_OPTION);
+                        view.pressEnterToContinue();
                 }
 
             } catch (Exception e) {
@@ -957,6 +957,8 @@ public class Controller {
             // Altrimenti, mostra il titolo e la lista dei comprensori
             view.showMessage(ControllerConstants.TITLE_COMPRENSORI);
             view.showMessage(database.toStringComprensori());
+            // Attende che l'utente legga i dati prima di pulire lo schermo
+            view.pressEnterToContinue();
         }
     }
 
@@ -997,6 +999,7 @@ public class Controller {
         } else {
             // In caso di annullamento o errore
             view.showMessage(ControllerConstants.OPERATION_CANCELLED);
+            view.pressEnterToContinue();
         }
     }
 
@@ -1078,7 +1081,7 @@ public class Controller {
 
         // Mostra un messaggio di successo se l'operazione è andata a buon fine
         if (risultato) {
-            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_COMPRENSORIO_AGGIUNTO, nome));
+            view.showSuccessMessageNoWait(String.format(ControllerConstants.SUCCESS_COMPRENSORIO_AGGIUNTO, nome));
         }
 
         return risultato;
@@ -1153,7 +1156,7 @@ public class Controller {
             comuniAggiunti++;
 
             // Mostra conferma dell'aggiunta
-            this.view.showSuccessMessage(
+            this.view.showSuccessMessageNoWait(
                     String.format(ControllerConstants.SUCCESS_COMUNE_AGGIUNTO, comune, comprensorio.getNome()));
 
             // Dopo aver aggiunto almeno un comune, offre la possibilità di terminare
@@ -1245,7 +1248,7 @@ public class Controller {
 
         // Recupera e mostra il comprensorio selezionato
         Comprensorio selezionato = comprensori.get(index - 1);
-        this.view.showSuccessMessage(String.format(
+        this.view.showMessage(String.format(
                 ControllerConstants.SUCCESS_COMPRENSORIO_SELEZIONATO,
                 selezionato.getNome()));
 
@@ -1282,6 +1285,8 @@ public class Controller {
             // Altrimenti, mostra il titolo e la lista delle gerarchie
             view.showMessage(ControllerConstants.TITLE_GERARCHIE);
             view.showMessage(this.database.toStringGerarchie());
+            // Attende che l'utente legga i dati prima di pulire lo schermo
+            view.pressEnterToContinue();
         }
     }
 
@@ -1583,7 +1588,7 @@ public class Controller {
 
         // Feedback all'utente sul tipo di categoria creata
         if (campo != null) {
-            view.showSuccessMessage(
+            view.showSuccessMessageNoWait(
                     String.format(ControllerConstants.SUCCESS_CATEGORIA_CON_CAMPO, nome, campo.getNome()));
         } else {
             view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_CATEGORIA_FOGLIA, nome));
@@ -1650,7 +1655,7 @@ public class Controller {
         } while (campo.getDominio().isEmpty());
 
         // Feedback di successo con riepilogo
-        view.showSuccessMessage(
+        view.showSuccessMessageNoWait(
                 String.format(ControllerConstants.SUCCESS_CAMPO_CREATO, nome, campo.getDominio().size()));
         return campo;
     }
@@ -1733,7 +1738,7 @@ public class Controller {
             valoreCount++;
 
             // Conferma l'aggiunta all'utente
-            this.view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_VALORE_AGGIUNTO, nomeValore));
+            this.view.showSuccessMessageNoWait(String.format(ControllerConstants.SUCCESS_VALORE_AGGIUNTO, nomeValore));
 
             // Dopo il primo valore, chiede se l'utente vuole aggiungerne altri
             if (valoreCount >= 1) {
@@ -1852,6 +1857,8 @@ public class Controller {
                 .showMessage(String.format(ControllerConstants.INFO_VISUALIZZA_FATTORI, fogliaScelta.data().getNome()));
         this.view.showMessage(
                 gerarchiaDestinazione.toStringFattoreConversione(fattoreCombinato));
+        // Attende che l'utente legga i dati prima di pulire lo schermo
+        this.view.pressEnterToContinue();
     }
 
     /**
@@ -2872,7 +2879,7 @@ public class Controller {
         List<InsiemeChiuso> insiemi = database.getInsiemiChiusi();
 
         if (insiemi.isEmpty()) {
-            view.showMessage(ControllerConstants.MSG_NESSUN_INSIEME_CHIUSO);
+            view.showErrorMessage(ControllerConstants.MSG_NESSUN_INSIEME_CHIUSO);
             return;
         }
 
@@ -2902,7 +2909,13 @@ public class Controller {
                 selezionato.setNotificato(true);
                 salvaTutti();
                 view.showSuccessMessage(ControllerConstants.SUCCESS_INSIEME_NOTIFICATO);
+            } else {
+                // Attende che l'utente legga i dettagli prima di tornare al menu
+                view.pressEnterToContinue();
             }
+        } else {
+            // Attende che l'utente legga i dettagli prima di tornare al menu
+            view.pressEnterToContinue();
         }
     }
 
@@ -2930,6 +2943,7 @@ public class Controller {
 
         if (proposte.isEmpty()) {
             this.view.showMessage(ControllerConstants.MSG_NESSUNA_PROPOSTA);
+            this.view.pressEnterToContinue();
             return;
         }
 
@@ -2937,6 +2951,8 @@ public class Controller {
         for (Proposta proposta : proposte) {
             this.view.showMessage(proposta.toString());
         }
+        // Attende che l'utente legga i dati prima di pulire lo schermo
+        this.view.pressEnterToContinue();
     }
 
     /**
@@ -2958,6 +2974,7 @@ public class Controller {
         // Verifica se ci sono proposte aperte disponibili
         if (proposteAperte.isEmpty()) {
             this.view.showMessage(ControllerConstants.MSG_NESSUNA_PROPOSTA_APERTA);
+            this.view.pressEnterToContinue();
             return;
         }
 
@@ -2981,7 +2998,7 @@ public class Controller {
 
         // Gestione dell'annullamento dell'operazione
         if (index == 0) {
-            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            this.view.showMessageWithDelay(ControllerConstants.MSG_OPERAZIONE_ANNULLATA, 1000);
             return;
         }
 
@@ -3003,7 +3020,7 @@ public class Controller {
                 this.view.showErrorMessage(ControllerConstants.ERROR_MODIFICA_PROPOSTA);
             }
         } else {
-            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            this.view.showMessageWithDelay(ControllerConstants.MSG_OPERAZIONE_ANNULLATA, 1000);
         }
     }
 
@@ -3047,7 +3064,7 @@ public class Controller {
 
         // Gestione dell'annullamento della selezione gerarchia
         if (gerarchia == null) {
-            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            this.view.showMessageWithDelay(ControllerConstants.MSG_OPERAZIONE_ANNULLATA, 1000);
             return;
         }
 
@@ -3058,7 +3075,7 @@ public class Controller {
 
         // Gestione dell'annullamento della selezione foglia
         if (foglia == null) {
-            this.view.showMessage(ControllerConstants.MSG_OPERAZIONE_ANNULLATA);
+            this.view.showMessageWithDelay(ControllerConstants.MSG_OPERAZIONE_ANNULLATA, 1000);
             return;
         }
 
@@ -3087,6 +3104,9 @@ public class Controller {
             this.view.showMessage(
                     String.format(ControllerConstants.MSG_NESSUNA_PROPOSTA_CATEGORIA, foglia.data().getNome()));
         }
+
+        // Attende che l'utente legga i dati prima di pulire lo schermo
+        this.view.pressEnterToContinue();
     }
 
     // ==============================================================================
