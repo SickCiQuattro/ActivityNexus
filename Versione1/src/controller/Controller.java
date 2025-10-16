@@ -215,7 +215,8 @@ public class Controller {
             // Carica i dati conversione gerarchie se il file esiste
             if (fileEsistente(ControllerConstants.CONVERSIONE_FILE_PATH)) {
                 this.database.deserializeConversioneGerarchie(ControllerConstants.CONVERSIONE_FILE_PATH);
-                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "conversione gerarchie"));
+                view.showSuccessMessageNoWait(
+                        String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "conversione gerarchie"));
             } else {
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato di conversione"));
             }
@@ -231,14 +232,15 @@ public class Controller {
             // Carica i dati insieme chiuso se il file esiste
             if (fileEsistente(ControllerConstants.INSIEMECHIUSO_FILE_PATH)) {
                 this.database.deserializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
-                view.showSuccessMessageNoWait(String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "insieme chiuso"));
+                view.showSuccessMessageNoWait(
+                        String.format(ControllerConstants.LOADING_ITEM_SUCCESS, "insieme chiuso"));
             } else {
                 // Altrimenti, indica che si parte da zero per questa sezione
                 view.showMessage(String.format(ControllerConstants.LOADING_ITEM_EMPTY, "dato insieme chiuso"));
             }
 
             // Indica all'utente che il processo di caricamento è completato con successo
-            view.showSuccessMessage(ControllerConstants.LOADING_COMPLETE);
+            view.showSuccessMessageNoWait(ControllerConstants.LOADING_COMPLETE);
         } catch (Exception e) {
             // Gestione centralizzata degli errori durante il caricamento
             view.showErrorMessage(String.format(ControllerConstants.LOADING_ERROR, e.getMessage()));
@@ -333,7 +335,7 @@ public class Controller {
      */
     private void salvaTutti() {
         // Informa l'utente che il processo di salvataggio è iniziato
-        view.showInfoMessage(ControllerConstants.SAVING_DATA);
+        view.showMessage(ControllerConstants.SAVING_DATA);
 
         try {
             // Salva tutti i componenti del database in file separati
@@ -345,7 +347,7 @@ public class Controller {
             this.database.serializeInsiemiChiusi(ControllerConstants.INSIEMECHIUSO_FILE_PATH);
 
             // Conferma che il salvataggio è avvenuto con successo
-            view.showSuccessMessage(ControllerConstants.SAVING_SUCCESS);
+            view.showMessage(ControllerConstants.SAVING_SUCCESS);
         } catch (Exception e) {
             // Gestisce eventuali errori durante il salvataggio
             view.showErrorMessage(String.format(ControllerConstants.SAVING_ERROR, e.getMessage()));
@@ -1043,15 +1045,15 @@ public class Controller {
             }
             // Verifica che il nome non sia vuoto
             else if (nome.isBlank()) {
-                view.showErrorMessage(ControllerConstants.ERROR_NOME_VUOTO);
+                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_VUOTO);
             }
             // Verifica che il nome abbia almeno 3 caratteri
             else if (nome.length() < 3) {
-                view.showErrorMessage(ControllerConstants.ERROR_NOME_CORTO);
+                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_CORTO);
             }
             // Verifica che non esista già un comprensorio con questo nome
             else if (database.hasComprensorio(nome)) {
-                view.showErrorMessage(ControllerConstants.ERROR_NOME_DUPLICATO);
+                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_DUPLICATO);
             } else {
                 // Tutte le verifiche sono passate, il nome è valido
                 nomeValido = true;
@@ -1146,7 +1148,7 @@ public class Controller {
 
             // Verifica che il comune non sia già presente nel comprensorio
             if (comprensorio.hasComune(comune)) {
-                this.view.showErrorMessage(String.format(ControllerConstants.ERROR_COMUNE_DUPLICATO, comune));
+                this.view.showErrorMessageNoWait(String.format(ControllerConstants.ERROR_COMUNE_DUPLICATO, comune));
                 continue;
             }
 
@@ -1559,7 +1561,7 @@ public class Controller {
             // (per la radice) o una categoria con questo nome (per le sottocategorie)
             if ((root == null && database.hasGerarchia(nome)) ||
                     (root != null && root.find(new Categoria(nome)) != null)) {
-                view.showErrorMessage(root == null ? ControllerConstants.ERROR_NOME_GERARCHIA_DUPLICATO
+                view.showErrorMessageNoWait(root == null ? ControllerConstants.ERROR_NOME_GERARCHIA_DUPLICATO
                         : ControllerConstants.ERROR_NOME_CATEGORIA_DUPLICATO);
                 continue;
             }
@@ -1590,7 +1592,7 @@ public class Controller {
             view.showSuccessMessageNoWait(
                     String.format(ControllerConstants.SUCCESS_CATEGORIA_CON_CAMPO, nome, campo.getNome()));
         } else {
-            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_CATEGORIA_FOGLIA, nome));
+            view.showSuccessMessageNoWait(String.format(ControllerConstants.SUCCESS_CATEGORIA_FOGLIA, nome));
         }
 
         // Crea e restituisce la nuova categoria
@@ -2052,7 +2054,7 @@ public class Controller {
 
         // Riepilogo finale dell'operazione
         if (fattoriCreati > 0) {
-            view.showSuccessMessage(String.format(ControllerConstants.SUCCESS_FATTORI_CREATI, fattoriCreati));
+            view.showSuccessMessageNoWait(String.format(ControllerConstants.SUCCESS_FATTORI_CREATI, fattoriCreati));
         } else {
             view.showMessage(ControllerConstants.INFO_NESSUN_FATTORE);
         }
@@ -2394,7 +2396,7 @@ public class Controller {
             view.showMessage("\n" + proposta);
             return true;
         } else {
-            view.showMessage(ControllerConstants.INFO_PROPOSTA_RITIRATA);
+            view.showMessageWithDelay(ControllerConstants.INFO_PROPOSTA_RITIRATA, 1000);
         }
         return false;
     }
@@ -2883,8 +2885,8 @@ public class Controller {
         }
 
         view.showMessage(ControllerConstants.TITLE_INSIEMI_CHIUSI);
-        view.showWarningMessage(ControllerConstants.INFO_NOTIFICA_SIMBOLO);
-        view.showWarningMessage(ControllerConstants.INFO_NON_NOTIFICA_SIMBOLO);
+        view.showInfoMessage(ControllerConstants.INFO_NOTIFICA_SIMBOLO);
+        view.showInfoMessage(ControllerConstants.INFO_NON_NOTIFICA_SIMBOLO);
         for (int i = 0; i < insiemi.size(); i++) {
             InsiemeChiuso insieme = insiemi.get(i);
             view.showMessage(String.format(ControllerConstants.FORMATO_INSIEME_CHIUSO,

@@ -228,6 +228,23 @@ public class ConsoleView {
     }
 
     /**
+     * Mostra un messaggio di errore senza attendere INVIO.
+     * <p>
+     * Visualizza il messaggio con formattazione rossa senza bloccare l'esecuzione.
+     * Utile per errori di validazione input dove si vuole ripetere subito la
+     * richiesta.
+     *
+     * @param messaggio il messaggio di errore
+     * 
+     * @pre true (messaggio può essere null)
+     * @post Il messaggio di errore viene visualizzato sulla console con
+     *       formattazione rossa
+     */
+    public void showErrorMessageNoWait(String messaggio) {
+        System.out.println(ERROR_LABEL + " " + RED + messaggio + RESET);
+    }
+
+    /**
      * Mostra un messaggio di successo con formattazione verde.
      * <p>
      * Visualizza il messaggio con sfondo verde per l'etichetta "SUCCESSO" e testo
@@ -267,7 +284,6 @@ public class ConsoleView {
      */
     public void showInfoMessage(String messaggio) {
         System.out.println(INFO_LABEL + " " + BLUE + messaggio + RESET);
-        pressEnterToContinue();
     }
 
     /**
@@ -351,21 +367,22 @@ public class ConsoleView {
     public int getIntInput(String prompt, int min, int max) {
         while (true) {
             try {
-                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare duplicazioni
+                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare
+                // duplicazioni
                 String cleanPrompt = prompt.trim();
                 if (cleanPrompt.endsWith(":")) {
                     cleanPrompt = cleanPrompt.substring(0, cleanPrompt.length() - 1).trim();
                 }
-                
+
                 String input = getInput(cleanPrompt + String.format(RANGE_PROMPT_FORMAT, min, max) + ": ");
                 int value = Integer.parseInt(input);
                 if (value >= min && value <= max) {
                     return value;
                 } else {
-                    showErrorMessage(OUT_OF_RANGE_MESSAGE + min + " e " + max);
+                    showErrorMessageNoWait(OUT_OF_RANGE_MESSAGE + min + " e " + max);
                 }
             } catch (NumberFormatException e) {
-                showErrorMessage(INVALID_NUMBER_MESSAGE);
+                showErrorMessageNoWait(INVALID_NUMBER_MESSAGE);
             }
         }
     }
@@ -390,21 +407,22 @@ public class ConsoleView {
     public double getDoubleInput(String prompt, double min, double max) {
         while (true) {
             try {
-                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare duplicazioni
+                // Rimuovi eventuali due punti e spazi finali dal prompt per evitare
+                // duplicazioni
                 String cleanPrompt = prompt.trim();
                 if (cleanPrompt.endsWith(":")) {
                     cleanPrompt = cleanPrompt.substring(0, cleanPrompt.length() - 1).trim();
                 }
-                
+
                 String input = getInput(cleanPrompt + String.format(RANGE_PROMPT_FORMAT, min, max) + ": ");
                 double value = Double.parseDouble(input);
                 if (value >= min && value <= max) {
                     return value;
                 } else {
-                    showErrorMessage(OUT_OF_RANGE_MESSAGE + min + " e " + max);
+                    showErrorMessageNoWait(OUT_OF_RANGE_MESSAGE + min + " e " + max);
                 }
             } catch (NumberFormatException e) {
-                showErrorMessage(INVALID_NUMBER_MESSAGE);
+                showErrorMessageNoWait(INVALID_NUMBER_MESSAGE);
             }
         }
     }
@@ -431,7 +449,7 @@ public class ConsoleView {
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                showMessage(INVALID_CONFIRMATION_MESSAGE);
+                showErrorMessageNoWait(INVALID_CONFIRMATION_MESSAGE);
             }
         }
     }
@@ -469,10 +487,10 @@ public class ConsoleView {
      */
     public void showMessageWithDelay(String messaggio, int millisecondi) {
         System.out.println(messaggio);
-        try {
-            Thread.sleep(millisecondi);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        long nanoSecondi = millisecondi * 1_000_000L;
+        long startTime = System.nanoTime();
+        while (System.nanoTime() - startTime < nanoSecondi) {
+            // Busy waiting - attesa attiva
         }
     }
 

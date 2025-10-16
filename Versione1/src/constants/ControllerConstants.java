@@ -6,7 +6,7 @@ public class ControllerConstants {
     // 1. COSTANTI GENERALI E INTERFACCIA
     // ==============================================================================
     public static final String INVALID_OPTION = "Scelta non valida. Riprova.";
-    public static final String EXIT_MESSAGE = "Grazie per aver utilizzato il programma. Arrivederci!";
+    public static final String EXIT_MESSAGE = "Grazie per aver utilizzato ActivityNexus! A presto! 👋";
     public static final String OPERATION_CANCELLED = "Operazione annullata.";
     public static final String ERROR_GENERIC = "Si è verificato un errore: %s";
     public static final String PROMPT_CHOICE = "Cosa vuoi fare? ";
@@ -27,8 +27,8 @@ public class ControllerConstants {
 
     // Costanti per caricamento e salvataggio dati
     public static final String LOADING_DATA = "Caricamento dati in corso...";
-    public static final String LOADING_ITEM_SUCCESS = "✓ Dati %s caricati";
-    public static final String LOADING_ITEM_EMPTY = "✓ Nessun %s trovato, si parte da zero";
+    public static final String LOADING_ITEM_SUCCESS = "Dati %s caricati";
+    public static final String LOADING_ITEM_EMPTY = "Nessun %s trovato, si parte da zero";
     public static final String LOADING_COMPLETE = "Caricamento dati completato con successo";
     public static final String LOADING_ERROR = "Errore durante il caricamento dei dati: %s";
     public static final String LOADING_DEFAULT = "L'applicazione continuerà con un database vuoto";
@@ -39,14 +39,14 @@ public class ControllerConstants {
     // ==============================================================================
     // 2. COSTANTI PER MENU E SESSIONE
     // ==============================================================================
-    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo";
+    public static final String LOGOUT_MESSAGE = "Logout effettuato con successo. A presto!";
 
     // ==============================================================================
     // 3. COSTANTI PER AUTENTICAZIONE E REGISTRAZIONE
     // ==============================================================================
     public static final String NO_USERS_REGISTERED = "Nessun utente registrato. Procedi con la registrazione.";
     public static final String LOGIN_SUCCESS = "Accesso effettuato con successo! Bentornato ";
-    public static final String LOGIN_FAILED = "Credenziali non valide. Riprova.";
+    public static final String LOGIN_FAILED = "Credenziali non valide.";
     public static final String REGISTRATION_SUCCESS = "Registrazione effettuata con successo! Ora puoi accedere al sistema!";
 
     // Costanti per autenticazione
@@ -106,19 +106,19 @@ public class ControllerConstants {
     public static final String INFO_COMUNI_AGGIUNTI = "Comuni aggiunti finora: %d";
 
     // Messaggi di errore
-    public static final String ERROR_NOME_VUOTO = "✗ Il nome del comprensorio non può essere vuoto";
-    public static final String ERROR_NOME_CORTO = "✗ Il nome del comprensorio deve contenere almeno 3 caratteri";
-    public static final String ERROR_NOME_DUPLICATO = "✗ Esiste già un comprensorio con questo nome";
-    public static final String ERROR_COMUNE_VUOTO = "✗ Il nome del comune non può essere vuoto";
-    public static final String ERROR_COMUNE_CORTO = "✗ Il nome del comune deve contenere almeno 2 caratteri";
-    public static final String ERROR_COMUNE_DUPLICATO = "✗ Il comune '%s' è già presente in questo comprensorio";
-    public static final String ERROR_NESSUN_COMUNE = "✗ Il comprensorio deve contenere almeno un comune";
-    public static final String ERROR_CREAZIONE_ANNULLATA = "✗ Creazione comprensorio annullata: nessun comune aggiunto";
+    public static final String ERROR_NOME_VUOTO = "Il nome del comprensorio non può essere vuoto";
+    public static final String ERROR_NOME_CORTO = "Il nome del comprensorio deve contenere almeno 3 caratteri";
+    public static final String ERROR_NOME_DUPLICATO = "Esiste già un comprensorio con questo nome";
+    public static final String ERROR_COMUNE_VUOTO = "Il nome del comune non può essere vuoto";
+    public static final String ERROR_COMUNE_CORTO = "Il nome del comune deve contenere almeno 2 caratteri";
+    public static final String ERROR_COMUNE_DUPLICATO = "Il comune '%s' è già presente in questo comprensorio";
+    public static final String ERROR_NESSUN_COMUNE = "Il comprensorio deve contenere almeno un comune";
+    public static final String ERROR_CREAZIONE_ANNULLATA = "Creazione comprensorio annullata: nessun comune aggiunto";
     public static final String ERROR_NO_COMPRENSORI = "Non ci sono comprensori registrati nel sistema.";
 
     // Messaggi di successo
-    public static final String SUCCESS_COMPRENSORIO_AGGIUNTO = "✓ Comprensorio '%s' aggiunto con successo!";
-    public static final String SUCCESS_COMUNE_AGGIUNTO = "✓ Comune '%s' aggiunto al comprensorio '%s'";
+    public static final String SUCCESS_COMPRENSORIO_AGGIUNTO = "Comprensorio '%s' aggiunto con successo!";
+    public static final String SUCCESS_COMUNE_AGGIUNTO = "Comune '%s' aggiunto al comprensorio '%s'";
 
     // Selezione comprensori
     public static final String TITLE_SELEZIONA_COMPRENSORIO = "\n=== Selezione Comprensorio ===";
@@ -174,22 +174,22 @@ public class ControllerConstants {
     public static final String PROMPT_VALORI_CAMPO = "Inserisci i valori possibili per il campo '%s':";
 
     // Messaggi di errore
-    public static final String ERROR_NOME_CATEGORIA_VUOTO = "✗ Nome non valido. Il nome non può essere vuoto.";
-    public static final String ERROR_NOME_GERARCHIA_DUPLICATO = "✗ Esiste già una gerarchia con questo nome.";
-    public static final String ERROR_NOME_CATEGORIA_DUPLICATO = "✗ Esiste già una categoria con questo nome in questa gerarchia.";
-    public static final String ERROR_CAMPO_VUOTO = "✗ Il nome del campo non può essere vuoto.";
-    public static final String ERROR_DOMINIO_VUOTO = "✗ Il campo deve contenere almeno un valore di dominio.";
-    public static final String ERROR_VALORE_VUOTO = "✗ Il nome del valore non può essere vuoto.";
-    public static final String ERROR_VALORE_DUPLICATO = "✗ Valore '%s' già esistente nel dominio.";
+    public static final String ERROR_NOME_CATEGORIA_VUOTO = "Nome non valido. Il nome non può essere vuoto.";
+    public static final String ERROR_NOME_GERARCHIA_DUPLICATO = "Esiste già una gerarchia con questo nome.";
+    public static final String ERROR_NOME_CATEGORIA_DUPLICATO = "Esiste già una categoria con questo nome in questa gerarchia.";
+    public static final String ERROR_CAMPO_VUOTO = "Il nome del campo non può essere vuoto.";
+    public static final String ERROR_DOMINIO_VUOTO = "Il campo deve contenere almeno un valore di dominio.";
+    public static final String ERROR_VALORE_VUOTO = "Il nome del valore non può essere vuoto.";
+    public static final String ERROR_VALORE_DUPLICATO = "Valore '%s' già esistente nel dominio.";
     public static final String ERROR_RADICE_SENZA_CAMPO = "ERRORE: La categoria radice deve avere un campo caratteristico!";
     public static final String ERROR_MINIMO_VALORE = "Devi inserire almeno un valore di dominio.";
 
     // Messaggi di successo
     public static final String SUCCESS_GERARCHIA_COMPLETATA = "Gerarchia completata con successo!";
-    public static final String SUCCESS_CATEGORIA_CON_CAMPO = "✓ Categoria '%s' creata con campo caratteristico '%s'";
-    public static final String SUCCESS_CATEGORIA_FOGLIA = "✓ Categoria foglia '%s' creata";
-    public static final String SUCCESS_CAMPO_CREATO = "✓ Campo '%s' creato con %d valori di dominio";
-    public static final String SUCCESS_VALORE_AGGIUNTO = "✓ Valore '%s' aggiunto al dominio";
+    public static final String SUCCESS_CATEGORIA_CON_CAMPO = "Categoria '%s' creata con campo caratteristico '%s'";
+    public static final String SUCCESS_CATEGORIA_FOGLIA = "Categoria foglia '%s' creata";
+    public static final String SUCCESS_CAMPO_CREATO = "Campo '%s' creato con %d valori di dominio";
+    public static final String SUCCESS_VALORE_AGGIUNTO = "Valore '%s' aggiunto al dominio";
 
     // Messaggi di riepilogo
     public static final String RIEPILOGO_PROFONDITA = "La gerarchia ha una profondità di %d livelli.";
@@ -230,7 +230,7 @@ public class ControllerConstants {
     public static final String ERROR_FATTORE_NON_SPECIALIZZATO = "Il fattore di conversione deve essere compreso tra 0.5 e meno di 1 per attività meno specializzate.";
 
     // Messaggi di successo
-    public static final String SUCCESS_FATTORE_AGGIUNTO = "✓ Fattore di conversione aggiunto: %s";
+    public static final String SUCCESS_FATTORE_AGGIUNTO = "Fattore di conversione aggiunto: %s";
     public static final String SUCCESS_FATTORI_CREATI = "Sono stati creati %d fattori di conversione tra gerarchie.";
     public static final String SUCCESS_FATTORE_SEMPLICE = "Fattore di conversione aggiunto.";
     public static final String INFO_NESSUN_FATTORE = "\nNessun fattore di conversione creato.";
@@ -254,7 +254,7 @@ public class ControllerConstants {
 
     // Messaggi informativi per proposte
     public static final String INFO_RIEPILOGO_PROPOSTA = "Richiedendo %d ore per \"%s\", dovrai offrire %d ore per \"%s\".";
-    public static final String INFO_PROPOSTA_AVVERTENZA = "\nIl sistema ammette una tolleranza di 1 ora rispetto alla proposta.";
+    public static final String INFO_PROPOSTA_AVVERTENZA = "Il sistema ammette una tolleranza di 1 ora rispetto alla proposta.";
     public static final String INFO_PROPOSTA_RITIRATA = "La proposta è stata ritirata.";
     public static final String SUCCESS_PROPOSTA_CREATA = "La proposta di scambio è stata creata con successo!";
 
@@ -277,7 +277,7 @@ public class ControllerConstants {
     public static final String ERROR_INDICE_NON_VALIDO = "Indice non valido. Riprova.";
     public static final String MSG_OPERAZIONE_ANNULLATA = "Operazione annullata.";
     public static final String PROMPT_CONFERMA_RITIRO = "Sei sicuro di voler ritirare questa proposta? ";
-    public static final String SUCCESS_PROPOSTA_RITIRATA = "Proposta ritirata con successo!";
+    public static final String SUCCESS_PROPOSTA_RITIRATA = "Proposta ritirata!";
     public static final String ERROR_MODIFICA_PROPOSTA = "Impossibile modificare la proposta. Potrebbe essere già chiusa o ritirata.";
 
     // Costanti per insiemi chiusi
