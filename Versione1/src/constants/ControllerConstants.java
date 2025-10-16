@@ -6,7 +6,7 @@ public class ControllerConstants {
     // 1. COSTANTI GENERALI E INTERFACCIA
     // ==============================================================================
     public static final String INVALID_OPTION = "Scelta non valida. Riprova.";
-    public static final String EXIT_MESSAGE = "Grazie per aver utilizzato ActivityNexus! A presto! 👋";
+    public static final String EXIT_MESSAGE = "Grazie per aver utilizzato ActivityNexus! A presto!";
     public static final String OPERATION_CANCELLED = "Operazione annullata.";
     public static final String ERROR_GENERIC = "Si è verificato un errore: %s";
     public static final String PROMPT_CHOICE = "Cosa vuoi fare? ";
