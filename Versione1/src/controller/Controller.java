@@ -5,6 +5,8 @@ import constants.ControllerConstants;
 import util.UserUtil;
 import model.*;
 import view.ConsoleView;
+import view.IView;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +53,7 @@ public class Controller {
     // TODO: test finale
 
     private Database database;
-    private final ConsoleView view;
+    private final IView view; // Interfaccia per disaccoppiare dalla ConsoleView
 
     // ==============================================================================
     // 1. METODI CORE E INIZIALIZZAZIONE
@@ -71,11 +73,13 @@ public class Controller {
      * @post this.view == view
      * @post il controller è pronto per gestire le interazioni utente
      */
-    public Controller(ConsoleView view) {
-        // Inizializza un nuovo database vuoto
-        this.database = new Database();
-        // Mantiene un riferimento alla vista per interagire con l'utente
-        this.view = view;
+    public Controller(IView view, Database database) {
+        this.view = view; // Interfaccia per disaccoppiare dalla ConsoleView
+        this.database = database;
+    }
+
+    public Database getDatabase() {
+        return this.database;
     }
 
     /**

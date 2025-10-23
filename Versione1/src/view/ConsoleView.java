@@ -38,7 +38,7 @@ import java.util.*;
  * @see controller.Controller
  * @see java.util.Scanner
  */
-public class ConsoleView {
+public class ConsoleView implements IView {
     // -----------------------------------------------------------------------------------
     // ATTRIBUTI
     // -----------------------------------------------------------------------------------
@@ -186,6 +186,7 @@ public class ConsoleView {
      * @post Se messaggio == null, viene visualizzato "null"
      * @post Se messaggio != null, il messaggio viene visualizzato sulla console
      */
+    @Override
     public void showMessage(String messaggio) {
         System.out.println(messaggio);
     }
@@ -222,6 +223,7 @@ public class ConsoleView {
      * @post Il messaggio di errore viene visualizzato sulla console con
      *       formattazione rossa
      */
+    @Override
     public void showErrorMessage(String messaggio) {
         System.out.println(ERROR_LABEL + " " + RED + messaggio + RESET);
         pressEnterToContinue();
@@ -240,6 +242,7 @@ public class ConsoleView {
      * @post Il messaggio di errore viene visualizzato sulla console con
      *       formattazione rossa
      */
+    @Override
     public void showErrorMessageNoWait(String messaggio) {
         System.out.println(ERROR_LABEL + " " + RED + messaggio + RESET);
     }
@@ -259,11 +262,13 @@ public class ConsoleView {
      *       formattazione verde
      * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
+    @Override
     public void showSuccessMessage(String messaggio) {
         System.out.println(SUCCESS_LABEL + " " + GREEN + messaggio + RESET);
         pressEnterToContinue();
     }
 
+    @Override
     public void showSuccessMessageNoWait(String messaggio) {
         System.out.println(SUCCESS_LABEL + " " + GREEN + messaggio + RESET);
     }
@@ -282,6 +287,7 @@ public class ConsoleView {
      *       formattazione blu
      * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
+    @Override
     public void showInfoMessage(String messaggio) {
         System.out.println(INFO_LABEL + " " + BLUE + messaggio + RESET);
     }
@@ -302,6 +308,7 @@ public class ConsoleView {
      *       formattazione gialla
      * @post L'esecuzione si blocca fino alla pressione di INVIO
      */
+    @Override
     public void showWarningMessage(String messaggio) {
         System.out.println(WARNING_LABEL + " " + YELLOW + messaggio + RESET);
     }
@@ -319,6 +326,7 @@ public class ConsoleView {
      * @post result != null
      * @post result non contiene spazi iniziali o finali
      */
+    @Override
     public String getInput(String prompt) {
         System.out.print(CYAN + prompt + RESET + " ");
         return scanner.nextLine().trim();
@@ -341,6 +349,7 @@ public class ConsoleView {
      * @post result != null
      * @post result è esattamente la stringa inserita dall'utente senza modifiche
      */
+    @Override
     public String getPasswordInput(String prompt) {
         System.out.print(MAGENTA + prompt + RESET + " ");
         // In una console standard non possiamo mascherare l'input
@@ -364,6 +373,7 @@ public class ConsoleView {
      * @post min <= result <= max
      * @post Il metodo ha richiesto input finché non ha ricevuto un valore valido
      */
+    @Override
     public int getIntInput(String prompt, int min, int max) {
         while (true) {
             try {
@@ -404,6 +414,7 @@ public class ConsoleView {
      * @post min <= result <= max
      * @post Il metodo ha richiesto input finché non ha ricevuto un valore valido
      */
+    @Override
     public double getDoubleInput(String prompt, double min, double max) {
         while (true) {
             try {
@@ -441,6 +452,7 @@ public class ConsoleView {
      * @post result è true solo se l'utente ha inserito una risposta affermativa
      * @post Il metodo ha richiesto input finché non ha ricevuto una risposta valida
      */
+    @Override
     public boolean getConfirmation(String prompt) {
         while (true) {
             String input = getInput(prompt + CONFIRMATION_PROMPT_SUFFIX).toLowerCase();
