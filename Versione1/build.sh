@@ -84,6 +84,7 @@ javac -cp ".:$TREE_LIB/*:$TREE_CLASSES:$JUNIT_JARS" -d "$BIN_DIR" \
     "$SRC_DIR/model/observers/"*.java \
     "$SRC_DIR/model/factory/"*.java \
     "$SRC_DIR/model/state/"*.java \
+    "$SRC_DIR/service/"*.java \
     "$SRC_DIR/constants/"*.java \
     "$SRC_DIR/util/"*.java \
     "$SRC_DIR/view/"*.java 2>&1

@@ -2,7 +2,7 @@ package controller;
 
 import com.scalified.tree.TreeNode;
 import constants.ControllerConstants;
-import util.UserUtil;
+import service.CredentialService;
 import util.ValidationResult;
 import model.*;
 import view.ConsoleView;
@@ -863,23 +863,14 @@ public class Controller {
 
     /**
      * Valida il formato di un indirizzo email.
+     * <p>
+     * PATTERN: Low Coupling - Delega la validazione a CredentialService.
      *
      * @param email l'indirizzo email da validare
      * @return true se il formato è valido, false altrimenti
      */
     private boolean validaFormatoEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return false;
-        }
-
-        // Validazione di base: deve contenere @ e almeno un punto dopo @
-        int chiocciola = email.indexOf('@');
-        if (chiocciola < 1 || chiocciola == email.length() - 1) {
-            return false;
-        }
-
-        String dominio = email.substring(chiocciola + 1);
-        return dominio.contains(".") && !dominio.startsWith(".");
+        return CredentialService.getInstance().validateEmail(email);
     }
 
     /**
@@ -904,9 +895,12 @@ public class Controller {
      * @post Il metodo mostrerà all'utente le credenziali predefinite create
      */
     private boolean defaultUtente() {
+        // PATTERN: Low Coupling - Usa CredentialService invece di UserUtil direttamente
+        CredentialService credentialService = CredentialService.getInstance();
+
         // Genera credenziali casuali temporanee
-        String usernameDefault = UserUtil.generateRandomUsername();
-        String passwordDefault = UserUtil.generateRandomPassword();
+        String usernameDefault = credentialService.generateUsername();
+        String passwordDefault = credentialService.generatePassword();
 
         // Mostra le credenziali all'utente
         view.showInfoMessage(ControllerConstants.DEFAULT_LOGIN_INTRO);
@@ -3258,13 +3252,17 @@ public class Controller {
      *       definiti nel sistema
      */
     private String getUsername() {
+        // PATTERN: Low Coupling - Usa CredentialService invece di UserUtil direttamente
+        CredentialService credentialService = CredentialService.getInstance();
+
         while (true) {
             // Richiede uno username all'utente, specificando i requisiti di lunghezza
             String username = view
-                    .getInput(String.format(ControllerConstants.PROMPT_NEW_USERNAME, UserUtil.USERNAME_LENGTH));
+                    .getInput(String.format(ControllerConstants.PROMPT_NEW_USERNAME,
+                            CredentialService.MAX_USERNAME_LENGTH));
 
             // Verifica se lo username soddisfa i criteri di sicurezza
-            if (UserUtil.checkUsername(username))
+            if (credentialService.validateUsername(username))
                 return username; // Username valido
 
             // Se lo username non è valido, mostra un messaggio di errore
@@ -3294,15 +3292,19 @@ public class Controller {
      *       funzioni di hash appropriate
      */
     private String getPassword() {
+        // PATTERN: Low Coupling - Usa CredentialService invece di UserUtil direttamente
+        CredentialService credentialService = CredentialService.getInstance();
+
         while (true) {
             // Richiede una password all'utente, specificando i requisiti minimi di
             // lunghezza
             // e complessità (maiuscole, minuscole, caratteri speciali)
             String password = view
-                    .getPasswordInput(String.format(ControllerConstants.PROMPT_NEW_PASSWORD, UserUtil.PASSWORD_LENGTH));
+                    .getPasswordInput(String.format(ControllerConstants.PROMPT_NEW_PASSWORD,
+                            CredentialService.MIN_PASSWORD_LENGTH));
 
             // Verifica se la password soddisfa i criteri di sicurezza
-            if (UserUtil.checkPassword(password))
+            if (credentialService.validatePassword(password))
                 return password; // Password valida
 
             // Se la password non è valida, mostra un messaggio di errore
