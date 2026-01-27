@@ -173,6 +173,59 @@ public class Proposta implements Serializable {
     }
 
     // -----------------------------------------------------------------------------------
+    // METODI INFORMATION EXPERT
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Verifica se questa proposta è attualmente aperta.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta è l'esperto delle sue
+     * informazioni
+     * e quindi è responsabile di rispondere a domande sul proprio stato.
+     *
+     * @return true se la proposta è nello stato APERTA, false altrimenti
+     *
+     * @post result == (this.stato == StatoProposta.APERTA)
+     */
+    public boolean isAperta() {
+        return this.stato == StatoProposta.APERTA;
+    }
+
+    /**
+     * Verifica se questa proposta appartiene allo stesso comprensorio specificato.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta ha accesso diretto al
+     * propostitore
+     * e quindi può rispondere a domande sul comprensorio di appartenenza.
+     *
+     * @param comprensorio il comprensorio da confrontare
+     * @return true se il propostitore appartiene al comprensorio specificato
+     *
+     * @pre comprensorio != null
+     * @post result == this.propostitore.getComprensorio().equals(comprensorio)
+     */
+    public boolean appartieneStoComprensorio(Comprensorio comprensorio) {
+        return this.propostitore.getComprensorio().equals(comprensorio);
+    }
+
+    /**
+     * Verifica se questa proposta è stata creata dal fruitore specificato.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta conosce il proprio
+     * propostitore
+     * e può rispondere direttamente a questa domanda.
+     *
+     * @param fruitore il fruitore da confrontare
+     * @return true se il fruitore specificato è il propostitore di questa proposta
+     *
+     * @pre fruitore != null
+     * @post result == this.propostitore.equals(fruitore)
+     */
+    public boolean isDiPropostitore(Fruitore fruitore) {
+        return this.propostitore.equals(fruitore);
+    }
+
+    // -----------------------------------------------------------------------------------
     // METODI DI CAMBIO STATO
     // -----------------------------------------------------------------------------------
 
@@ -188,7 +241,7 @@ public class Proposta implements Serializable {
      *
      * @pre true (può essere invocato in qualsiasi stato)
      * @post result == true ⟹ this.stato == StatoProposta.CHIUSA && la data di
-     * modifica è aggiornata
+     *       modifica è aggiornata
      * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
      */
     public void chiudiProposta() {
