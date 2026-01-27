@@ -3,6 +3,7 @@ package controller;
 import com.scalified.tree.TreeNode;
 import constants.ControllerConstants;
 import util.UserUtil;
+import util.ValidationResult;
 import model.*;
 import view.ConsoleView;
 import view.IView;
@@ -1009,7 +1010,7 @@ public class Controller {
     }
 
     /**
-     * Crea un nuovo comprensorio con nome e comuni definiti dall'utente.
+     * Crea un nuovo comprensorio attraverso un processo guidato.
      * <p>
      * Gestisce l'intero processo di creazione interattiva che include:
      * <ol>
@@ -1018,6 +1019,14 @@ public class Controller {
      * <li>Raccolta dei comuni appartenenti tramite processo guidato</li>
      * <li>Aggiunta del comprensorio completo al database</li>
      * </ol>
+     * <p>
+     * <b>REFACTORING APPLICATI:</b>
+     * <ul>
+     * <li>Extract Method: validaNomeComprensorio(), creaComprensorioConComuni(),
+     * salvaComprensorio()</li>
+     * <li>Replace Temp with Query: eliminata variabile nomeValido</li>
+     * <li>Decompose Conditional: separati metodi di validazione</li>
+     * </ul>
      *
      * @return true se il comprensorio è stato creato e aggiunto con successo, false
      *         altrimenti
@@ -1035,58 +1044,169 @@ public class Controller {
         // Mostra il titolo della prima fase: definizione del nome del comprensorio
         view.showInfoMessage(ControllerConstants.STEP_NOME_COMPRENSORIO);
 
-        String nome = null;
-        boolean nomeValido = false;
-
-        // Ciclo di validazione del nome del comprensorio
-        while (!nomeValido) {
-            // Richiede il nome all'utente
-            nome = view.getInput(ControllerConstants.PROMPT_NOME_COMPRENSORIO);
-
-            // Verifica se l'utente vuole annullare l'operazione
-            if (nome.equals("0")) {
-                return false; // Operazione annullata dall'utente
-            }
-            // Verifica che il nome non sia vuoto
-            else if (nome.isBlank()) {
-                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_VUOTO);
-            }
-            // Verifica che il nome abbia almeno 3 caratteri
-            else if (nome.length() < 3) {
-                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_CORTO);
-            }
-            // Verifica che non esista già un comprensorio con questo nome
-            else if (database.hasComprensorio(nome)) {
-                view.showErrorMessageNoWait(ControllerConstants.ERROR_NOME_DUPLICATO);
-            } else {
-                // Tutte le verifiche sono passate, il nome è valido
-                nomeValido = true;
-            }
+        // STEP 1: Ottieni nome valido (Extract Method)
+        String nome = validaNomeComprensorio();
+        if (nome == null) {
+            return false; // Utente ha annullato
         }
 
-        // Inizia la seconda fase: aggiunta dei comuni al comprensorio
+        // STEP 2: Crea comprensorio con comuni (Extract Method)
+        Comprensorio comprensorio = creaComprensorioConComuni(nome);
+        if (comprensorio == null) {
+            return false; // Nessun comune aggiunto
+        }
+
+        // STEP 3: Salva nel database (Extract Method)
+        return salvaComprensorio(comprensorio);
+    }
+
+    /**
+     * Valida e ottiene un nome valido per il comprensorio dall'utente.
+     * <p>
+     * <b>REFACTORING:</b> Extract Method - Estratto da createComprensorio()
+     * <p>
+     * Gestisce il ciclo di input/validazione fino a ottenere un nome valido
+     * o fino a quando l'utente non annulla l'operazione.
+     *
+     * @return il nome validato, o null se l'utente annulla l'operazione
+     *
+     * @pre this.view != null
+     * @pre this.database != null
+     * @post Se result != null, il nome è valido (non vuoto, >= 3 caratteri, unico)
+     * @post Se l'utente inserisce "0", result == null
+     */
+    private String validaNomeComprensorio() {
+        while (true) {
+            // Richiede il nome all'utente
+            String nome = view.getInput(ControllerConstants.PROMPT_NOME_COMPRENSORIO);
+
+            // Early return per annullamento
+            if (nome.equals("0")) {
+                return null;
+            }
+
+            // Validazione delegata a metodo specifico (Decompose Conditional)
+            ValidationResult validazione = validaNomeComprensorioInput(nome);
+
+            if (validazione.isValid()) {
+                return nome; // Nome valido trovato
+            }
+
+            // Mostra errore e riprova
+            view.showErrorMessageNoWait(validazione.getErrorMessage());
+        }
+    }
+
+    /**
+     * Valida un nome di comprensorio secondo le regole di business.
+     * <p>
+     * <b>REFACTORING:</b> Extract Method + Introduce Parameter Object
+     * <p>
+     * Esegue le seguenti validazioni in sequenza:
+     * <ol>
+     * <li>Il nome non deve essere vuoto o contenere solo spazi</li>
+     * <li>Il nome deve avere almeno 3 caratteri</li>
+     * <li>Il nome non deve essere già utilizzato da un altro comprensorio</li>
+     * </ol>
+     *
+     * @param nome il nome da validare
+     * @return ValidationResult che indica successo o errore con messaggio
+     *
+     * @pre nome != null
+     * @post Se tutte le validazioni passano, result.isValid() == true
+     * @post Se una validazione fallisce, result.getErrorMessage() contiene il
+     *       motivo
+     */
+    private ValidationResult validaNomeComprensorioInput(String nome) {
+        // Validazione: nome non vuoto
+        if (nome.isBlank()) {
+            return ValidationResult.error(ControllerConstants.ERROR_NOME_VUOTO);
+        }
+
+        // Validazione: lunghezza minima
+        if (nome.length() < 3) {
+            return ValidationResult.error(ControllerConstants.ERROR_NOME_CORTO);
+        }
+
+        // Validazione: unicità
+        if (database.hasComprensorio(nome)) {
+            return ValidationResult.error(ControllerConstants.ERROR_NOME_DUPLICATO);
+        }
+
+        return ValidationResult.success();
+    }
+
+    /**
+     * Crea un comprensorio e guida l'utente nell'aggiunta dei comuni.
+     * <p>
+     * <b>REFACTORING:</b> Extract Method - Estratto da createComprensorio()
+     * <p>
+     * Gestisce la seconda fase della creazione del comprensorio:
+     * <ol>
+     * <li>Mostra le istruzioni per l'aggiunta dei comuni</li>
+     * <li>Crea l'oggetto Comprensorio</li>
+     * <li>Delega l'aggiunta dei comuni a addComuniToComprensorio()</li>
+     * <li>Verifica che almeno un comune sia stato aggiunto</li>
+     * </ol>
+     *
+     * @param nome il nome validato del comprensorio
+     * @return il comprensorio creato con i comuni, o null se nessun comune è stato
+     *         aggiunto
+     *
+     * @pre nome != null && !nome.isBlank() && nome.length() >= 3
+     * @pre !database.hasComprensorio(nome)
+     * @post Se result != null, result.getComuni().size() >= 1
+     * @post Se l'utente non aggiunge comuni, result == null
+     */
+    private Comprensorio creaComprensorioConComuni(String nome) {
+        // Mostra le istruzioni per la fase 2
         view.showInfoMessage(ControllerConstants.STEP_COMUNI_COMPRENSORIO);
         view.showMessage(String.format(ControllerConstants.INFO_AGGIUNGI_COMUNI, nome));
         view.showMessage(ControllerConstants.INFO_MINIMO_UN_COMUNE);
 
-        // Crea il nuovo oggetto Comprensorio con il nome validato
+        // Crea il nuovo oggetto Comprensorio
         Comprensorio comprensorio = new Comprensorio(nome);
 
-        // Chiama il metodo per aggiungere comuni al comprensorio appena creato
+        // Delega l'aggiunta dei comuni
         addComuniToComprensorio(comprensorio);
 
-        // Verifica che il comprensorio abbia almeno un comune
+        // Verifica che almeno un comune sia stato aggiunto
         if (comprensorio.getComuni().isEmpty()) {
             view.showErrorMessage(ControllerConstants.ERROR_CREAZIONE_ANNULLATA);
-            return false; // Operazione fallita: nessun comune aggiunto
+            return null;
         }
 
-        // Aggiunge il comprensorio completo al database
+        return comprensorio;
+    }
+
+    /**
+     * Salva il comprensorio nel database e mostra il risultato.
+     * <p>
+     * <b>REFACTORING:</b> Extract Method - Estratto da createComprensorio()
+     * <p>
+     * Gestisce la fase finale della creazione:
+     * <ol>
+     * <li>Aggiunge il comprensorio al database</li>
+     * <li>Mostra un messaggio di successo se l'operazione è andata a buon fine</li>
+     * </ol>
+     *
+     * @param comprensorio il comprensorio da salvare
+     * @return true se il comprensorio è stato salvato con successo, false
+     *         altrimenti
+     *
+     * @pre comprensorio != null
+     * @pre comprensorio.getComuni().size() >= 1
+     * @post Se result == true, database.hasComprensorio(comprensorio.getNome()) ==
+     *       true
+     */
+    private boolean salvaComprensorio(Comprensorio comprensorio) {
+        // Aggiunge il comprensorio al database
         boolean risultato = database.addComprensorio(comprensorio);
 
-        // Mostra un messaggio di successo se l'operazione è andata a buon fine
+        // Mostra messaggio di successo
         if (risultato) {
-            view.showSuccessMessageNoWait(String.format(ControllerConstants.SUCCESS_COMPRENSORIO_AGGIUNTO, nome));
+            view.showSuccessMessageNoWait(
+                    String.format(ControllerConstants.SUCCESS_COMPRENSORIO_AGGIUNTO, comprensorio.getNome()));
         }
 
         return risultato;
