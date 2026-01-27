@@ -1,5 +1,7 @@
 package model;
 
+import model.factory.UserFactory;
+
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -283,8 +285,8 @@ public class Database {
         if (hasUtente(username)) {
             return false;
         }
-        // Crea e registra il nuovo utente configuratore
-        Configuratore configuratore = new Configuratore(username, password);
+        // Crea e registra il nuovo utente configuratore tramite Factory
+        Configuratore configuratore = UserFactory.getInstance().createConfiguratore(username, password);
         return this.addUtente(configuratore);
     }
 
@@ -325,8 +327,8 @@ public class Database {
         if (hasUtente(username)) {
             return false;
         }
-        // Crea e registra il nuovo utente fruitore
-        Fruitore fruitore = new Fruitore(username, password, email, comprensorio);
+        // Crea e registra il nuovo utente fruitore tramite Factory
+        Fruitore fruitore = UserFactory.getInstance().createFruitore(username, password, email, comprensorio);
         return this.addUtente(fruitore);
     }
 
