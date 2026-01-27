@@ -7,7 +7,8 @@ package view;
  * Questa interfaccia isola le funzionalità speciali/divertenti che non sono
  * necessarie per il funzionamento dell'applicazione.
  * <p>
- * MockView e altre implementazioni di test NON devono implementare questa interfaccia,
+ * MockView e altre implementazioni di test NON devono implementare questa
+ * interfaccia,
  * evitando di dover fornire implementazioni vuote per metodi non utilizzati.
  *
  * @see IView

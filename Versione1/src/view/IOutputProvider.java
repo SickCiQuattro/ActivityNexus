@@ -4,10 +4,13 @@ package view;
  * Interfaccia per la gestione degli output verso l'utente.
  * <p>
  * PRINCIPIO: Interface Segregation Principle (ISP)
- * Questa interfaccia contiene solo i metodi relativi alla visualizzazione di messaggi,
- * permettendo ai client di dipendere solo dalle funzionalità di output che utilizzano.
+ * Questa interfaccia contiene solo i metodi relativi alla visualizzazione di
+ * messaggi,
+ * permettendo ai client di dipendere solo dalle funzionalità di output che
+ * utilizzano.
  * <p>
- * I client che necessitano solo di mostrare messaggi possono dipendere da questa
+ * I client che necessitano solo di mostrare messaggi possono dipendere da
+ * questa
  * interfaccia invece che dall'intera IView, riducendo l'accoppiamento.
  *
  * @see IInputProvider

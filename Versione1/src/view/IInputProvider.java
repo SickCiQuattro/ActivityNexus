@@ -5,10 +5,12 @@ package view;
  * <p>
  * PRINCIPIO: Interface Segregation Principle (ISP)
  * Questa interfaccia contiene solo i metodi relativi all'acquisizione di input,
- * permettendo ai client di dipendere solo dalle funzionalità che effettivamente utilizzano.
+ * permettendo ai client di dipendere solo dalle funzionalità che effettivamente
+ * utilizzano.
  * <p>
  * I client che necessitano solo di ricevere input dall'utente possono dipendere
- * da questa interfaccia invece che dall'intera IView, riducendo l'accoppiamento.
+ * da questa interfaccia invece che dall'intera IView, riducendo
+ * l'accoppiamento.
  *
  * @see IOutputProvider
  * @see IMenuProvider

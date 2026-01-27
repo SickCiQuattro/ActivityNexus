@@ -16,7 +16,8 @@ package view;
  * <b>Vantaggi dell'ISP applicato:</b>
  * <ul>
  * <li>Le classi client possono dipendere solo dalle interfacce che usano</li>
- * <li>MockView per i test può implementare solo IInputProvider e IOutputProvider</li>
+ * <li>MockView per i test può implementare solo IInputProvider e
+ * IOutputProvider</li>
  * <li>Riduzione dell'accoppiamento e del codice boilerplate</li>
  * <li>Maggiore flessibilità nell'aggiungere nuove implementazioni</li>
  * </ul>

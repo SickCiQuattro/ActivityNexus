@@ -2,9 +2,13 @@ package model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import model.observers.PropostaObserver;
 
 /**
  * Rappresenta una proposta di scambio di prestazioni d'opera nel sistema.
@@ -71,6 +75,16 @@ public class Proposta implements Serializable {
 
     /** Data e ora dell'ultima modifica di stato (null se ancora non modificata) */
     private LocalDateTime dataModifica;
+
+    /**
+     * Lista degli observer registrati per questa proposta.
+     * <p>
+     * PATTERN: Observer (GoF) + Open/Closed Principle (SOLID)
+     * <p>
+     * Gli observer vengono notificati quando la proposta cambia stato.
+     * La lista è transient perché gli observer non devono essere serializzati.
+     */
+    private transient List<PropostaObserver> observers = new ArrayList<>();
 
     /** Messaggi di errore per validazione */
     private static final String ERRORE_FRUITORE_NULL = "Il fruitore non può essere null";
@@ -254,6 +268,8 @@ public class Proposta implements Serializable {
             // Aggiorna la data di modifica con il timestamp corrente
             this.dataModifica = LocalDateTime.now();
 
+            // PATTERN: Observer - Notifica tutti gli observer della chiusura
+            notifyPropostaChiusa();
         }
 
         // Se la proposta non era aperta, l'operazione fallisce
@@ -287,11 +303,74 @@ public class Proposta implements Serializable {
             // Aggiorna la data di modifica con il timestamp corrente
             this.dataModifica = LocalDateTime.now();
 
+            // PATTERN: Observer - Notifica tutti gli observer del ritiro
+            notifyPropostaRitirata();
+
             return true; // Operazione riuscita
         }
 
         // Se la proposta non era aperta, l'operazione fallisce
         return false;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI OBSERVER PATTERN
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Registra un observer per ricevere notifiche sui cambiamenti di stato.
+     * <p>
+     * PATTERN: Observer (GoF) + Open/Closed Principle (SOLID)
+     * <p>
+     * Questo metodo permette di estendere il comportamento della proposta
+     * senza modificare il codice esistente, rispettando il principio OCP.
+     *
+     * @param observer l'observer da registrare
+     * @throws NullPointerException se observer è null
+     */
+    public void addObserver(PropostaObserver observer) {
+        Objects.requireNonNull(observer, "Observer non può essere null");
+        if (observers == null) {
+            observers = new ArrayList<>();
+        }
+        observers.add(observer);
+    }
+
+    /**
+     * Rimuove un observer dalla lista delle notifiche.
+     *
+     * @param observer l'observer da rimuovere
+     */
+    public void removeObserver(PropostaObserver observer) {
+        if (observers != null) {
+            observers.remove(observer);
+        }
+    }
+
+    /**
+     * Notifica tutti gli observer che la proposta è stata chiusa.
+     * <p>
+     * PATTERN: Observer - Metodo privato per la notifica
+     */
+    private void notifyPropostaChiusa() {
+        if (observers != null) {
+            for (PropostaObserver observer : observers) {
+                observer.onPropostaChiusa(this);
+            }
+        }
+    }
+
+    /**
+     * Notifica tutti gli observer che la proposta è stata ritirata.
+     * <p>
+     * PATTERN: Observer - Metodo privato per la notifica
+     */
+    private void notifyPropostaRitirata() {
+        if (observers != null) {
+            for (PropostaObserver observer : observers) {
+                observer.onPropostaRitirata(this);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------------
