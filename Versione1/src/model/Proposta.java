@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import model.observers.PropostaObserver;
+import model.state.PropostaState;
+import model.state.PropostaStateAperta;
+import model.state.PropostaStateChiusa;
+import model.state.PropostaStateRitirata;
 
 /**
  * Rappresenta una proposta di scambio di prestazioni d'opera nel sistema.
@@ -86,6 +90,17 @@ public class Proposta implements Serializable {
      */
     private transient List<PropostaObserver> observers = new ArrayList<>();
 
+    /**
+     * Oggetto stato corrente della proposta.
+     * <p>
+     * PATTERN: State (GoF)
+     * <p>
+     * Lo stato è gestito tramite il pattern State per eliminare la logica
+     * if-else nei metodi di cambio stato. È transient perché lo stato viene
+     * ricostruito dall'enum StatoProposta durante la deserializzazione.
+     */
+    private transient PropostaState stateObject;
+
     /** Messaggi di errore per validazione */
     private static final String ERRORE_FRUITORE_NULL = "Il fruitore non può essere null";
     private static final String ERRORE_RICHIESTA_NULL = "La prestazione richiesta non può essere null";
@@ -132,6 +147,69 @@ public class Proposta implements Serializable {
 
         // La data di modifica è inizialmente null (non ci sono state modifiche)
         this.dataModifica = null;
+
+        // PATTERN: State - Inizializza l'oggetto stato in base all'enum
+        this.stateObject = mapEnumToState(stato);
+    }
+
+    /**
+     * Mappa un valore dell'enum StatoProposta al corrispondente oggetto State.
+     * <p>
+     * PATTERN: State - Questo metodo facilita la conversione tra la
+     * rappresentazione
+     * enum (usata per la serializzazione) e l'oggetto State (usato per il
+     * comportamento).
+     *
+     * @param statoEnum il valore dell'enum da mappare
+     * @return l'oggetto State corrispondente
+     */
+    private PropostaState mapEnumToState(StatoProposta statoEnum) {
+        return switch (statoEnum) {
+            case APERTA -> PropostaStateAperta.getInstance();
+            case CHIUSA -> PropostaStateChiusa.getInstance();
+            case RITIRATA -> PropostaStateRitirata.getInstance();
+        };
+    }
+
+    /**
+     * Metodo interno per impostare lo stato (usato dalle classi State).
+     * <p>
+     * PATTERN: State - Questo metodo permette agli oggetti State di cambiare
+     * lo stato della proposta durante le transizioni.
+     * <p>
+     * <b>Nota:</b> Questo metodo è public per permettere l'accesso dal package
+     * model.state, ma è inteso solo per uso interno del pattern State.
+     *
+     * @param newState il nuovo oggetto stato
+     */
+    public void setStatoInternal(PropostaState newState) {
+        this.stateObject = newState;
+        // Aggiorna anche l'enum per la serializzazione e compatibilità
+        if (newState.isAperta()) {
+            this.stato = StatoProposta.APERTA;
+        } else if (newState.isChiusa()) {
+            this.stato = StatoProposta.CHIUSA;
+        } else if (newState.isRitirata()) {
+            this.stato = StatoProposta.RITIRATA;
+        }
+        // Aggiorna la data di modifica
+        this.dataModifica = LocalDateTime.now();
+    }
+
+    /**
+     * Restituisce l'oggetto stato corrente.
+     * <p>
+     * PATTERN: State - Assicura che lo stateObject sia sempre inizializzato,
+     * anche dopo la deserializzazione.
+     *
+     * @return l'oggetto State corrente
+     */
+    private PropostaState getStateObject() {
+        if (stateObject == null) {
+            // Reinizializza dopo deserializzazione
+            stateObject = mapEnumToState(stato);
+        }
+        return stateObject;
     }
 
     // -----------------------------------------------------------------------------------
@@ -202,7 +280,8 @@ public class Proposta implements Serializable {
      * @post result == (this.stato == StatoProposta.APERTA)
      */
     public boolean isAperta() {
-        return this.stato == StatoProposta.APERTA;
+        // PATTERN: State - Delega all'oggetto stato
+        return getStateObject().isAperta();
     }
 
     /**
@@ -259,20 +338,14 @@ public class Proposta implements Serializable {
      * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
      */
     public void chiudiProposta() {
-        // Verifica che la proposta sia nello stato APERTA
-        // Solo le proposte aperte possono essere chiuse
-        if (stato == StatoProposta.APERTA) {
-            // Modifica lo stato a CHIUSA
-            stato = StatoProposta.CHIUSA;
+        // PATTERN: State - Delega la logica all'oggetto stato corrente
+        // Elimina la necessità di if-else basati sullo stato
+        boolean success = getStateObject().chiudi(this);
 
-            // Aggiorna la data di modifica con il timestamp corrente
-            this.dataModifica = LocalDateTime.now();
-
+        if (success) {
             // PATTERN: Observer - Notifica tutti gli observer della chiusura
             notifyPropostaChiusa();
         }
-
-        // Se la proposta non era aperta, l'operazione fallisce
     }
 
     /**
@@ -294,23 +367,16 @@ public class Proposta implements Serializable {
      * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
      */
     public boolean ritiraProposta() {
-        // Verifica che la proposta sia nello stato APERTA
-        // Solo le proposte aperte possono essere ritirate
-        if (stato == StatoProposta.APERTA) {
-            // Modifica lo stato a RITIRATA
-            stato = StatoProposta.RITIRATA;
+        // PATTERN: State - Delega la logica all'oggetto stato corrente
+        // Elimina la necessità di if-else basati sullo stato
+        boolean success = getStateObject().ritira(this);
 
-            // Aggiorna la data di modifica con il timestamp corrente
-            this.dataModifica = LocalDateTime.now();
-
+        if (success) {
             // PATTERN: Observer - Notifica tutti gli observer del ritiro
             notifyPropostaRitirata();
-
-            return true; // Operazione riuscita
         }
 
-        // Se la proposta non era aperta, l'operazione fallisce
-        return false;
+        return success;
     }
 
     // -----------------------------------------------------------------------------------
