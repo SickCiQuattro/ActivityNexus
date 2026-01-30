@@ -47,11 +47,6 @@ import java.util.*;
  * @see view.ConsoleView
  */
 public class Controller {
-    // TODO: Applicare il Pattern "Separation of Concerns" per dividere le
-    // funzionalità
-    // da monilitico a moduli più piccoli e coesi
-    // TODO: preparare i .ser per l'esame
-    // TODO: test finale
 
     private Database database;
     private final IView view; // Interfaccia per disaccoppiare dalla ConsoleView

@@ -20,23 +20,6 @@ import model.Proposta;
  * <li><b>Leggibilità:</b> il comportamento di ogni stato è chiaramente isolato
  * nella sua classe</li>
  * </ul>
- * <p>
- * <b>Macchina a stati delle proposte:</b>
- * 
- * <pre>
- *     ┌──────────┐
- *     │  APERTA  │ ─────────┬──────────────┐
- *     └──────────┘          │              │
- *          │            chiudi()      ritira()
- *          │                │              │
- *          ▼                ▼              ▼
- *     ┌──────────┐    ┌──────────┐   ┌──────────┐
- *     │          │    │  CHIUSA  │   │ RITIRATA │
- *     │          │    └──────────┘   └──────────┘
- *     │          │         │              │
- *     │          │    (stato finale) (stato finale)
- *     └──────────┘
- * </pre>
  *
  * @see Proposta
  * @see PropostaStateAperta

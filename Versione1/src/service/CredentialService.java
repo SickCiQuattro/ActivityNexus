@@ -63,10 +63,6 @@ public class CredentialService {
         // Costruttore vuoto - servizio stateless
     }
 
-    // -----------------------------------------------------------------------------------
-    // COSTANTI ESPOSTE
-    // -----------------------------------------------------------------------------------
-
     /** Lunghezza massima consentita per gli username */
     public static final int MAX_USERNAME_LENGTH = UserUtil.USERNAME_LENGTH;
 

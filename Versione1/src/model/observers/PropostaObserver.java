@@ -18,13 +18,6 @@ import model.Proposta;
  * testabilità</li>
  * </ul>
  * <p>
- * <b>Esempio di utilizzo:</b>
- * 
- * <pre>
- * PropostaObserver emailNotifier = new EmailNotifier();
- * proposta.addObserver(emailNotifier);
- * proposta.chiudiProposta(); // emailNotifier viene notificato automaticamente
- * </pre>
  *
  * @see Proposta
  * @see EmailNotifier

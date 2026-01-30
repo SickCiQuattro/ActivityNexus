@@ -2,8 +2,8 @@ package controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import view.MockView; // Assicurati che MockView sia nel package 'view'
-import constants.ControllerConstants; // Assicurati di avere questo file di costanti
+import view.MockView;
+import constants.ControllerConstants;
 import controller.*;
 import model.*;
 
@@ -225,9 +225,8 @@ class ControllerTest {
                 "mario",
                 "Mario123!",
                 "mario@test.it",
-                comprensorio
-        );
-// 3. Assert
+                comprensorio);
+        // 3. Assert
         assertTrue(risultato, "La registrazione dovrebbe avere successo");
         assertTrue(database.hasUtente("mario"), "L'utente dovrebbe essere nel database");
 
@@ -255,9 +254,8 @@ class ControllerTest {
                 "mario", // Stesso username
                 "DifferentPass123!",
                 "altro@test.it",
-                comprensorio
-        );
-// 3. Assert
+                comprensorio);
+        // 3. Assert
         assertFalse(risultato, "La registrazione con username duplicato dovrebbe fallire");
         assertEquals(1, database.getUtenti().size(), "Dovrebbe esserci solo 1 utente");
     }
@@ -278,7 +276,7 @@ class ControllerTest {
     @Test
     void testPropostaScambio_CreazioneSemplice() {
         // 1. Arrange - Prepara il contesto completo
-        
+
         // 1a. Crea un comprensorio
         Comprensorio comprensorio = new Comprensorio("Lombardia");
         comprensorio.addComune("Milano");
@@ -324,9 +322,8 @@ class ControllerTest {
                 fruitore,
                 richiesta,
                 offerta,
-                StatoProposta.APERTA
-        );
-database.aggiungiProposta(proposta);
+                StatoProposta.APERTA);
+        database.aggiungiProposta(proposta);
 
         // 3. Assert - Verifica che la proposta sia stata creata correttamente
         List<Proposta> proposte = database.getPropostePerStato(StatoProposta.APERTA);
@@ -370,7 +367,8 @@ database.aggiungiProposta(proposta);
         Prestazione prestazione = new Prestazione(nodo, 10);
 
         // 2. Act & Assert
-        // Tentare di creare una proposta con fruitore null dovrebbe lanciare un'eccezione
+        // Tentare di creare una proposta con fruitore null dovrebbe lanciare
+        // un'eccezione
         assertThrows(NullPointerException.class, () -> {
             new Proposta(null, prestazione, prestazione, StatoProposta.APERTA);
         }, "Dovrebbe lanciare NullPointerException per fruitore null");

@@ -42,10 +42,6 @@ import java.util.Objects;
  */
 public class UserFactory {
 
-    // -----------------------------------------------------------------------------------
-    // ENUMERAZIONE TIPI UTENTE
-    // -----------------------------------------------------------------------------------
-
     /**
      * Enumerazione dei tipi di utente supportati dal sistema.
      * <p>
@@ -58,10 +54,6 @@ public class UserFactory {
         /** Utente standard che partecipa agli scambi */
         FRUITORE
     }
-
-    // -----------------------------------------------------------------------------------
-    // SINGLETON INSTANCE (opzionale, per uso semplificato)
-    // -----------------------------------------------------------------------------------
 
     /** Istanza singleton della factory */
     private static final UserFactory INSTANCE = new UserFactory();
@@ -86,10 +78,6 @@ public class UserFactory {
     private UserFactory() {
         // Costruttore vuoto - factory stateless
     }
-
-    // -----------------------------------------------------------------------------------
-    // FACTORY METHODS
-    // -----------------------------------------------------------------------------------
 
     /**
      * Crea un nuovo Configuratore con le credenziali specificate.
@@ -186,10 +174,6 @@ public class UserFactory {
             case FRUITORE -> createFruitoreFromParams(username, password, extraParams);
         };
     }
-
-    // -----------------------------------------------------------------------------------
-    // METODI HELPER PRIVATI
-    // -----------------------------------------------------------------------------------
 
     /**
      * Valida le credenziali di accesso.
