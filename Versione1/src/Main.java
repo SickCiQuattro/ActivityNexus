@@ -1,5 +1,7 @@
 import controller.Controller;
 import view.ConsoleView;
+import view.IView;
+import model.Database;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,20 +69,19 @@ public class Main {
      *       di errore appropriato dopo aver registrato l'eccezione
      */
     public static void main(String[] args) {
-        // Riferimento alla vista, inizializzato a null per la gestione sicura degli
-        // errori
-        ConsoleView view = null;
+        IView view = null; // Dichiara view fuori dal try per usarla nei catch
 
         try {
-            // Fase 1: Inizializzazione della vista (interfaccia utente a console)
+            // Fase 1: Inizializzazione della vista
             view = new ConsoleView();
 
-            // Fase 2: Creazione del controller che gestisce la logica applicativa
-            Controller controller = new Controller(view);
+            // Fase 2: Inizializzazione del modello
+            Database database = new Database();
 
-            // Fase 3: Avvio del ciclo principale dell'applicazione
-            // Questo metodo contiene il loop principale che termina solo all'uscita
-            // dell'utente
+            // Fase 3: Creazione del controller e INIEZIONE delle dipendenze
+            Controller controller = new Controller(view, database);
+
+            // Fase 4: Avvio
             controller.start();
 
         } catch (IllegalStateException e) {
@@ -137,7 +138,7 @@ public class Main {
      * @pre messaggio != null
      * @post Il messaggio è stato mostrato all'utente attraverso almeno un canale
      */
-    private static void mostraErrore(ConsoleView view, String messaggio) {
+    private static void mostraErrore(IView view, String messaggio) {
         if (view != null) {
             // Se la vista è stata inizializzata, usa il suo meccanismo per mostrare errori
             // Questo garantisce coerenza con lo stile dell'interfaccia utente

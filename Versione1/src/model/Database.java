@@ -1,7 +1,10 @@
 package model;
 
+import model.factory.UserFactory;
+
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Repository centrale per tutti i dati dell'applicazione "ActivityNexus".
@@ -282,8 +285,8 @@ public class Database {
         if (hasUtente(username)) {
             return false;
         }
-        // Crea e registra il nuovo utente configuratore
-        Configuratore configuratore = new Configuratore(username, password);
+        // Crea e registra il nuovo utente configuratore tramite Factory
+        Configuratore configuratore = UserFactory.getInstance().createConfiguratore(username, password);
         return this.addUtente(configuratore);
     }
 
@@ -324,8 +327,8 @@ public class Database {
         if (hasUtente(username)) {
             return false;
         }
-        // Crea e registra il nuovo utente fruitore
-        Fruitore fruitore = new Fruitore(username, password, email, comprensorio);
+        // Crea e registra il nuovo utente fruitore tramite Factory
+        Fruitore fruitore = UserFactory.getInstance().createFruitore(username, password, email, comprensorio);
         return this.addUtente(fruitore);
     }
 
@@ -737,11 +740,22 @@ public class Database {
      * disponibili
      * nel suo comprensorio geografico, con la possibilità di escludere le proprie
      * proposte.
-     * Il filtro applica due criteri:
+     * <p>
+     * <b>PATTERN: Information Expert</b> - Il metodo delega la logica di filtraggio
+     * alla classe Proposta che è l'esperto delle proprie informazioni. Questo
+     * riduce
+     * l'accoppiamento e migliora la manutenibilità.
+     * <p>
+     * Il filtro applica tre criteri usando i metodi della classe Proposta:
      * <ol>
-     * <li>Le proposte devono essere nello stato APERTA</li>
-     * <li>Le proposte devono provenire da fruitori dello stesso comprensorio
-     * dell'utente specificato</li>
+     * <li>{@link Proposta#isAperta()} - Le proposte devono essere nello stato
+     * APERTA</li>
+     * <li>{@link Proposta#appartieneStoComprensorio(Comprensorio)} - Le proposte
+     * devono
+     * provenire da fruitori dello stesso comprensorio</li>
+     * <li>{@link Proposta#isDiPropostitore(Fruitore)} - Opzionalmente esclude le
+     * proposte
+     * dell'utente di riferimento</li>
      * </ol>
      *
      * @param utente        l'utente di riferimento per identificare il comprensorio
@@ -753,11 +767,11 @@ public class Database {
      * @pre utente è istanza di Fruitore
      * @pre ((Fruitore)utente).getComprensorio() != null
      * @post result != null
-     * @post tutti gli elementi in result hanno stato == StatoProposta.APERTA
+     * @post tutti gli elementi in result hanno isAperta() == true
      * @post tutti gli elementi in result hanno
-     *       proponente.getComprensorio().equals(((Fruitore)utente).getComprensorio())
+     *       appartieneStoComprensorio(((Fruitore)utente).getComprensorio()) == true
      * @post se includiUtente == false, nessun elemento in result ha
-     *       proponente.equals(utente)
+     *       isDiPropostitore((Fruitore)utente) == true
      * @post lo stato del database non viene modificato
      * 
      * @throws ClassCastException   se utente non è un'istanza di Fruitore
@@ -765,31 +779,18 @@ public class Database {
      */
     public List<Proposta> getProposteAperteStessoComprensorio(Utente utente, boolean includiUtente) {
         // Cast a Fruitore e recupero del comprensorio
-        Fruitore fruitoreRiferimento = (Fruitore) utente;
-        Comprensorio comprensorioRiferimento = fruitoreRiferimento.getComprensorio();
+        Fruitore fruitore = (Fruitore) utente;
+        Comprensorio comprensorio = fruitore.getComprensorio();
 
-        // Lista per le proposte aperte dello stesso comprensorio
-        List<Proposta> proposteAperte = new ArrayList<>();
-
-        // Filtra tutte le proposte aperte
-        List<Proposta> tutteProposteAperte = getPropostePerStato(StatoProposta.APERTA);
-
-        for (Proposta proposta : tutteProposteAperte) {
-            Fruitore proponente = proposta.getPropostitore();
-
-            // Controlla che il proponente abbia lo stesso comprensorio
-            if (proponente.getComprensorio().equals(comprensorioRiferimento)) {
-                // Se non dobbiamo includere l'utente di riferimento e questo è la proposta
-                // dell'utente, la saltiamo
-                if (!includiUtente && proponente.equals(fruitoreRiferimento)) {
-                    continue;
-                }
-
-                proposteAperte.add(proposta);
-            }
-        }
-
-        return proposteAperte;
+        // PATTERN: Information Expert - Usa metodi della classe Proposta per il
+        // filtraggio
+        // La logica di verifica è delegata a Proposta che è l'esperto delle sue
+        // informazioni
+        return proposte.stream()
+                .filter(Proposta::isAperta) // Proposta sa se è aperta
+                .filter(p -> p.appartieneStoComprensorio(comprensorio)) // Proposta sa il suo comprensorio
+                .filter(p -> includiUtente || !p.isDiPropostitore(fruitore)) // Proposta sa chi l'ha creata
+                .collect(Collectors.toList());
     }
 
     // -----------------------------------------------------------------------------------

@@ -46,7 +46,6 @@ public class Campo implements Serializable {
     /** Messaggi di errore per validazione */
     private static final String ERRORE_NOME_NULLO = "Il nome del campo non può essere null";
     private static final String ERRORE_VALORE_NULLO = "Il valore non può essere null";
-    private static final String ERRORE_VALORE_DUPLICATO = "Il valore è già presente nel dominio";
 
     /** Nome identificativo del campo */
     private String nome;

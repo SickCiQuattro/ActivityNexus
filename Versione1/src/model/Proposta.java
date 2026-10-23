@@ -2,9 +2,17 @@ package model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import model.observers.PropostaObserver;
+import model.state.PropostaState;
+import model.state.PropostaStateAperta;
+import model.state.PropostaStateChiusa;
+import model.state.PropostaStateRitirata;
 
 /**
  * Rappresenta una proposta di scambio di prestazioni d'opera nel sistema.
@@ -72,6 +80,27 @@ public class Proposta implements Serializable {
     /** Data e ora dell'ultima modifica di stato (null se ancora non modificata) */
     private LocalDateTime dataModifica;
 
+    /**
+     * Lista degli observer registrati per questa proposta.
+     * <p>
+     * PATTERN: Observer (GoF) + Open/Closed Principle (SOLID)
+     * <p>
+     * Gli observer vengono notificati quando la proposta cambia stato.
+     * La lista è transient perché gli observer non devono essere serializzati.
+     */
+    private transient List<PropostaObserver> observers = new ArrayList<>();
+
+    /**
+     * Oggetto stato corrente della proposta.
+     * <p>
+     * PATTERN: State (GoF)
+     * <p>
+     * Lo stato è gestito tramite il pattern State per eliminare la logica
+     * if-else nei metodi di cambio stato. È transient perché lo stato viene
+     * ricostruito dall'enum StatoProposta durante la deserializzazione.
+     */
+    private transient PropostaState stateObject;
+
     /** Messaggi di errore per validazione */
     private static final String ERRORE_FRUITORE_NULL = "Il fruitore non può essere null";
     private static final String ERRORE_RICHIESTA_NULL = "La prestazione richiesta non può essere null";
@@ -118,6 +147,69 @@ public class Proposta implements Serializable {
 
         // La data di modifica è inizialmente null (non ci sono state modifiche)
         this.dataModifica = null;
+
+        // PATTERN: State - Inizializza l'oggetto stato in base all'enum
+        this.stateObject = mapEnumToState(stato);
+    }
+
+    /**
+     * Mappa un valore dell'enum StatoProposta al corrispondente oggetto State.
+     * <p>
+     * PATTERN: State - Questo metodo facilita la conversione tra la
+     * rappresentazione
+     * enum (usata per la serializzazione) e l'oggetto State (usato per il
+     * comportamento).
+     *
+     * @param statoEnum il valore dell'enum da mappare
+     * @return l'oggetto State corrispondente
+     */
+    private PropostaState mapEnumToState(StatoProposta statoEnum) {
+        return switch (statoEnum) {
+            case APERTA -> PropostaStateAperta.getInstance();
+            case CHIUSA -> PropostaStateChiusa.getInstance();
+            case RITIRATA -> PropostaStateRitirata.getInstance();
+        };
+    }
+
+    /**
+     * Metodo interno per impostare lo stato (usato dalle classi State).
+     * <p>
+     * PATTERN: State - Questo metodo permette agli oggetti State di cambiare
+     * lo stato della proposta durante le transizioni.
+     * <p>
+     * <b>Nota:</b> Questo metodo è public per permettere l'accesso dal package
+     * model.state, ma è inteso solo per uso interno del pattern State.
+     *
+     * @param newState il nuovo oggetto stato
+     */
+    public void setStatoInternal(PropostaState newState) {
+        this.stateObject = newState;
+        // Aggiorna anche l'enum per la serializzazione e compatibilità
+        if (newState.isAperta()) {
+            this.stato = StatoProposta.APERTA;
+        } else if (newState.isChiusa()) {
+            this.stato = StatoProposta.CHIUSA;
+        } else if (newState.isRitirata()) {
+            this.stato = StatoProposta.RITIRATA;
+        }
+        // Aggiorna la data di modifica
+        this.dataModifica = LocalDateTime.now();
+    }
+
+    /**
+     * Restituisce l'oggetto stato corrente.
+     * <p>
+     * PATTERN: State - Assicura che lo stateObject sia sempre inizializzato,
+     * anche dopo la deserializzazione.
+     *
+     * @return l'oggetto State corrente
+     */
+    private PropostaState getStateObject() {
+        if (stateObject == null) {
+            // Reinizializza dopo deserializzazione
+            stateObject = mapEnumToState(stato);
+        }
+        return stateObject;
     }
 
     // -----------------------------------------------------------------------------------
@@ -173,6 +265,60 @@ public class Proposta implements Serializable {
     }
 
     // -----------------------------------------------------------------------------------
+    // METODI INFORMATION EXPERT
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Verifica se questa proposta è attualmente aperta.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta è l'esperto delle sue
+     * informazioni
+     * e quindi è responsabile di rispondere a domande sul proprio stato.
+     *
+     * @return true se la proposta è nello stato APERTA, false altrimenti
+     *
+     * @post result == (this.stato == StatoProposta.APERTA)
+     */
+    public boolean isAperta() {
+        // PATTERN: State - Delega all'oggetto stato
+        return getStateObject().isAperta();
+    }
+
+    /**
+     * Verifica se questa proposta appartiene allo stesso comprensorio specificato.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta ha accesso diretto al
+     * propostitore
+     * e quindi può rispondere a domande sul comprensorio di appartenenza.
+     *
+     * @param comprensorio il comprensorio da confrontare
+     * @return true se il propostitore appartiene al comprensorio specificato
+     *
+     * @pre comprensorio != null
+     * @post result == this.propostitore.getComprensorio().equals(comprensorio)
+     */
+    public boolean appartieneStoComprensorio(Comprensorio comprensorio) {
+        return this.propostitore.getComprensorio().equals(comprensorio);
+    }
+
+    /**
+     * Verifica se questa proposta è stata creata dal fruitore specificato.
+     * <p>
+     * PATTERN: Information Expert - La classe Proposta conosce il proprio
+     * propostitore
+     * e può rispondere direttamente a questa domanda.
+     *
+     * @param fruitore il fruitore da confrontare
+     * @return true se il fruitore specificato è il propostitore di questa proposta
+     *
+     * @pre fruitore != null
+     * @post result == this.propostitore.equals(fruitore)
+     */
+    public boolean isDiPropostitore(Fruitore fruitore) {
+        return this.propostitore.equals(fruitore);
+    }
+
+    // -----------------------------------------------------------------------------------
     // METODI DI CAMBIO STATO
     // -----------------------------------------------------------------------------------
 
@@ -188,22 +334,18 @@ public class Proposta implements Serializable {
      *
      * @pre true (può essere invocato in qualsiasi stato)
      * @post result == true ⟹ this.stato == StatoProposta.CHIUSA && la data di
-     * modifica è aggiornata
+     *       modifica è aggiornata
      * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
      */
     public void chiudiProposta() {
-        // Verifica che la proposta sia nello stato APERTA
-        // Solo le proposte aperte possono essere chiuse
-        if (stato == StatoProposta.APERTA) {
-            // Modifica lo stato a CHIUSA
-            stato = StatoProposta.CHIUSA;
+        // PATTERN: State - Delega la logica all'oggetto stato corrente
+        // Elimina la necessità di if-else basati sullo stato
+        boolean success = getStateObject().chiudi(this);
 
-            // Aggiorna la data di modifica con il timestamp corrente
-            this.dataModifica = LocalDateTime.now();
-
+        if (success) {
+            // PATTERN: Observer - Notifica tutti gli observer della chiusura
+            notifyPropostaChiusa();
         }
-
-        // Se la proposta non era aperta, l'operazione fallisce
     }
 
     /**
@@ -225,20 +367,76 @@ public class Proposta implements Serializable {
      * @post result == false ⟹ this.stato == old(this.stato) (nessun cambiamento)
      */
     public boolean ritiraProposta() {
-        // Verifica che la proposta sia nello stato APERTA
-        // Solo le proposte aperte possono essere ritirate
-        if (stato == StatoProposta.APERTA) {
-            // Modifica lo stato a RITIRATA
-            stato = StatoProposta.RITIRATA;
+        // PATTERN: State - Delega la logica all'oggetto stato corrente
+        // Elimina la necessità di if-else basati sullo stato
+        boolean success = getStateObject().ritira(this);
 
-            // Aggiorna la data di modifica con il timestamp corrente
-            this.dataModifica = LocalDateTime.now();
-
-            return true; // Operazione riuscita
+        if (success) {
+            // PATTERN: Observer - Notifica tutti gli observer del ritiro
+            notifyPropostaRitirata();
         }
 
-        // Se la proposta non era aperta, l'operazione fallisce
-        return false;
+        return success;
+    }
+
+    // -----------------------------------------------------------------------------------
+    // METODI OBSERVER PATTERN
+    // -----------------------------------------------------------------------------------
+
+    /**
+     * Registra un observer per ricevere notifiche sui cambiamenti di stato.
+     * <p>
+     * PATTERN: Observer (GoF) + Open/Closed Principle (SOLID)
+     * <p>
+     * Questo metodo permette di estendere il comportamento della proposta
+     * senza modificare il codice esistente, rispettando il principio OCP.
+     *
+     * @param observer l'observer da registrare
+     * @throws NullPointerException se observer è null
+     */
+    public void addObserver(PropostaObserver observer) {
+        Objects.requireNonNull(observer, "Observer non può essere null");
+        if (observers == null) {
+            observers = new ArrayList<>();
+        }
+        observers.add(observer);
+    }
+
+    /**
+     * Rimuove un observer dalla lista delle notifiche.
+     *
+     * @param observer l'observer da rimuovere
+     */
+    public void removeObserver(PropostaObserver observer) {
+        if (observers != null) {
+            observers.remove(observer);
+        }
+    }
+
+    /**
+     * Notifica tutti gli observer che la proposta è stata chiusa.
+     * <p>
+     * PATTERN: Observer - Metodo privato per la notifica
+     */
+    private void notifyPropostaChiusa() {
+        if (observers != null) {
+            for (PropostaObserver observer : observers) {
+                observer.onPropostaChiusa(this);
+            }
+        }
+    }
+
+    /**
+     * Notifica tutti gli observer che la proposta è stata ritirata.
+     * <p>
+     * PATTERN: Observer - Metodo privato per la notifica
+     */
+    private void notifyPropostaRitirata() {
+        if (observers != null) {
+            for (PropostaObserver observer : observers) {
+                observer.onPropostaRitirata(this);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------------

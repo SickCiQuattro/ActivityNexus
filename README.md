@@ -1,90 +1,79 @@
 # ActivityNexus
 
-![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
-![Gradle](https://img.shields.io/badge/Built_with-Gradle-02303A?style=flat-square&logo=gradle)
-![Testing](https://img.shields.io/badge/Tested_with-JUnit5-25A162?style=flat-square&logo=junit5)
-![Architecture](https://img.shields.io/badge/Architecture-MVC-8A2BE2?style=flat-square)
-![Console](https://img.shields.io/badge/UI-CLI_Console-4D4D4D?style=flat-square)
+Applicazione Java da console per gestire gerarchie di categorie, comprensori geografici e scambi di prestazioni tra utenti. Progetto del corso di Ingegneria del Software, sviluppato in due parti: funzionalità (Versione 1–4) e rifattorizzazione con pattern di progettazione, principi SOLID e test (Parte B).
 
-## About the Project
+![Java](https://img.shields.io/badge/Java-11%2B-orange)
+![JUnit](https://img.shields.io/badge/JUnit-5.10-green)
+![Architettura](https://img.shields.io/badge/architettura-MVC-blue)
 
-**ActivityNexus** is an advanced, standalone Java console application designed to manage complex category hierarchies, geographic areas, and structured exchange proposals. Developed as a comprehensive Software Engineering academic project, it solves the problem of modeling, comparing, and coordinating complex configurations between users with different roles.
+## Funzionalità
 
-A significant portion of the development (Phase B) was dedicated to **code refactoring and software quality**, focusing heavily on decoupling components via Dependency Injection and implementing rigorous black-box functional testing.
+- **Due ruoli**: il *configuratore* definisce comprensori, gerarchie di categorie e fattori di conversione; il *fruitore* crea e gestisce proposte di scambio.
+- **Gerarchie** ad albero (libreria [Scalified Tree](https://github.com/scalified/tree)) con campi caratteristici e domini di valori.
+- **Conversione** delle prestazioni tra categorie, dentro e fra gerarchie diverse.
+- **Proposte** con ciclo di vita aperta / chiusa / ritirata e **insiemi chiusi** di scambi.
+- **Persistenza** su file `.ser` (serializzazione Java) nella cartella `data/`.
 
-## Architecture & Engineering Highlights
+## Avvio rapido
 
-This project was built strictly adhering to object-oriented design principles and modern software engineering practices:
+Serve solo un JRE 11+.
 
-- **Strict MVC Architecture:** Clear separation of concerns between domain logic (Model), user interaction (View), and application flow (Controller).
-- **Design Patterns (GoF & GRASP):** \* _Factory Method & Singleton:_ For robust multi-role user creation and management.
-    - _State Pattern:_ To handle the lifecycle of proposals (Pending, Approved, Rejected).
-    - _Observer Pattern:_ Implemented for internal state notifications.
-    - _Controller as a Facade:_ Centralizing system operations.
-- **Test-Driven Refactoring:** The codebase utilizes Dependency Injection to ensure high testability. Testing includes functional black-box test cases focusing on equivalence classes and boundary values via **JUnit 5**.
-- **Advanced Data Modeling:** Implements N-ary trees (via the Scalified Tree library) to model category hierarchies and calculate intra/inter-hierarchy conversion factors dynamically.
-- **Standalone Persistence:** Entire application state is maintained via Java Serialization (`.ser` files), requiring no external RDBMS setup to run.
+```bash
+cd Versione1
+java -jar ActivityNexus_Parte_B.jar
+```
 
-## Key Features
+Il JAR include la libreria Tree. La cartella [Versione1/data](Versione1/data) contiene dati d'esempio già caricati; credenziali e scenari di prova sono in [docs/DatiEsempio.md](docs/DatiEsempio.md).
 
-- **Multi-Role User Management:** Distinct capabilities for `Configurators` (Admins) and `Fruitori` (Standard Users).
-- **Hierarchy & Territory Modeling:** Create geographic areas and define deep category hierarchies with specific characteristic fields and value domains.
-- **Conversion Engine:** Automated calculations for intra-hierarchy and inter-hierarchy conversion factors.
-- **Proposal Lifecycle:** Users can create exchange proposals that go through a formal approval workflow.
-- **Closed Exchange Sets:** Advanced validation logic to manage and balance closed sets of exchanges between users.
-- **Interactive CLI:** Fully functional, menu-driven console interface.
+> [!NOTE]
+> L'app legge e scrive `data/` relativa alla directory di lavoro: lanciala da `Versione1/`.
 
-## Tech Stack
+## Architettura e pattern (Parte B)
 
-- **Language:** Java (11+)
-- **Architecture:** MVC (Model-View-Controller)
-- **Testing:** JUnit 5
-- **Build System:** Gradle (for tree library) & Custom Bash/Batch Scripts
-- **External Libraries:** [Scalified Tree](https://github.com/scalified/tree) (v0.2.5) for N-ary tree data structures.
+| Area | Applicazione nel codice |
+| --- | --- |
+| MVC | `Controller` dipende da interfacce `IView`, `IInputProvider`, `IOutputProvider`, non da `ConsoleView` |
+| Factory Method + Singleton | `model/factory/UserFactory` |
+| State | `model/state/PropostaState*` (aperta, chiusa, ritirata) |
+| Observer | `model/observers/PropostaObserver`, `EmailNotifier` |
+| GRASP | Controller, Information Expert, Low Coupling / High Cohesion |
+| SOLID | SRP, OCP, ISP, DIP |
+| Refactoring | Extract Class (es. `service/CredentialService`) |
 
-## Getting Started
+```
+Versione1/src
+├── Main.java
+├── controller/   Controller (facade verso il modello)
+├── model/        dominio, factory/, state/, observers/
+├── view/         ConsoleView e interfacce I*
+├── service/      CredentialService
+├── util/ constants/
+└── test/java/    ControllerTest + MockView (test double)
+```
 
-The application is designed to be easily executable as a standalone JAR.
+## Sviluppo
 
-### Prerequisites
+Requisiti: JDK 11+ e la libreria Tree compilata (`tree/` è una copia vendorizzata di Scalified Tree).
 
-- Java JRE/JDK 11 or higher.
+```bash
+(cd tree && ./gradlew build -x test)   # produce tree/tree/build/libs
+cd Versione1
+./build.sh                             # compila, esegue i test JUnit 5, crea ActivityNexus_Parte_B.jar
+```
 
-### Quick Run (Using Pre-built JAR)
+I report dei test finiscono in `Versione1/test-reports/`. Le dipendenze JUnit sono in [Versione1/lib](Versione1/lib).
 
-1. Download the latest `ActivityNexusV4.jar` from the repository.
-2. Run the application from your terminal:
-    ```bash
-    java -jar ActivityNexusV4.jar
-    ```
-    (Note: On the first run, the application will automatically create a data/ directory to handle persistence and ask you to register the first Configurator user).
+## Documentazione
 
-### Building from Source
+Analisi di progetto scritte per la presentazione, in [docs/](docs):
 
-To compile the project and generate the executable JAR yourself:
+- [Separazione modello-vista](docs/SEPARAZIONE_MODELLO_VISTA.md)
+- [Pattern GRASP](docs/PATTERN_GRASP.md) e [pattern GoF](docs/PATTERN_GOF.md)
+- [Principi SOLID](docs/PRINCIPI_SOLID.md)
+- [Refactoring](docs/REFACTORING.md)
+- [Testing](docs/TESTING.md)
+- [Note conclusive](docs/NOTE_CONCLUSIVE.md)
 
-1. Clone the repository:
+## Crediti
 
-    ```bash
-    git clone https://github.com/SickCiQuattro/ActivityNexus.git
-    ```
-
-2. Build the Scalified Tree dependency via Gradle:
-
-    ```bash
-    cd tree
-    ./gradlew build -x test
-    cd ..
-    ```
-
-3. Compile the main Java project and create the JAR (Linux/macOS):
-
-    ```bash
-    cd Versione1
-    # Use the provided build script
-    ./build.sh
-    ```
-
-### Testing
-
-The project includes a comprehensive suite of black-box tests. To run the JUnit 5 test suite, compile the test classes against the JUnit platform and execute them via your preferred IDE or command line.
+Libreria [Scalified Tree](https://github.com/scalified/tree) (Apache 2.0), inclusa in `tree/`.
